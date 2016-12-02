@@ -167,13 +167,13 @@ void computeInitialPose(string folder,
 }
 
 void updatePose(char filename[100],
-  Mat &currImage_c,
-  Mat &prevImage,
-  Mat &currImage,
-  vector<Point2f> &prevFeatures,
-  vector<Point2f> &currFeatures,
-  Mat &R_f,
-  Mat &t_f)
+                Mat &currImage_c,
+                Mat &prevImage,
+                Mat &currImage,
+                vector<Point2f> &prevFeatures,
+                vector<Point2f> &currFeatures,
+                Mat &R_f,
+                Mat &t_f)
 {
     currImage_c = imread(filename);
     cvtColor(currImage_c, currImage, COLOR_BGR2GRAY);
@@ -214,9 +214,6 @@ void updatePose(char filename[100],
      //cout << "scale below 0.1, or incorrect translation" << endl;
     }
     
-   // lines for printing results
-   // myfile << t_f.at<double>(0) << " " << t_f.at<double>(1) << " " << t_f.at<double>(2) << endl;
-
   // a redetection is triggered in case the number of feautres being trakced go below a particular threshold
     if (prevFeatures.size() < MIN_NUM_FEAT) {
       //cout << "Number of tracked features reduced to " << prevFeatures.size() << endl;
@@ -232,15 +229,14 @@ void updatePose(char filename[100],
 
 
 void stereoVisionIntialPose(string folder,
-  Mat &R_f_left,
-  Mat &t_f_left,
-  Mat &img_left,
-  vector<Point2f> &feature_left,
-  Mat &R_f_right,
-  Mat &t_f_right,
-  Mat &img_right,
-  vector<Point2f> &feature_right
-  )
+                            Mat &R_f_left,
+                            Mat &t_f_left,
+                            Mat &img_left,
+                            vector<Point2f> &feature_left,
+                            Mat &R_f_right,
+                            Mat &t_f_right,
+                            Mat &img_right,
+                            vector<Point2f> &feature_right)
 {
 
   // left camera
@@ -267,9 +263,10 @@ void stereoVision(string folder,
                   Mat &t )
 {
 
-double focal = 718.8560;
-cv::Point2d pp(607.1928, 185.2157);
-double scale = 1.0;
+  double focal = 718.8560;
+  cv::Point2d pp(607.1928, 185.2157);
+  double scale = 1.0;
+  
   // for the first pose
   if (firstPose){
     computeInitialPose(folder, R_f_left, t_f_left, img_left, feature_left);
