@@ -24,12 +24,16 @@ THE SOFTWARE.
 
 */
 
+#include "opencv2/opencv_modules.hpp"
+#include <stdio.h>
+
 #include "opencv2/video/tracking.hpp"
 #include "opencv2/imgproc/imgproc.hpp"
 #include "opencv2/highgui/highgui.hpp"
 #include "opencv2/features2d/features2d.hpp"
 #include "opencv2/calib3d/calib3d.hpp"
 
+#include "opencv2/xfeatures2d.hpp"
 
 #include <iostream>
 #include <ctype.h>
@@ -43,6 +47,9 @@ THE SOFTWARE.
 
 using namespace cv;
 using namespace std;
+
+using namespace cv::xfeatures2d;
+
 
 #define MIN_NUM_FEAT 200
 
@@ -85,7 +92,11 @@ double getAbsoluteScale(int frame_id, int sequence_id, double z_cal)  {
 
 
 
-void featureTracking(Mat img_1, Mat img_2, vector<Point2f>& points1, vector<Point2f>& points2, vector<uchar>& status)	{ 
+void featureTracking(Mat img_1, 
+	                 Mat img_2, 
+	                 vector<Point2f>& points1, 
+	                 vector<Point2f>& points2, 
+	                 vector<uchar>& status)	{ 
 
 //this function automatically gets rid of points for which tracking fails
 
@@ -117,7 +128,6 @@ void featureDetection(Mat img_1, vector<Point2f>& points1)	{   //uses FAST as of
   vector<KeyPoint> keypoints_1;
   int fast_threshold = 20;
   bool nonmaxSuppression = true;
-  FAST(img_1, keypoints_1, fast_threshold, nonmaxSuppression);
   KeyPoint::convert(keypoints_1, points1, vector<int>());
 }
 
@@ -214,7 +224,7 @@ void updatePose(char filename[100],
      //cout << "scale below 0.1, or incorrect translation" << endl;
     }
     
-  // a redetection is triggered in case the number of feautres being trakced go below a particular threshold
+   // a redetection is triggered in case the number of feautres being trakced go below a particular threshold
     if (prevFeatures.size() < MIN_NUM_FEAT) {
       //cout << "Number of tracked features reduced to " << prevFeatures.size() << endl;
       //cout << "trigerring redection" << endl;
@@ -343,5 +353,44 @@ void poseUpdate(Mat &R_f,
      R_f_left = R*R_f;
     }
     
+
+}
+
+
+// check features are matched or not between left and right.
+bool MatchFeatures(Mat &img_1,
+				   Mat &img_2) 
+{
+
+// ref: http://stackoverflow.com/questions/27533203/how-do-i-use-sift-in-opencv-3-0-with-c
+   //-- Step 1: Detect the keypoints using SURF Detector
+ //-- Step 1: Detect the keypoints using SURF Detector
+  // detecting keypoints
+//SurfFeatureDetector detector(400);
+Ptr<SURF> detector = SURF::create(400);
+vector<KeyPoint> keypoints1, keypoints2;
+detector->detect(img_1, keypoints1);
+detector->detect(img_2, keypoints2);
+
+// computing descriptors
+//SurfDescriptorExtractor extractor;
+Ptr<SURF> extractor = SURF::create();
+Mat descriptors1, descriptors2;
+extractor->compute(img_1, keypoints1, descriptors1);
+extractor->compute(img_2, keypoints2, descriptors2);
+
+// matching descriptors
+//BruteForceMatcher<L2<float> > matcher;
+//Ptr<BFMatcher> matcher = BFMatcher::create(cv::NORM_L2, false);
+BFMatcher matcher;
+std::vector< DMatch > matches;
+matcher.match( descriptors1, descriptors2, matches );
+
+// drawing the results
+namedWindow("matches", 1);
+Mat img_matches;
+drawMatches(img_1, keypoints1, img_2, keypoints2, matches, img_matches);
+imshow("matches", img_matches);
+waitKey(0);
 
 }

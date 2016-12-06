@@ -47,12 +47,21 @@ cv::Point textOrg(10, 50);
 
 int main( int argc, char** argv )	{
 
+ 
+
+  // Set initial orientation and position aligned with left camera
+  // which will be the orientation and position of the system. 
+  // Then right camera has an offset of 0.5 meters from left camera
+  // The right camera has the same orientation as the left camera.
+
+  
+  Mat R_f, t_f; //the final rotation and tranlation vectors 
 
   Mat img_1, img_2;
-  Mat R_f, t_f; //the final rotation and tranlation vectors containing the 
-
   vector<Point2f> points2 ;
   char folder[100];
+
+  // use the first two images from left camear to compute the init values.
   computeInitialPose(folder, R_f, t_f, img_2, points2);
   
   Mat prevImage = img_2;
@@ -70,7 +79,7 @@ int main( int argc, char** argv )	{
 
   Mat traj = Mat::zeros(600, 600, CV_8UC3);
   Mat currImage_c;
-
+#if 0  
   for(int numFrame=2; numFrame < MAX_FRAME; numFrame++)	{
   	sprintf(filename, "/home/cwu/Downloads/dataset/sequences/00/image_1/%06d.png", numFrame);
     //cout << numFrame << endl;
@@ -97,6 +106,18 @@ int main( int argc, char** argv )	{
 
   //cout << R_f << endl;
   //cout << t_f << endl;
+#else
 
+  img_1 = imread("/home/cwu/Downloads/dataset/sequences/00/image_0/000000.png", IMREAD_GRAYSCALE);
+  img_2 = imread("/home/cwu/Downloads/dataset/sequences/00/image_0/000000.png", IMREAD_GRAYSCALE);
+
+
+  if ( !img_1.data || !img_2.data ) { 
+    std::cout<< " --(!) Error reading images " << std::endl; 
+  }
+
+   bool matched = MatchFeatures(img_1,img_2) ;
+
+#endif
   return 0;
 }
