@@ -46,18 +46,25 @@ cv::Point textOrg(10, 50);
 
 int main(int argc, char** argv) {
 
+	// Open a txt file to store the results
+	ofstream fout("/home/cwu/project/stereo-vo/src/result.txt");
+	if (!fout) {
+		cout << "File not opened!" << endl;
+		return 1;
+	}
+
 	// Set initial orientation and position aligned with left camera
 	// which will be the orientation and position of the system.
 	// Then right camera has an offset of 0.5 meters from left camera
 	// The right camera has the same orientation as the left camera.
 
-	Mat R_f, t_f; //the final rotation and tranlation vectors
+	Mat R_f, t_f; //the final rotation and translation vectors
 
 	Mat img_1, img_2;
 	vector < Point2f > points2;
 	char folder[100];
 
-	// use the first two images from left camear to compute the init values.
+	// use the first two images from left camera to compute the init values.
 	computeInitialPose(folder, R_f, t_f, img_2, points2);
 
 	Mat prevImage = img_2;
@@ -75,22 +82,40 @@ int main(int argc, char** argv) {
 
 	Mat traj = Mat::zeros(600, 600, CV_8UC3);
 	Mat currImage_c;
-#if 0
-	for(int numFrame=2; numFrame < MAX_FRAME; numFrame++) {
-		sprintf(filename, "/home/cwu/Downloads/dataset/sequences/00/image_1/%06d.png", numFrame);
+#if 1
+	for (int numFrame = 2; numFrame < MAX_FRAME; numFrame++) {
+		sprintf(filename,
+				"/home/cwu/Downloads/dataset/sequences/00/image_1/%06d.png",
+				numFrame);
 		//cout << numFrame << endl;
-		updatePose(filename, currImage_c, prevImage, currImage, prevFeatures, currFeatures, R_f, t_f);
+		updatePose(filename, currImage_c, prevImage, currImage, prevFeatures,
+				currFeatures, R_f, t_f);
 
 		int x = int(t_f.at<double>(0)) + 300;
 		int y = int(t_f.at<double>(2)) + 100;
-		circle(traj, Point(x, y) ,1, CV_RGB(255,0,0), 2);
+		circle(traj, Point(x, y), 1, CV_RGB(255, 0, 0), 2);
 
-		rectangle( traj, Point(10, 30), Point(550, 50), CV_RGB(0,0,0), CV_FILLED);
-		sprintf(text, "Coordinates: x = %02fm y = %02fm z = %02fm", t_f.at<double>(0), t_f.at<double>(1), t_f.at<double>(2));
-		putText(traj, text, textOrg, fontFace, fontScale, Scalar::all(255), thickness, 8);
+		rectangle(traj, Point(10, 30), Point(550, 50), CV_RGB(0, 0, 0),
+				CV_FILLED);
+		sprintf(text, "Coordinates: x = %02fm y = %02fm z = %02fm",
+				t_f.at<double>(0), t_f.at<double>(1), t_f.at<double>(2));
+		putText(traj, text, textOrg, fontFace, fontScale, Scalar::all(255),
+				thickness, 8);
 
-		imshow( "Road facing camera", currImage_c );
-		imshow( "Trajectory", traj );
+		// Save the result
+		fout << numFrame << "\t";
+
+//		fout << R_f.at<double>(0, 0) << "  \t";
+//		fout << R_f.at<double>(1, 0) << "  \t";
+//		fout << R_f.at<double>(2, 0) << "  \t";
+		fout << t_f.at<double>(0) << "\t";
+		fout << t_f.at<double>(1) << "\t";
+		fout << t_f.at<double>(2) << "\t";
+    fout << x << "\t";
+    fout << y << "\n";
+
+		imshow("Road facing camera", currImage_c);
+		imshow("Trajectory", traj);
 
 		waitKey(1);
 
