@@ -29,7 +29,7 @@
 using namespace cv;
 using namespace std;
 
-#define MAX_FRAME 1000
+#define MAX_FRAME 4541
 #define MIN_NUM_FEAT 200
 
 // IMP: Change the file directories (4 places) according to where your dataset is saved before running!
@@ -66,6 +66,14 @@ int main(int argc, char** argv) {
 
 	// use the first two images from left camera to compute the init values.
 	computeInitialPose(folder, R_f, t_f, img_2, points2);
+  fout << 1 << "\t";
+
+  fout << t_f.at<double>(0) << "\t";
+  fout << t_f.at<double>(1) << "\t";
+  fout << t_f.at<double>(2) << "\t";
+  fout << 0 << "\t";
+  fout << 0 << "\n";
+
 
 	Mat prevImage = img_2;
 	Mat currImage;
@@ -120,6 +128,8 @@ int main(int argc, char** argv) {
 		waitKey(1);
 
 	}
+
+  imwrite("map.png", traj);
 
 	clock_t end = clock();
 	double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
