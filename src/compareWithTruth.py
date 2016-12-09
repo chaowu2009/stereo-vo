@@ -40,21 +40,32 @@ def loadResult(resultFile = '/home/cwu/project/stereo-vo/src/result.txt'):
 if __name__ == "__main__":
 
     position = loadPose()	
-    position3D = loadResult()
+    position3D = loadResult("/home/cwu/project/SimpleStereoVO/src/result.txt")
 
 
-    plt.subplot(211)
+    plt.subplot(311)
     lx, = plt.plot(position[:,0], label= 'x')
     plt.hold(True)
     ly, = plt.plot(position[:,1], label= 'y')
     lz, = plt.plot(position[:,2], label= 'z')
 
     plt.legend([lx,ly,lz],['x','y','z'])
-
+    plt.title('True position')
     plt.grid(True)
-    
 
-    plt.subplot(212)
+
+    plt.subplot(312)
+    lx, = plt.plot(position3D[:,0], label= 'x')
+    plt.hold(True)
+    ly, = plt.plot(position3D[:,1], label= 'y')
+    lz, = plt.plot(position3D[:,2], label= 'z')
+
+    plt.legend([lx,ly,lz],['x','y','z'])
+    plt.title('vo position')
+    plt.grid(True)
+        
+
+    plt.subplot(313)
     l1, = plt.plot(position[:,0], position[:,2], marker = 'o', label='truth')
     plt.hold(True)
     l2, = plt.plot(position3D[:,0], position3D[:,2], marker = 'x', label='vo')
