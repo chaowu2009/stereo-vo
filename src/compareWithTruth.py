@@ -6,7 +6,7 @@ from mpl_toolkits.mplot3d import Axes3D
 
 
 def loadPose(basedir = '/home/cwu/Downloads/dataset/poses', sequence = "00"):
-    pose_file = basedir + "/" +sequence + ".txt"
+    pose_file = basedir + "/" + sequence + ".txt"
 
     position = []
     firstLine = True

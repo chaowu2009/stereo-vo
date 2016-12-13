@@ -53,6 +53,43 @@ using namespace cv::xfeatures2d;
 #define MIN_NUM_FEAT 200
 #define MAX_FRAME 4541
 
+
+double getAbsoluteScale(int frame_id, int sequence_id, double z_cal)  {
+  
+  string line;
+  int i = 0;
+  ifstream myfile ("/home/cwu/Downloads/dataset/sequences/00/calib.txt");
+  double x =0, y=0, z = 0;
+  double x_prev, y_prev, z_prev;
+  if (myfile.is_open())
+  {
+    while (( getline (myfile,line) ) && (i<=frame_id))
+    {
+      z_prev = z;
+      x_prev = x;
+      y_prev = y;
+      std::istringstream in(line);
+      cout << line << '\n';
+      for (int j=0; j<12; j++)  {
+        in >> z ;
+        if (j==7) y=z;
+        if (j==3)  x=z;
+      }
+      
+      i++;
+    }
+    myfile.close();
+  }
+
+  else {
+    cout << "Unable to open file";
+    return 0;
+  }
+
+  return sqrt((x-x_prev)*(x-x_prev) + (y-y_prev)*(y-y_prev) + (z-z_prev)*(z-z_prev)) ;
+
+}
+
 void featureTracking(Mat img_1, 
 	                 Mat img_2, 
 	                 vector<Point2f>& points1,
@@ -166,18 +203,18 @@ void updatePose(char filename[100],
 	Mat currPts(2, currFeatures.size(), CV_64F);
 
 	//this (x,y) combination makes sense as observed from the source code of triangulatePoints on GitHub
-	for (int i = 0; i < prevFeatures.size(); i++) {
-		prevPts.at<double>(0, i) = prevFeatures.at(i).x;
-		prevPts.at<double>(1, i) = prevFeatures.at(i).y;
+	//for (int i = 0; i < prevFeatures.size(); i++) {
+	//	prevPts.at<double>(0, i) = prevFeatures.at(i).x;
+	//	prevPts.at<double>(1, i) = prevFeatures.at(i).y;
 
-		currPts.at<double>(0, i) = currFeatures.at(i).x;
-		currPts.at<double>(1, i) = currFeatures.at(i).y;
-	}
+	//	currPts.at<double>(0, i) = currFeatures.at(i).x;
+	//	currPts.at<double>(1, i) = currFeatures.at(i).y;
+	//}
 
 	//scale = getAbsoluteScale(numFrame, 0, t.at<double>(2));
 
 	//cout << "Scale is " << scale << endl;
-	double scale = 1.0;
+	double scale = 0.95;
 
 	if ((scale > 0.1) && (t.at<double>(2) > t.at<double>(0))
 			&& (t.at<double>(2) > t.at<double>(1))) {

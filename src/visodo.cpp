@@ -26,6 +26,7 @@
 
 #include "vo_features.h"
 #include <iomanip>
+#include <fstream>
 
 using namespace cv;
 using namespace std;
@@ -34,6 +35,26 @@ using namespace std;
 #define MIN_NUM_FEAT 200
 #define PLOT_COLOR CV_RGB(0, 0, 0)
 #define PL std::setprecision(3)
+
+
+void getPosition(string line, float vout[3]){
+	// If possible, always prefer std::vector to naked array
+  std::vector<float> v;
+
+  // Build an istream that holds the input string
+  std::istringstream iss(line);
+
+  // Iterate over the istream, using >> to grab floats
+  // and push_back to store them in the vector
+  std::copy(std::istream_iterator<float>(iss),
+        std::istream_iterator<float>(),
+        std::back_inserter(v));
+
+  vout[0] = v[3];
+  vout[1] = v[7];
+  vout[2] = v[11];
+
+}
 
 // IMP: Change the file directories (4 places) according to where your dataset is saved before running!
 
@@ -49,6 +70,16 @@ cv::Point textOrg(10, 50);
 
 int main(int argc, char** argv) {
 
+     //obtain truth for plot comparison
+	string posePath = "/home/cwu/Downloads/dataset/poses/00.txt";
+    std::ifstream infile("/home/cwu/Downloads/dataset/poses/00.txt");
+
+    std::string line; 
+    float truthPosition[3] ;
+
+    getline(infile, line);
+    getPosition(line, truthPosition);
+
 	// Open a txt file to store the results
 	ofstream fout("/home/cwu/project/stereo-vo/src/vo_result.txt");
 	if (!fout) {
@@ -56,6 +87,7 @@ int main(int argc, char** argv) {
 		return 1;
 	}
 
+    
 	// Set initial orientation and position aligned with left camera
 	// which will be the orientation and position of the system.
 	// Then right camera has an offset of 0.5 meters from left camera
@@ -88,6 +120,7 @@ int main(int argc, char** argv) {
 	namedWindow("Trajectory", WINDOW_AUTOSIZE); // Create a window for display.
 
 	Mat traj = Mat::zeros(600, 600, CV_8UC3);
+	Mat trajTruth = Mat::zeros(600, 600, CV_8UC3);
 	Mat currImage_c;
     Mat currImage_rc; 
 
@@ -132,9 +165,13 @@ int main(int argc, char** argv) {
 	for (int numFrame = 2; numFrame < MAX_FRAME; numFrame++) {
 		sprintf(filename, "/home/cwu/Downloads/dataset/sequences/00/image_0/%06d.png", numFrame);
 		currImage_c = imread(filename);
-		
-#if 0
-		
+		getline(infile, line);
+        getPosition(line, truthPosition);
+
+#if 1
+		//scale = getAbsoluteScale(numFrame, 0, t_f.at<double>(2));
+		//cout << "scale is " << scale << endl;
+
 		updatePose(filename, 
 			       prevImage, 
 			       prevFeatures, 
@@ -154,27 +191,33 @@ int main(int argc, char** argv) {
 #endif
 
        // for plotting purpose
-		int x = int(t_f.at<double>(0)) + 300;
-		int y = int(t_f.at<double>(2)) + 100;
-		circle(traj, Point(x, y), 1, CV_RGB(255, 0, 0), 2);
-
-		rectangle(traj, Point(10,30), Point(550, 50), PLOT_COLOR, CV_FILLED);
-		
-		double x1 = t_f.at<double>(0);
+    	double x1 = t_f.at<double>(0);
         double y1 = t_f.at<double>(1);
         double z1 = t_f.at<double>(2);
 
-		sprintf(text, "Coordinates: x = %02fm y = %02fm z = %02fm", x1, y1, z1);
-		putText(traj, text, textOrg, fontFace, fontScale, Scalar::all(255),
-				thickness, 8);
+		int x = int(x1) + 300;
+		int y = int(z1) + 100;
+
+		int xTruth = int(truthPosition[0])+ 300;
+		int yTruth = int(truthPosition[2])+ 100;
+        // current point
+		circle(traj, Point(x, y), 1, CV_RGB(255, 0, 0), 2);
+		circle(traj, Point(xTruth, yTruth), 1, CV_RGB(0, 0, 255), 2);
+		
+		//rectangle(traj, Point(10,30), Point(550, 50), PLOT_COLOR, CV_FILLED);
+        
+		//sprintf(text, "Coordinates: x = %02fm y = %02fm z = %02fm", x1, y1, z1);
+		//putText(traj, text, textOrg, fontFace, fontScale, Scalar::all(255),	thickness, 8);
 
 		// Save the result
 		fout << numFrame << "\t";
 		fout << x1 << "\t" << y1 << "\t" << z1 << "\t" << x << "\t" << y << "\n";
         
-        cout << "x = " << PL<< t_f.at<double>(0) << "\t y = " << PL<< t_f.at<double>(1) << "\t z = " << PL<< t_f.at<double>(2) << endl;
+        cout << "vo: x = " << PL<< x1 << "\t y = " << PL<< y1 << "\t z = " << PL<< z1 << endl;
+        cout << "tr: x = " << PL<< truthPosition[0] << "\t y = " << PL<< truthPosition[1] << "\t z = " << PL<< truthPosition[2] << endl;
 		imshow("Road facing camera", currImage_c);
 		imshow("Trajectory", traj);
+		//imshow("Trajectory", trajTruth);
 
 		waitKey(1);
 
