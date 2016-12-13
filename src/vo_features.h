@@ -51,9 +51,13 @@ using namespace std;
 using namespace cv::xfeatures2d;
 
 #define MIN_NUM_FEAT 200
+#define MAX_FRAME 4541
 
-void featureTracking(Mat img_1, Mat img_2, vector<Point2f>& points1,
-		vector<Point2f>& points2, vector<uchar>& status) {
+void featureTracking(Mat img_1, 
+	                 Mat img_2, 
+	                 vector<Point2f>& points1,
+		             vector<Point2f>& points2, 
+		             vector<uchar>& status) {
 
 //this function automatically gets rid of points for which tracking fails
 
@@ -62,7 +66,9 @@ void featureTracking(Mat img_1, Mat img_2, vector<Point2f>& points1,
 	TermCriteria termcrit = TermCriteria(
 			TermCriteria::COUNT + TermCriteria::EPS, 30, 0.01);
 
-	calcOpticalFlowPyrLK(img_1, img_2, points1, points2, status, err, winSize,
+    // img_1, pointers1 previous frame
+    // img_2, pointers2 previous frame
+	calcOpticalFlowPyrLK(img_1,  img_2, points1, points2, status, err, winSize,
 			3, termcrit, 0, 0.001);
 
 	//getting rid of points for which the KLT tracking failed or those who have gone outside the frame
@@ -91,16 +97,19 @@ void featureDetection(Mat img_1, vector<Point2f>& points1) {
 	KeyPoint::convert(keypoints_1, points1, vector<int>());
 }
 
-void computeInitialPose(string folder, Mat &R_f, Mat &t_f, Mat &img_2,
-		vector<Point2f> &points2) {
+void computeInitialPose(string folder, 
+	                    Mat &R_f, 
+	                    Mat &t_f, 
+	                    Mat &img_2,
+		                vector<Point2f> &points2) {
 
 	Mat img_1;
 	char filename1[200];
 	char filename2[200];
 	sprintf(filename1,
-			"/home/cwu/Downloads/dataset/sequences/00/image_1/%06d.png", 0);
+			"/home/cwu/Downloads/dataset/sequences/00/image_0/%06d.png", 0);
 	sprintf(filename2,
-			"/home/cwu/Downloads/dataset/sequences/00/image_1/%06d.png", 1);
+			"/home/cwu/Downloads/dataset/sequences/00/image_0/%06d.png", 1);
 
 	//read the first two frames from the dataset
 	Mat img_1_c = imread(filename1);
@@ -134,19 +143,23 @@ void computeInitialPose(string folder, Mat &R_f, Mat &t_f, Mat &img_2,
 
 }
 
-void updatePose(char filename[100], Mat &currImage_c, Mat &prevImage,
-		Mat &currImage, vector<Point2f> &prevFeatures,
-		vector<Point2f> &currFeatures, Mat &R_f, Mat &t_f) {
-	currImage_c = imread(filename);
+void updatePose(char filename[100], 
+	            Mat &prevImage,
+		        vector<Point2f> &prevFeatures,
+		        vector<Point2f> &currFeatures, 
+		        Mat &R_f, 
+		        Mat &t_f) 
+{
+	Mat currImage_c = imread(filename);
+	Mat currImage; 
 	cvtColor(currImage_c, currImage, COLOR_BGR2GRAY);
 	vector < uchar > status;
-	featureTracking(prevImage, currImage, prevFeatures, currFeatures, status);
+	featureTracking(prevImage, currImage,  prevFeatures, currFeatures,  status);
 
 	Mat E, R, t, mask;
 	double focal = 718.8560;
 	cv::Point2d pp(607.1928, 185.2157);
-	E = findEssentialMat(currFeatures, prevFeatures, focal, pp, RANSAC, 0.999,
-			1.0, mask);
+	E = findEssentialMat(currFeatures, prevFeatures, focal, pp, RANSAC, 0.999,	1.0, mask);
 	recoverPose(E, currFeatures, prevFeatures, R, t, focal, pp, mask);
 
 	Mat prevPts(2, prevFeatures.size(), CV_64F);
@@ -174,17 +187,10 @@ void updatePose(char filename[100], Mat &currImage_c, Mat &prevImage,
 
 	}
 
-	else {
-		//cout << "scale below 0.1, or incorrect translation" << endl;
-	}
-
 	// a redetection is triggered in case the number of feautres being trakced go below a particular threshold
 	if (prevFeatures.size() < MIN_NUM_FEAT) {
-		//cout << "Number of tracked features reduced to " << prevFeatures.size() << endl;
-		//cout << "trigerring redection" << endl;
 		featureDetection(prevImage, prevFeatures);
-		featureTracking(prevImage, currImage, prevFeatures, currFeatures,
-				status);
+		featureTracking(currImage, prevImage, prevFeatures, currFeatures, status);
 
 	}
 
@@ -192,44 +198,54 @@ void updatePose(char filename[100], Mat &currImage_c, Mat &prevImage,
 	prevFeatures = currFeatures;
 }
 
-void stereoVisionIntialPose(string folder, Mat &R_f_left, Mat &t_f_left,
-		Mat &img_left, vector<Point2f> &feature_left, Mat &R_f_right,
-		Mat &t_f_right, Mat &img_right, vector<Point2f> &feature_right) {
+void stereoVisionIntialPose(string folder, 
+		                    Mat &img_left, vector<Point2f> &feature_left,
+		                    Mat &img_right, vector<Point2f> &feature_right) {
 
 	// left camera
 	char folder_left[100];
+	Mat R_f_left, t_f_left;
 	computeInitialPose(folder_left, R_f_left, t_f_left, img_left, feature_left);
 
 	// right camera
 	char folder_right[100];
+	Mat R_f_right, t_f_right;
 	computeInitialPose(folder_right, R_f_right, t_f_right, img_right,
 			feature_right);
 }
 
-void stereoVision(string folder, bool firstPose, Mat &R_f_left, Mat &t_f_left,
-		Mat &img_left, vector<Point2f> &feature_left, Mat &R_f_right,
-		Mat &t_f_right, Mat &img_right, vector<Point2f> &feature_right, Mat &R,
-		Mat &t) {
+void stereoVision(string folder, 
+	              int numFrame, 
+	              Mat &currImage_lc, 
+	              Mat &currImage_rc, 
+	              Mat &previous_img_left, 
+		          vector<Point2f> &previous_feature_left, 
+		          vector<Point2f> &current_feature_left, 
+		          Mat &previous_img_right, 
+		          vector<Point2f> &previous_feature_right, 
+		          vector<Point2f> &current_feature_right, 
+		          Mat &R_f,
+		          Mat &t_f) 
+{
 
 	double focal = 718.8560;
 	cv::Point2d pp(607.1928, 185.2157);
 	double scale = 1.0;
 
-	// for the first pose
-	if (firstPose) {
-		computeInitialPose(folder, R_f_left, t_f_left, img_left, feature_left);
-		computeInitialPose(folder, R_f_right, t_f_right, img_right,
-				feature_right);
-	}
+	char filename1[200], filename2[200];
+	sprintf(filename1, "/home/cwu/Downloads/dataset/sequences/00/image_0/%06d.png", numFrame);
+	sprintf(filename2, "/home/cwu/Downloads/dataset/sequences/00/image_0/%06d.png", numFrame);
 
-	// following pose
-	Mat current_img_left, current_img_right;
-	// load left and right image
-	current_img_left = imread(folder + "/image_0/000000.png");
-	current_img_right = imread(folder + "/image_0/000001.png");
+
+	//read the first two frames from the dataset
+	Mat current_img_left  = imread(filename1);
+	currImage_lc = current_img_left;   //for plotting purpose
+
+	Mat current_img_right = imread(filename2);
+    currImage_rc = current_img_right;   //for plotting purpose
 
 	if (!current_img_left.data || !current_img_right.data) {
-		std::cout << " --(!) Error reading images " << std::endl;
+	    std::cout << " --(!) Error reading images " << std::endl;
 	}
 
 	// we work with grayscale images
@@ -237,29 +253,62 @@ void stereoVision(string folder, bool firstPose, Mat &R_f_left, Mat &t_f_left,
 	cvtColor(current_img_right, current_img_right, COLOR_BGR2GRAY);
 
 	// feature detection, tracking
-	vector < Point2f > current_feature_left; //vectors to store the coordinates of the feature points
-	featureDetection(current_img_left, current_feature_left);
+	//vector < Point2f > current_feature_left; //vectors to store the coordinates of the feature points
+	//featureDetection(current_img_left, current_feature_left);
 
-	vector < Point2f > current_feature_right; //vectors to store the coordinates of the feature points
-	featureDetection(current_img_right, current_feature_right);
+	//vector < Point2f > current_feature_right; //vectors to store the coordinates of the feature points
+	//featureDetection(current_img_right, current_feature_right);
 
 	// left camera feature tracking
 	vector < uchar > status;
-	featureTracking(img_left, current_img_left, feature_left,
-			current_feature_left, status);
+	featureTracking(previous_img_left, current_img_left, previous_feature_left,	current_feature_left, status);
 
 	// right camera feature tracking
-	featureTracking(img_left, current_img_right, feature_right,
-			current_feature_right, status);
+	featureTracking(previous_img_right, current_img_right, previous_feature_right, current_feature_right, status);
 
 	// left pose estimation
-	// local bundle adjustment
+	Mat E1, R1, t1, mask1;
+	E1 = findEssentialMat(current_feature_left, previous_feature_left, focal, pp, RANSAC, 0.999,	1.0, mask1);
+	recoverPose(E1, current_feature_left, previous_feature_left, R1, t1, focal, pp, mask1);
 
-	//new tracks
+    // right pose estimation
+    Mat E2, R2, t2, mask2;
+    E2 = findEssentialMat(current_feature_right, previous_feature_right, focal, pp, RANSAC, 0.999,	1.0, mask2);
+	recoverPose(E2, current_feature_right, previous_feature_right, R2, t2, focal, pp, mask2);
+		
+		// fuse left and right pose
+		
+	Mat t = (t1+t2)/2.0;
+	Mat R = (R1 + R2)/2.0;
+	t = t1;
+	R = R1;
 
+	if ( (t.at<double>(2) > t.at<double>(0)) && (t.at<double>(2) > t.at<double>(1))) {
+	    t_f = t_f + scale * (R_f * t);
+		R_f = R * R_f;
+	}
+
+    // a redetection is triggered in case the number of feautres being trakced go below a particular threshold
+	if (previous_feature_left.size() < MIN_NUM_FEAT) {
+		featureDetection(previous_img_left, previous_feature_left);
+		featureTracking(previous_img_left, current_img_left, previous_feature_left, current_feature_left, status);
+	}
+
+	previous_img_left = current_img_left.clone();
+	previous_feature_left = current_feature_left;
+
+	// a redetection is triggered in case the number of feautres being trakced go below a particular threshold
+	if (previous_feature_right.size() < MIN_NUM_FEAT) {
+		featureDetection(previous_img_right, previous_feature_right);
+		featureTracking(previous_img_right, current_img_right, previous_feature_right, current_feature_right, status);
+	}
+
+	previous_img_right = current_img_right.clone();
+	previous_feature_right= current_feature_right;
+   
 }
 
-void poseUpdate(Mat &R_f, Mat &t_f, vector<Point2f> &previous_feature,
+void stereoPoseUpdate(Mat &R_f, Mat &t_f, vector<Point2f> &previous_feature,
 		vector<Point2f> &current_feature) {
 
 	double focal = 718.8560;
@@ -273,28 +322,11 @@ void poseUpdate(Mat &R_f, Mat &t_f, vector<Point2f> &previous_feature,
 			0.999, 1.0, mask);
 	recoverPose(E, current_feature, previous_feature, R, t, focal, pp, mask);
 
-	Mat prevPts(2, previous_feature.size(), CV_64F);
-	Mat currPts(2, current_feature.size(), CV_64F);
-
-	//this (x,y) combination makes sense as observed from the source code of triangulatePoints on GitHub
-	for (int i = 0; i < previous_feature.size(); i++) {
-		prevPts.at<double>(0, i) = previous_feature.at(i).x;
-		prevPts.at<double>(1, i) = previous_feature.at(i).y;
-
-		currPts.at<double>(0, i) = current_feature.at(i).x;
-		currPts.at<double>(1, i) = current_feature.at(i).y;
-	}
-
-	if ((scale > 0.1) && (t.at<double>(2) > t.at<double>(0))
-			&& (t.at<double>(2) > t.at<double>(1))) {
-		t_f_left = t_f + scale * (R_f * t);
-		R_f_left = R * R_f;
-	}
 
 }
 
 // check features are matched or not between left and right.
-bool MatchFeatures(Mat &img_1, Mat &img_2) {
+bool MatchFeatures(Mat &img_1, Mat &img_2, Mat &R_f, Mat &t_f) {
 
 	// ref: http://stackoverflow.com/questions/27533203/how-do-i-use-sift-in-opencv-3-0-with-c
 	//-- Step 1: Detect the keypoints using SURF Detector

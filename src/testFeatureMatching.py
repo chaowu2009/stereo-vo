@@ -4,6 +4,18 @@ from matplotlib import pylab as plt
 import time
 import os
 
+
+# Camera internals
+focal_length = 718.856
+center = (607.1928, 185.2157)
+camera_matrix = np.array(
+                         [[focal_length, 0, center[0]],
+                         [0, focal_length, center[1]],
+                         [0, 0, 1]], dtype = "double"
+                         )
+dist_coeffs = np.zeros((4,1)) # Assuming no lens distortion 
+print "Camera Matrix :\n {0}".format(camera_matrix)
+
 baseFolder = "/home/cwu/Downloads/dataset/sequences/00/"
 
 left = "image_0/"
@@ -43,11 +55,46 @@ ax2 = fig.add_subplot(212)
 plt.ion()
 plt.show()
 
+T = np.zeros((3,1))
+R = np.zeros((3,3))
 
-for k in range(0,100):
-    imgFile = leftFolder + str(k).rjust(6, '0') + '.png'
-    img = cv2.imread(imgFile)
-    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+baseline_distance = 0.52 # meter
+
+for k in range(1,100):
+    left_image = leftFolder + str(k).rjust(6, '0') + '.png'
+    right_image = rightFolder + str(k).rjust(6, '0') + '.png'
+
+    left_img = cv2.imread(left_image, 0 )
+    right_img = cv2.imread(right_image, 0)
+	
+    orb = cv2.ORB_create()
+
+    kp_left, descriptor_left   = orb.detectAndCompute(left_img, None)
+    kp_right, descriptor_right = orb.detectAndCompute(right_img, None)
+
+    bf = cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck= True)
+    matches = bf.match(descriptor_left, descriptor_right)
+
+    matches = sorted(matches, key = lambda x:x.distance)
+
+    img = cv2.drawMatches(left_img, kp_left, right_img, kp_right, matches[:10], 2)
+
+    ax2.imshow(img)
+    plt.draw()    
+    plt.title("keypoint")
+
+    plt.show()
+
+    #http://docs.opencv.org/3.1.0/d7/d53/tutorial_py_pose.html
+	
+    plt.pause(0.1)
+    #time.sleep(1)
+
+
+"""    
+    img = cv2.imread(left_image)
+    
+    left_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
     corners = cv2.goodFeaturesToTrack(gray, 25, 0.01, 10)
     corners = np.int0(corners)
@@ -57,66 +104,23 @@ for k in range(0,100):
     	cv2.circle(img,(x,y), 8, 255, -1)
     ax1.imshow(img)
     plt.draw()
-    plt.title(imgFile)
+    plt.title(imgFile + "goodFeaturesToTrack")
 
     # find keypoints
-    sift = cv2.xfeatures2d.SIFT_create()
-    (keypoints, desriptors) = sift.detectAndCompute(gray, None)
-    cv2.drawKeypoints(gray,keypoints, img)
-   
-    ax2.imshow(img)
-    plt.draw()
-    plt.title("keypoint")
+    #detector = cv2.xfeatures2d.SIFT_create()
+    #detector = cv2.xfeatures2d.SURF_create(300)
+    #(keypoints, desriptors) = detector.detectAndCompute(gray, None)
+    
+#    detector = cv2.FastFeatureDetector_create()
+#    keypoints= detector.detect(gray, None)
+     
+    #detector = cv2.FastFeatureDetector_create()
+    #brief = cv2.DescriptorExtractor_create("BRIEF")
+    #keypoints, descriptors = brief.compute(img, keypoints)
+    #keypoints = detector.detect(img, None)
 
-    plt.show()
+    orb = cv2.ORB_create()
+    keypoints = orb.detect(img,None)
 
-
-    plt.pause(0.1)
-    #time.sleep(1)
-
-
-"""
-stereo = cv2.StereoBM_create(numDisparities = 64, blockSize = 5)
-
-disparity = stereo.compute(img_left, img_right)
-
-plt.subplot(311)
-plt.imshow(disparity, 'gray')
-plt.title('disparity')
-
-plt.subplot(312)
-plt.imshow(img_left, 'gray')
-plt.title('left image')
-
-plt.subplot(313)
-plt.imshow(img_right, 'gray')
-plt.title('right image')
-
-
-plt.show()
-"""
-
-"""
-# init SIFT detector
-orb = cv2.ORB_create()
-
-# find the keypoints and descriptors with SIFT
-kp1, des1 = orb.detectAndCompute(img1, None)
-kp2, des2 = orb.detectAndCompute(img2, None)
-
-# create BFMatcher object
-bf = cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck=True)
-
-#match descriptors
-matches = bf.match(des1, des2)
-
-# sort them in the order of their distance
-matches = sorted(matches, key= lambda x:x.distance)
-
-#Draw first 10 matches
-flags = 2
-img3 = cv2.drawMatches(img1, kp1, img2, kp2, matches[:10], flags)
-
-plt.imshow(img3)
-plt.show()
+    cv2.drawKeypoints(gray,keypoints, img, color = (0,255,0), flags = 1)
 """
