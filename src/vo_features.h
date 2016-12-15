@@ -1,29 +1,3 @@
-/*
-
- The MIT License
-
- Copyright (c) 2015 Avi Singh
-
- Permission is hereby granted, free of charge, to any person obtaining a copy
- of this software and associated documentation files (the "Software"), to deal
- in the Software without restriction, including without limitation the rights
- to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- copies of the Software, and to permit persons to whom the Software is
- furnished to do so, subject to the following conditions:
-
- The above copyright notice and this permission notice shall be included in
- all copies or substantial portions of the Software.
-
- THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- THE SOFTWARE.
-
- */
-
 #include "opencv2/opencv_modules.hpp"
 #include <stdio.h>
 
@@ -58,7 +32,7 @@ double getAbsoluteScale(int frame_id, int sequence_id, double z_cal)  {
   
   string line;
   int i = 0;
-  ifstream myfile ("/home/cwu/Downloads/dataset/sequences/00/calib.txt");
+  ifstream myfile ("D:/vision/dataset/sequences/00/calib.txt");
   double x =0, y=0, z = 0;
   double x_prev, y_prev, z_prev;
   if (myfile.is_open())
@@ -110,7 +84,7 @@ void featureTracking(Mat img_1,
 
 	//getting rid of points for which the KLT tracking failed or those who have gone outside the frame
 	int indexCorrection = 0;
-	for (int i = 0; i < status.size(); i++) {
+	for (uint i = 0; i < status.size(); i++) {
 		Point2f pt = points2.at(i - indexCorrection);
 		if ((status.at(i) == 0) || (pt.x < 0) || (pt.y < 0)) {
 			if ((pt.x < 0) || (pt.y < 0)) {
@@ -143,8 +117,8 @@ void computeInitialPose(string folder,
 	Mat img_1;
 	char filename1[200];
 	char filename2[200];
-	sprintf(filename1, "/home/cwu/Downloads/dataset/sequences/00/image_0/%06d.png", 0);
-	sprintf(filename2, "/home/cwu/Downloads/dataset/sequences/00/image_0/%06d.png", 1);
+	sprintf_s(filename1, "D:/vision/dataset/sequences/00/image_0/%06d.png", 0);
+	sprintf_s(filename2, "D:/vision/dataset/sequences/00/image_0/%06d.png", 1);
 
 	//read the first two frames from the dataset
 	Mat img_1_c = imread(filename1);
@@ -191,8 +165,8 @@ void computeInitialStereoPose(string folder,
 	Mat img_1;
 	char filename1[200];
 	char filename2[200];
-	sprintf(filename1, "/home/cwu/Downloads/dataset/sequences/00/image_0/%06d.png", 0);
-	sprintf(filename2,	"/home/cwu/Downloads/dataset/sequences/00/image_0/%06d.png", 1);
+	sprintf_s(filename1, "D:/vision/dataset/sequences/00/image_0/%06d.png", 0);
+	sprintf_s(filename2, "D:/vision/dataset/sequences/00/image_0/%06d.png", 1);
 
 	//read the first two frames from the dataset
 	Mat img_1_c = imread(filename1);
@@ -227,8 +201,8 @@ void computeInitialStereoPose(string folder,
 
    // right camera
 	
-	sprintf(filename1, "/home/cwu/Downloads/dataset/sequences/00/image_1/%06d.png", 0);
-	sprintf(filename2,	"/home/cwu/Downloads/dataset/sequences/00/image_1/%06d.png", 1);
+	sprintf_s(filename1, "D:/vision/dataset/sequences/00/image_1/%06d.png", 0);
+	sprintf_s(filename2, "D:/vision/dataset/sequences/00/image_1/%06d.png", 1);
 
 	//read the first two frames from the dataset
 	img_1_c = imread(filename1);
@@ -350,8 +324,8 @@ void stereoVision(string folder,
 	double scale = 0.95;
 
 	char filename1[200], filename2[200];
-	sprintf(filename1, "/home/cwu/Downloads/dataset/sequences/00/image_0/%06d.png", numFrame);
-	sprintf(filename2, "/home/cwu/Downloads/dataset/sequences/00/image_0/%06d.png", numFrame);
+	sprintf_s(filename1, "D:/vision/dataset/sequences/00/image_0/%06d.png", numFrame);
+	sprintf_s(filename2, "D:/vision/dataset/sequences/00/image_0/%06d.png", numFrame);
 
 
 	//read the first two frames from the dataset
@@ -467,7 +441,7 @@ void stereoPoseUpdate(Mat &R_f, Mat &t_f, vector<Point2f> &previous_feature,
 }
 
 // check features are matched or not between left and right.
-bool MatchFeatures(Mat &img_1, Mat &img_2, Mat &R_f, Mat &t_f) {
+void MatchFeatures(Mat &img_1, Mat &img_2, Mat &R_f, Mat &t_f) {
 
 	// ref: http://stackoverflow.com/questions/27533203/how-do-i-use-sift-in-opencv-3-0-with-c
 	//-- Step 1: Detect the keypoints using SURF Detector

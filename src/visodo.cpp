@@ -1,29 +1,3 @@
-/*
-
- The MIT License
-
- Copyright (c) 2015 Avi Singh
-
- Permission is hereby granted, free of charge, to any person obtaining a copy
- of this software and associated documentation files (the "Software"), to deal
- in the Software without restriction, including without limitation the rights
- to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- copies of the Software, and to permit persons to whom the Software is
- furnished to do so, subject to the following conditions:
-
- The above copyright notice and this permission notice shall be included in
- all copies or substantial portions of the Software.
-
- THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- THE SOFTWARE.
-
- */
-
 #include "vo_features.h"
 #include <iomanip>
 #include <fstream>
@@ -100,8 +74,8 @@ cv::Point textOrg(10, 50);
 int main(int argc, char** argv) {
 
      //obtain truth for plot comparison
-	string posePath = "/home/cwu/Downloads/dataset/poses/00.txt";
-    std::ifstream infile("/home/cwu/Downloads/dataset/poses/00.txt");
+	string posePath = "D:/vision/poses/00.txt";
+    std::ifstream infile("D:/vision/poses/00.txt");
 
     std::string line; 
     float truthPosition[3] ;
@@ -111,7 +85,7 @@ int main(int argc, char** argv) {
     getPosition(line, truthPosition);
 
 	// Open a txt file to store the results
-	ofstream fout("/home/cwu/project/stereo-vo/src/vo_result.txt");
+	ofstream fout("D:/vision/stereo-vo/src/vo_result.txt");
 	if (!fout) {
 		cout << "File not opened!" << endl;
 		return 1;
@@ -154,7 +128,7 @@ int main(int argc, char** argv) {
 	Mat currImage_lc;
     Mat currImage_rc; 
 
-    string fileFolder = "/home/cwu/Downloads/dataset/sequences/00/"; 
+    string fileFolder = "D:/vision/dataset/sequences/00/"; 
     Mat R_f_left, t_f_left;
     Mat previous_img_left = img_2;
 
@@ -165,10 +139,10 @@ int main(int argc, char** argv) {
 	vector<Point2f> previous_feature_right, current_feature_right;
 
     char filename1[200], filename2[200];
-	sprintf(filename1, "/home/cwu/Downloads/dataset/sequences/00/image_0/%06d.png", 0);
-	sprintf(filename2, "/home/cwu/Downloads/dataset/sequences/00/image_0/%06d.png", 0);
+	sprintf_s(filename1, "D:/vision/dataset/sequences/00/image_0/%06d.png", 0);
+	sprintf_s(filename2, "D:/vision/dataset/sequences/00/image_0/%06d.png", 0);
 
-    computeInitialStereoPose("/home/cwu/Downloads/dataset/sequences/00/",
+    computeInitialStereoPose("D:/vision/dataset/sequences/00/",
 	                    R_f_left, 
 	                    t_f_left, 
 	                    previous_img_left,
@@ -180,12 +154,12 @@ int main(int argc, char** argv) {
 
 
 	for (int numFrame = 2; numFrame < MAX_FRAME; numFrame++) {
-		sprintf(filename, "/home/cwu/Downloads/dataset/sequences/00/image_0/%06d.png", numFrame);
+		sprintf_s(filename, "D:/vision/dataset/sequences/00/image_0/%06d.png", numFrame);
 		currImage_lc = imread(filename);
 		getline(infile, line);
         getPosition(line, truthPosition);
 
-#if 0
+#if 1
 		//scale = getAbsoluteScale(numFrame, 0, t_f.at<double>(2));
 		//cout << "scale is " << scale << endl;
 
@@ -223,12 +197,12 @@ int main(int argc, char** argv) {
 		int yTruth = int(truthPosition[2])+ 100;
         // current point
 		circle(traj, Point(x, y), 1, CV_RGB(255, 0, 0), 2);
-		circle(traj, Point(xTruth, yTruth), 1, CV_RGB(0, 0, 255), 2);
+		//circle(traj, Point(xTruth, yTruth), 1, CV_RGB(0, 0, 255), 2);
 		
-		//rectangle(traj, Point(10,30), Point(550, 50), PLOT_COLOR, CV_FILLED);
+		rectangle(traj, Point(10,30), Point(550, 50), PLOT_COLOR, CV_FILLED);
         
-		//sprintf(text, "Coordinates: x = %02fm y = %02fm z = %02fm", x1, y1, z1);
-		//putText(traj, text, textOrg, fontFace, fontScale, Scalar::all(255),	thickness, 8);
+		sprintf_s(text, "Coordinates: x = %02fm y = %02fm z = %02fm", x1, y1, z1);
+		putText(traj, text, textOrg, fontFace, fontScale, Scalar::all(255),	thickness, 8);
 
 		// Save the result
 		fout << numFrame << "\t";
@@ -244,7 +218,7 @@ int main(int argc, char** argv) {
 
 	}
 
-    imwrite("/home/cwu/project/stereo-vo/src/final_map.png", traj);
+    imwrite("d:/vision/stereo-vo/src/final_map.png", traj);
 
 	clock_t end = clock();
 	double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
