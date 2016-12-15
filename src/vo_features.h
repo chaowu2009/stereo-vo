@@ -21,6 +21,14 @@
 #include <cv.h>
 #include <stdarg.h>
 #include <iomanip>
+
+#if defined(__linux__)
+#  include <unistd.h>
+#elif defined(_WIN32)
+#  include <windows.h>
+#  define sleep(s) Sleep((s)*1000)
+#endif
+
 using namespace cv;
 using namespace std;
 
@@ -579,17 +587,15 @@ void addDelay( float N){
 void getImage(int portNumber, Mat &imgOut, Mat &edges)
 {
 	VideoCapture capture(portNumber);
-	
+	sleep(1);  //sleep for 1 second
+
 	if(!capture.isOpened()){
-		cout << "left camera is not loaded correctly" << endl;
+		cout << "camera is not loaded correctly" << endl;
 	}
 		
-	Mat leftFrame;
-	capture >> leftFrame; // get a new frame from camera
-	
-	addDelay(1e6);
-	
-	cvtColor(leftFrame, imgOut, COLOR_BGR2GRAY);
+	Mat currentFrame;
+	capture >> currentFrame; // get a new frame from camera
+	cvtColor(currentFrame, imgOut, COLOR_BGR2GRAY);
 
 	// filter image
 	Mat imgTemp;

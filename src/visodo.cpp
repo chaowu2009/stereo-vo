@@ -19,10 +19,10 @@ double scale = 1.00;
 char text[100];
 int fontFace = FONT_HERSHEY_PLAIN;
 double fontScale = 1;
-int thickness = 1;
+int thickness = 0.5;
 cv::Point textOrg(10, 50);
 
-//#define REAL_TIME
+#define REAL_TIME 1
 
 int main(int argc, char** argv) {
 
@@ -30,14 +30,14 @@ int main(int argc, char** argv) {
     //linux code goes here
 	string localDataDir = "/home/cwu/Downloads";
 	string resultFile = "/home/cwu/project/stereo-vo/src/vo_result.txt";
+	cout << "localDataDir is " << localDataDir << endl;
     #else
     // windows code goes here
 	string localDataDir = "d:/vision";
 	string resultFile   = "d:/vision/stereo-vo/src/vo_result.txt";
-    #endif
-
 	cout << "localDataDir is " << localDataDir << endl;
-
+    #endif
+	
 	Mat current_img_left, current_img_right;
 	Mat previous_img_left, previous_img_right; 
 	Mat leftEdge, rightEdge;
@@ -50,7 +50,9 @@ int main(int argc, char** argv) {
 	Mat img_1, img_2;  // two consecutive images from the same camera
 
 #ifdef REAL_TIME
-	getImage(0, img_1, leftEdge);
+	getImage(1, img_1, leftEdge);
+	namedWindow("first image", 0);
+	imshow("first image", img_1);
 #endif
 
 	//obtain truth for plot comparison
@@ -78,9 +80,9 @@ int main(int argc, char** argv) {
 		
 	//left camera
 	// get the second frame
-	getImage(0, img_2, leftEdge);
+	getImage(1, img_2, leftEdge);
 	
-	getImage(1, previous_img_right, rightEdge);
+	getImage(2, previous_img_right, rightEdge);
 	
 	// display them
 	//cvShowManyImages("Left & Right", 2, current_img_left, current_img_right);
@@ -131,10 +133,10 @@ int main(int argc, char** argv) {
 #ifdef REAL_TIME
 	// new frame from left camera
 	previous_img_left = img_2;
-    getImage(0, current_img_left, leftEdge);
+    getImage(1, current_img_left, leftEdge);
 
 	// new frame from right camera
-	getImage(1, current_img_right, rightEdge);
+	getImage(2, current_img_right, rightEdge);
 	
 #else
 	
@@ -159,9 +161,9 @@ int main(int argc, char** argv) {
 		previous_feature_right);
 
 	for (int numFrame = 2; numFrame < MAX_FRAME; numFrame++) {
-		filename = combineName(localDataDir + "/dataset/sequences/00/image_0/", numFrame);
+		//filename = combineName(localDataDir + "/dataset/sequences/00/image_0/", numFrame);
 		//cout << "filename is " << filename;
-		currImage_lc = imread(filename);
+		
 		getline(infile, line);
 		getPosition(line, truthPosition);
 
@@ -179,10 +181,12 @@ int main(int argc, char** argv) {
 #ifdef REAL_TIME
 
 	   // Mat leftFrame;
-		getImage(0, current_img_left, leftEdge);
+		getImage(1, current_img_left, leftEdge);
+		currImage_lc = current_img_left;
 		
       // Mat rightFrame;
-		getImage(1, current_img_right, rightEdge);
+		getImage(2, current_img_right, rightEdge);
+		currImage_rc = current_img_right;
 		
 #else
 		
@@ -213,25 +217,30 @@ int main(int argc, char** argv) {
 
 		int xTruth = int(truthPosition[0])+ 300;
 		int yTruth = int(truthPosition[2])+ 100;
+		
+		// output to the screen
+		cout << "vo: x = " << PL<< x1 << "\t y = " << PL<< y1 << "\t z = " << PL<< z1 << endl;
+#ifndef REAL_TIME
+		cout << "tr: x = " << PL<< truthPosition[0] << "\t y = " << PL<< truthPosition[1] << "\t z = " << PL<< truthPosition[2] << endl;
+#endif
 		// current point
-		circle(traj, Point(x, y), 1, CV_RGB(255, 0, 0), 2);
-		circle(traj, Point(xTruth, yTruth), 1, CV_RGB(0, 0, 255), 2);
+		circle(traj, Point(x, y), 0.2, CV_RGB(255, 0, 0), 2);
+#ifndef REAL_TIME
+		circle(traj, Point(xTruth, yTruth), 0.2, CV_RGB(0, 0, 255), 2);
+#endif
+		//rectangle(traj, Point(10,30), Point(550, 50), PLOT_COLOR, CV_FILLED);
 
-		rectangle(traj, Point(10,30), Point(550, 50), PLOT_COLOR, CV_FILLED);
-
-		sprintf(text, "Coordinates: x = %02fm y = %02fm z = %02fm", x1, y1, z1);
+		sprintf_s(text, "Coordinates: x = %02fm y = %02fm z = %02fm", x1, y1, z1);
 		putText(traj, text, textOrg, fontFace, fontScale, Scalar::all(255),	thickness, 8);
 
-		// Save the result
-		fout << numFrame << "\t";
-		fout << x1 << "\t" << y1 << "\t" << z1 << "\t" << x << "\t" << y << "\n";
-
-		cout << "vo: x = " << PL<< x1 << "\t y = " << PL<< y1 << "\t z = " << PL<< z1 << endl;
-		cout << "tr: x = " << PL<< truthPosition[0] << "\t y = " << PL<< truthPosition[1] << "\t z = " << PL<< truthPosition[2] << endl;
+		// plot them
 		imshow("Road facing camera", currImage_lc);
 		imshow("Trajectory", traj);
 		//imshow("Trajectory", trajTruth);
 
+		// Save the result
+		fout << numFrame << "\t";
+		fout << x1 << "\t" << y1 << "\t" << z1 << "\t" << x << "\t" << y << "\n";
 		waitKey(1);
 
 	}
