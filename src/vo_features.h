@@ -11,8 +11,8 @@
 
 #include <iostream>
 #include <ctype.h>
-#include <algorithm> // for copy
-#include <iterator> // for ostream_iterator
+#include <algorithm> 
+#include <iterator> 
 #include <vector>
 #include <ctime>
 #include <sstream>
@@ -621,4 +621,4 @@ string combineName(string localDataDir, int numFrame){
 
 	return fileName;
 
-}
+}  

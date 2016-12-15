@@ -24,19 +24,19 @@ cv::Point textOrg(10, 50);
 
 //#define REAL_TIME
 
-
-
 int main(int argc, char** argv) {
 
 	#ifdef __linux__ 
     //linux code goes here
 	string localDataDir = "/home/cwu/Downloads";
 	string resultFile = "/home/cwu/project/stereo-vo/src/vo_result.txt";
-    #elif _WIN32
+    #else
     // windows code goes here
 	string localDataDir = "d:/vision";
-	string resultFile = "d:/vision/stereo-vo/src/vo_result.txt"
+	string resultFile   = "d:/vision/stereo-vo/src/vo_result.txt";
     #endif
+
+	cout << "localDataDir is " << localDataDir << endl;
 
 	Mat current_img_left, current_img_right;
 	Mat previous_img_left, previous_img_right; 
@@ -93,9 +93,9 @@ int main(int argc, char** argv) {
 	loadImage(localDataDir + "/dataset/sequences/00/image_0/000001.png", img_2, currImage_lc);
 
 #endif
-
+	
 	computeInitialPose(img_1, R_f, t_f, img_2, keyFeatures);
-
+	
 	fout << 1 << "\t";
 	fout << t_f.at<double>(0) << "\t" << t_f.at<double>(1) << "\t" << t_f.at<double>(2) << "\t";
 	fout << 0 << "\t" << 0 << "\n";
