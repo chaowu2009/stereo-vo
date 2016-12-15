@@ -18,6 +18,8 @@
 #include <sstream>
 #include <fstream>
 #include <string>
+#include <cv.h>
+#include <stdarg.h>
 
 using namespace cv;
 using namespace std;
@@ -64,6 +66,57 @@ double getAbsoluteScale(int frame_id, int sequence_id, double z_cal)  {
 
 }
 
+
+void getPosition_Orientation(string line, float vout[3], Mat &Rout ){
+	// If possible, always prefer std::vector to naked array
+	std::vector<float> v;
+
+	// Build an istream that holds the input string
+	std::istringstream iss(line);
+
+	// Iterate over the istream, using >> to grab floats
+	// and push_back to store them in the vector
+	std::copy(std::istream_iterator<float>(iss),
+		std::istream_iterator<float>(),
+		std::back_inserter(v));
+
+	vout[0] = v[3];
+	vout[1] = v[7];
+	vout[2] = v[11];
+
+	Rout.at<double>(0,0) = v[0];
+	Rout.at<double>(0,1) = v[1];
+	Rout.at<double>(0,2) = v[2];
+	Rout.at<double>(1,0) = v[4];
+	Rout.at<double>(1,1) = v[5];
+	Rout.at<double>(1,2) = v[6];
+	Rout.at<double>(2,0) = v[8];
+	Rout.at<double>(2,1) = v[9];
+	Rout.at<double>(2,2) = v[10];
+
+}
+
+void getPosition(string line, float vout[3]){
+	// If possible, always prefer std::vector to naked array
+	std::vector<float> v;
+
+	// Build an istream that holds the input string
+	std::istringstream iss(line);
+
+	// Iterate over the istream, using >> to grab floats
+	// and push_back to store them in the vector
+	std::copy(std::istream_iterator<float>(iss),
+		std::istream_iterator<float>(),
+		std::back_inserter(v));
+
+	vout[0] = v[3];
+	vout[1] = v[7];
+	vout[2] = v[11];
+
+}
+
+
+
 void featureTracking(Mat img_1, 
 	                 Mat img_2, 
 	                 vector<Point2f>& points1,
@@ -108,29 +161,11 @@ void featureDetection(Mat img_1, vector<Point2f>& points1) {
 	KeyPoint::convert(keypoints_1, points1, vector<int>());
 }
 
-void computeInitialPose(string folder, 
+void computeInitialPose(Mat &img_1, 
 	                    Mat &R_f, 
 	                    Mat &t_f, 
 	                    Mat &img_2,
 		                vector<Point2f> &points2) {
-
-	Mat img_1;
-	char filename1[200];
-	char filename2[200];
-	sprintf_s(filename1, "D:/vision/dataset/sequences/00/image_0/%06d.png", 0);
-	sprintf_s(filename2, "D:/vision/dataset/sequences/00/image_0/%06d.png", 1);
-
-	//read the first two frames from the dataset
-	Mat img_1_c = imread(filename1);
-	Mat img_2_c = imread(filename2);
-
-	if (!img_1_c.data || !img_2_c.data) {
-		std::cout << " --(!) Error reading images " << std::endl;
-	}
-
-	// we work with grayscale images
-	cvtColor(img_1_c, img_1, COLOR_BGR2GRAY);
-	cvtColor(img_2_c, img_2, COLOR_BGR2GRAY);
 
 	// feature detection, tracking
 	vector < Point2f > points1; //vectors to store the coordinates of the feature points
@@ -152,41 +187,23 @@ void computeInitialPose(string folder,
 
 }
 
-void computeInitialStereoPose(string folder, 
-	                    Mat &R_f_left, 
-	                    Mat &t_f_left, 
-	                    Mat &img_left,
-		                vector<Point2f> &points_left,
-		                Mat &R_f_right, 
-	                    Mat &t_f_right, 
-		                Mat &img_right,
-		                vector<Point2f> &points_right) {
-    // left camera
-	Mat img_1;
-	char filename1[200];
-	char filename2[200];
-	sprintf_s(filename1, "D:/vision/dataset/sequences/00/image_0/%06d.png", 0);
-	sprintf_s(filename2, "D:/vision/dataset/sequences/00/image_0/%06d.png", 1);
-
-	//read the first two frames from the dataset
-	Mat img_1_c = imread(filename1);
-	Mat img_2_c = imread(filename2);
-
-	if (!img_1_c.data || !img_2_c.data) {
-		std::cout << " --(!) Error reading images " << std::endl;
-	}
-
-	// we work with grayscale images
-	cvtColor(img_1_c, img_1, COLOR_BGR2GRAY);
-	cvtColor(img_2_c, img_left, COLOR_BGR2GRAY);
-
+void computeInitialStereoPose(Mat &previous_img_left,
+	                          Mat &current_img_left,
+	                          Mat &R_f_left, 
+	                          Mat &t_f_left, 
+		                      vector<Point2f> &points_left,
+		                      Mat &previous_img_right,
+							  Mat &current_img_right,
+							  Mat &R_f_right, 
+	                          Mat &t_f_right, 
+		                      vector<Point2f> &points_right) {
+    
 	// feature detection, tracking
 	vector < Point2f > points1; //vectors to store the coordinates of the feature points
-	featureDetection(img_1, points1);        //detect features in img_1
+	featureDetection(previous_img_left, points1);        //detect features in img_1
 	vector < uchar > status;
-	featureTracking(img_1, img_left, points1, points_left, status); //track those features to img_2
+	featureTracking(previous_img_left, current_img_left, points1, points_left, status); //track those features to img_2
 
-	//TODO: add a fucntion to load these values directly from KITTI's calib files
 	// WARNING: different sequences in the KITTI VO dataset have different intrinsic/extrinsic parameters
 	double focal = 718.8560;
 	cv::Point2d pp(607.1928, 185.2157);
@@ -197,40 +214,19 @@ void computeInitialStereoPose(string folder,
 
 	R_f_left = R.clone();
 	t_f_left = t.clone();
-
-
-   // right camera
 	
-	sprintf_s(filename1, "D:/vision/dataset/sequences/00/image_1/%06d.png", 0);
-	sprintf_s(filename2, "D:/vision/dataset/sequences/00/image_1/%06d.png", 1);
-
-	//read the first two frames from the dataset
-	img_1_c = imread(filename1);
-	img_2_c = imread(filename2);
-
-	if (!img_1_c.data || !img_2_c.data) {
-		std::cout << " --(!) Error reading images " << std::endl;
-	}
-
-	// we work with grayscale images
-	cvtColor(img_1_c, img_1, COLOR_BGR2GRAY);
-	cvtColor(img_2_c, img_right, COLOR_BGR2GRAY);
-
+   // right camera
 	// feature detection, tracking
-	//vector < Point2f > points1; //vectors to store the coordinates of the feature points
-	featureDetection(img_1, points1);        //detect features in img_1
-	//vector < uchar > status;
-	featureTracking(img_1, img_left, points1, points_right, status); //track those features to img_2
+	featureDetection(previous_img_right, points1);        //detect features in img_1
+	featureTracking(previous_img_right, current_img_right, points1, points_right, status); //track those features to img_2
 
 	//recovering the pose and the essential matrix
-	//Mat E, R, t, mask;
 	E = findEssentialMat(points_right, points1, focal, pp, RANSAC, 0.999, 1.0, mask);
 	recoverPose(E, points_right, points1, R, t, focal, pp, mask);
 
 	R_f_right = R.clone();
 	t_f_right= t.clone();
-
-
+	
 }
 
 
@@ -289,24 +285,21 @@ void updatePose(char filename[100],
 	prevFeatures = currFeatures;
 }
 
-void stereoVisionIntialPose(string folder, 
-		                    Mat &img_left, vector<Point2f> &feature_left,
+void stereoVisionIntialPose(Mat &img_left, vector<Point2f> &feature_left,
 		                    Mat &img_right, vector<Point2f> &feature_right) {
 
 	// left camera
-	char folder_left[100];
 	Mat R_f_left, t_f_left;
-	computeInitialPose(folder_left, R_f_left, t_f_left, img_left, feature_left);
+	computeInitialPose(img_left, R_f_left, t_f_left, img_left, feature_left);
 
 	// right camera
-	char folder_right[100];
 	Mat R_f_right, t_f_right;
-	computeInitialPose(folder_right, R_f_right, t_f_right, img_right,
+	computeInitialPose(img_right, R_f_right, t_f_right, img_right,
 			feature_right);
 }
 
-void stereoVision(string folder, 
-	              int numFrame, 
+void stereoVision(Mat &current_img_left,
+	              Mat & current_img_right,
 	              Mat &currImage_lc, 
 	              Mat &currImage_rc, 
 	              Mat &previous_img_left, 
@@ -322,26 +315,6 @@ void stereoVision(string folder,
 	double focal = 718.8560;
 	cv::Point2d pp(607.1928, 185.2157);
 	double scale = 0.95;
-
-	char filename1[200], filename2[200];
-	sprintf_s(filename1, "D:/vision/dataset/sequences/00/image_0/%06d.png", numFrame);
-	sprintf_s(filename2, "D:/vision/dataset/sequences/00/image_0/%06d.png", numFrame);
-
-
-	//read the first two frames from the dataset
-	Mat current_img_left  = imread(filename1);
-	currImage_lc = current_img_left;   //for plotting purpose
-
-	Mat current_img_right = imread(filename2);
-    currImage_rc = current_img_right;   //for plotting purpose
-
-	if (!current_img_left.data || !current_img_right.data) {
-	    std::cout << " --(!) Error reading images " << std::endl;
-	}
-
-	// we work with grayscale images
-	cvtColor(current_img_left, current_img_left, COLOR_BGR2GRAY);
-	cvtColor(current_img_right, current_img_right, COLOR_BGR2GRAY);
 
 	// left camera feature tracking
 	vector < uchar > status;
@@ -473,3 +446,167 @@ void MatchFeatures(Mat &img_1, Mat &img_2, Mat &R_f, Mat &t_f) {
 	waitKey(0);
 
 }
+
+//https://github.com/opencv/opencv/wiki/DisplayManyImages
+void cvShowManyImages(char* title, int nArgs, ...) {
+
+	// img - Used for getting the arguments
+	IplImage *img;
+
+	// [[DispImage]] - the image in which input images are to be copied
+	IplImage *DispImage;
+
+	int size;
+	int i;
+	int m, n;
+	int x, y;
+
+	// w - Maximum number of images in a row
+	// h - Maximum number of images in a column
+	int w, h;
+
+	// scale - How much we have to resize the image
+	float scale;
+	int max;
+
+	// If the number of arguments is lesser than 0 or greater than 12
+	// return without displaying
+	if(nArgs <= 0) {
+	printf("Number of arguments too small....\n");
+	return;
+	}
+	else if(nArgs > 12) {
+	printf("Number of arguments too large....\n");
+	return;
+	}
+	// Determine the size of the image,
+	// and the number of rows/cols
+	// from number of arguments
+	else if (nArgs == 1) {
+	w = h = 1;
+	size = 300;
+	}
+	else if (nArgs == 2) {
+	w = 2; h = 1;
+	size = 300;
+	}
+	else if (nArgs == 3 || nArgs == 4) {
+	w = 2; h = 2;
+	size = 300;
+	}
+	else if (nArgs == 5 || nArgs == 6) {
+	w = 3; h = 2;
+	size = 200;
+	}
+	else if (nArgs == 7 || nArgs == 8) {
+	w = 4; h = 2;
+	size = 200;
+	}
+	else {
+	w = 4; h = 3;
+	size = 150;
+	}
+
+	// Create a new 3 channel image
+	//[[DispImage]] = cvCreateImage( cvSize(100 + size*w, 60 + size*h), 8, 3 );
+	DispImage = cvCreateImage( cvSize(100 + size*w, 60 + size*h), 8, 3 );
+
+	// Used to get the arguments passed
+	va_list args;
+	va_start(args, nArgs);
+
+	// Loop for nArgs number of arguments
+	for (i = 0, m = 20, n = 20; i < nArgs; i++, m += (20 + size)) {
+
+	// Get the Pointer to the IplImage
+	img = va_arg(args, IplImage*);
+
+	// Check whether it is NULL or not
+	// If it is NULL, release the image, and return
+	if(img == 0) {
+	printf("Invalid arguments");
+	cvReleaseImage(&DispImage);
+	return;
+	}
+
+	// Find the width and height of the image
+	x = img->width;
+	y = img->height;
+
+	// Find whether height or width is greater in order to resize the image
+	max = (x > y)? x: y;
+
+	// Find the scaling factor to resize the image
+	scale = (float) ( (float) max / size );
+
+	// Used to Align the images
+	if( i % w == 0 && m!= 20) {
+	m = 20;
+	n+= 20 + size;
+	}
+
+	// Set the image ROI to display the current image
+	cvSetImageROI(DispImage, cvRect(m, n, (int)( x/scale ), (int)( y/scale )));
+
+	// Resize the input image and copy the it to the Single Big Image
+	cvResize(img, DispImage);
+
+	// Reset the ROI in order to display the next image
+	cvResetImageROI(DispImage);
+	}
+
+	// Create a new window, and show the Single Big Image
+	cvNamedWindow( title, 1 );
+	cvShowImage( title, DispImage);
+
+	cvWaitKey();
+	cvDestroyWindow(title);
+
+	// End the number of arguments
+	va_end(args);
+
+	// Release the Image Memory
+	cvReleaseImage(&DispImage);
+}
+
+// add a delay
+void addDelay( float N){
+
+	for(int k= 0; k< N; k++){}
+
+}
+
+void getImage(int portNumber, Mat &imgOut, Mat &edges)
+{
+	VideoCapture capture(portNumber);
+	
+	if(!capture.isOpened()){
+		cout << "left camera is not loaded correctly" << endl;
+	}
+		
+	Mat leftFrame;
+	capture >> leftFrame; // get a new frame from camera
+	
+	addDelay(1e6);
+	
+	cvtColor(leftFrame, imgOut, COLOR_BGR2GRAY);
+
+	// filter image
+	Mat imgTemp;
+	GaussianBlur(imgOut, imgTemp, Size(7,7), 1.5, 1.5);
+	Canny(imgTemp, edges, 0, 30, 3);
+}
+
+void loadImage(char fileName[200], Mat &imgOut, Mat &img_1_c){
+	
+	//read the image
+	img_1_c = imread(fileName);
+	
+	if (!img_1_c.data) {
+		std::cout << " --(!) Error reading images " << std::endl;
+	}
+
+	// we work with grayscale images
+	cvtColor(img_1_c, imgOut, COLOR_BGR2GRAY);
+}
+
