@@ -617,7 +617,7 @@ string combineName(string localDataDir, int numFrame){
 
 	 ostr << std::setfill('0') << std::setw(6) << numFrame ;
 
-	string fileName  = localDataDir +  ostr.str() + "*.png";
+	string fileName  = localDataDir +  ostr.str() + ".png";
 
 	return fileName;
 

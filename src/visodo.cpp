@@ -31,9 +31,11 @@ int main(int argc, char** argv) {
 	#ifdef __linux__ 
     //linux code goes here
 	string localDataDir = "/home/cwu/Downloads";
+	string resultFile = "/home/cwu/project/stereo-vo/src/vo_result.txt";
     #elif _WIN32
     // windows code goes here
 	string localDataDir = "d:/vision";
+	string resultFile = "d:/vision/stereo-vo/src/vo_result.txt"
     #endif
 
 	Mat current_img_left, current_img_right;
@@ -53,7 +55,7 @@ int main(int argc, char** argv) {
 
 	//obtain truth for plot comparison
 	string posePath = localDataDir + "/dataset/poses/00.txt";
-	std::ifstream infile(localDataDir + "/dataset/poses/00.txt");
+	std::ifstream infile(posePath.c_str());
 
 	std::string line; 
 	float truthPosition[3] ;
@@ -63,7 +65,7 @@ int main(int argc, char** argv) {
 	getPosition(line, truthPosition);
 
 	// Open a txt file to store the results
-	ofstream fout(localDataDir + "/stereo-vo/src/vo_result.txt");
+	ofstream fout(resultFile.c_str());
 	if (!fout) {
 		cout << "File not opened!" << endl;
 		return 1;
@@ -158,7 +160,7 @@ int main(int argc, char** argv) {
 
 	for (int numFrame = 2; numFrame < MAX_FRAME; numFrame++) {
 		filename = combineName(localDataDir + "/dataset/sequences/00/image_0/", numFrame);
-		cout << "filename is " << filename;
+		//cout << "filename is " << filename;
 		currImage_lc = imread(filename);
 		getline(infile, line);
 		getPosition(line, truthPosition);
@@ -213,11 +215,11 @@ int main(int argc, char** argv) {
 		int yTruth = int(truthPosition[2])+ 100;
 		// current point
 		circle(traj, Point(x, y), 1, CV_RGB(255, 0, 0), 2);
-		//circle(traj, Point(xTruth, yTruth), 1, CV_RGB(0, 0, 255), 2);
+		circle(traj, Point(xTruth, yTruth), 1, CV_RGB(0, 0, 255), 2);
 
 		rectangle(traj, Point(10,30), Point(550, 50), PLOT_COLOR, CV_FILLED);
 
-		sprintf_s(text, "Coordinates: x = %02fm y = %02fm z = %02fm", x1, y1, z1);
+		sprintf(text, "Coordinates: x = %02fm y = %02fm z = %02fm", x1, y1, z1);
 		putText(traj, text, textOrg, fontFace, fontScale, Scalar::all(255),	thickness, 8);
 
 		// Save the result
