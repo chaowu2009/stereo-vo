@@ -24,7 +24,17 @@ cv::Point textOrg(10, 50);
 
 //#define REAL_TIME
 
+
+
 int main(int argc, char** argv) {
+
+	#ifdef __linux__ 
+    //linux code goes here
+	string localDataDir = "/home/cwu/Downloads";
+    #elif _WIN32
+    // windows code goes here
+	string localDataDir = "d:/vision";
+    #endif
 
 	Mat current_img_left, current_img_right;
 	Mat previous_img_left, previous_img_right; 
@@ -42,8 +52,8 @@ int main(int argc, char** argv) {
 #endif
 
 	//obtain truth for plot comparison
-	string posePath = "D:/vision/poses/00.txt";
-	std::ifstream infile("D:/vision/poses/00.txt");
+	string posePath = localDataDir + "/dataset/poses/00.txt";
+	std::ifstream infile(localDataDir + "/dataset/poses/00.txt");
 
 	std::string line; 
 	float truthPosition[3] ;
@@ -53,7 +63,7 @@ int main(int argc, char** argv) {
 	getPosition(line, truthPosition);
 
 	// Open a txt file to store the results
-	ofstream fout("D:/vision/stereo-vo/src/vo_result.txt");
+	ofstream fout(localDataDir + "/stereo-vo/src/vo_result.txt");
 	if (!fout) {
 		cout << "File not opened!" << endl;
 		return 1;
@@ -77,8 +87,8 @@ int main(int argc, char** argv) {
 
 #else
 	// use the first two images from left camera to compute the init values.
-	loadImage("D:/vision/dataset/sequences/00/image_0/000000.png", img_1, currImage_lc);
-	loadImage("D:/vision/dataset/sequences/00/image_0/000001.png", img_2, currImage_lc);
+	loadImage(localDataDir + "/dataset/sequences/00/image_0/000000.png", img_1, currImage_lc);
+	loadImage(localDataDir + "/dataset/sequences/00/image_0/000001.png", img_2, currImage_lc);
 
 #endif
 
@@ -95,7 +105,7 @@ int main(int argc, char** argv) {
 	Mat currImage;
 	vector < Point2f > currFeatures;
 
-	char filename[100];
+	string filename;
 	Mat E, R, t, mask;
 
 	clock_t begin = clock();
@@ -106,7 +116,7 @@ int main(int argc, char** argv) {
 	Mat traj = Mat::zeros(600, 600, CV_8UC3);
 	Mat trajTruth = Mat::zeros(600, 600, CV_8UC3);
 	
-	string fileFolder = "D:/vision/dataset/sequences/00/"; 
+	string fileFolder = localDataDir + "/dataset/sequences/00/"; 
 	Mat R_f_left, t_f_left;
 	previous_img_left = img_2;
 
@@ -127,12 +137,12 @@ int main(int argc, char** argv) {
 #else
 	
 	// read the first two iamges from left camera
-	loadImage("D:/vision/dataset/sequences/00/image_0/000000.png", previous_img_left, currImage_lc );
-	loadImage("D:/vision/dataset/sequences/00/image_0/000001.png", current_img_left,  currImage_lc);
+	loadImage(localDataDir + "/dataset/sequences/00/image_0/000000.png", previous_img_left, currImage_lc );
+	loadImage(localDataDir + "/dataset/sequences/00/image_0/000001.png", current_img_left,  currImage_lc);
 
 	// read the first two iamges from right camera
-	loadImage("D:/vision/dataset/sequences/00/image_1/000001.png", previous_img_right, currImage_rc);
-	loadImage("D:/vision/dataset/sequences/00/image_1/000001.png", current_img_right, currImage_rc);
+	loadImage(localDataDir + "/dataset/sequences/00/image_1/000001.png", previous_img_right, currImage_rc);
+	loadImage(localDataDir + "/dataset/sequences/00/image_1/000001.png", current_img_right, currImage_rc);
 	
 #endif
 	computeInitialStereoPose(previous_img_left,
@@ -147,7 +157,8 @@ int main(int argc, char** argv) {
 		previous_feature_right);
 
 	for (int numFrame = 2; numFrame < MAX_FRAME; numFrame++) {
-		sprintf_s(filename, "D:/vision/dataset/sequences/00/image_0/%06d.png", numFrame);
+		filename = combineName(localDataDir + "/dataset/sequences/00/image_0/", numFrame);
+		cout << "filename is " << filename;
 		currImage_lc = imread(filename);
 		getline(infile, line);
 		getPosition(line, truthPosition);
@@ -173,15 +184,12 @@ int main(int argc, char** argv) {
 		
 #else
 		
-		char filename1[200], filename2[200];
-		sprintf_s(filename1, "D:/vision/dataset/sequences/00/image_0/%06d.png", numFrame);
-		sprintf_s(filename2, "D:/vision/dataset/sequences/00/image_0/%06d.png", numFrame);
-
-		loadImage(filename1, current_img_left, currImage_lc);
+		string filename1 =  combineName(localDataDir + "/dataset/sequences/00/image_0/", numFrame);
+		string filename2 =  combineName(localDataDir + "/dataset/sequences/00/image_1/", numFrame);
 		
+		loadImage(filename1, current_img_left, currImage_lc);
 		loadImage(filename2, current_img_right, currImage_rc);
 		
-
 #endif
 
 		stereoVision(current_img_left,
@@ -226,7 +234,7 @@ int main(int argc, char** argv) {
 
 	}
 
-	imwrite("d:/vision/stereo-vo/src/final_map.png", traj);
+	imwrite(localDataDir + "/stereo-vo/src/final_map.png", traj);
 
 	clock_t end = clock();
 	double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;

@@ -20,7 +20,7 @@
 #include <string>
 #include <cv.h>
 #include <stdarg.h>
-
+#include <iomanip>
 using namespace cv;
 using namespace std;
 
@@ -597,7 +597,7 @@ void getImage(int portNumber, Mat &imgOut, Mat &edges)
 	Canny(imgTemp, edges, 0, 30, 3);
 }
 
-void loadImage(char fileName[200], Mat &imgOut, Mat &img_1_c){
+void loadImage(string fileName, Mat &imgOut, Mat &img_1_c){
 	
 	//read the image
 	img_1_c = imread(fileName);
@@ -610,3 +610,15 @@ void loadImage(char fileName[200], Mat &imgOut, Mat &img_1_c){
 	cvtColor(img_1_c, imgOut, COLOR_BGR2GRAY);
 }
 
+
+string combineName(string localDataDir, int numFrame){
+	
+	 std::ostringstream ostr;
+
+	 ostr << std::setfill('0') << std::setw(6) << numFrame ;
+
+	string fileName  = localDataDir +  ostr.str() + "*.png";
+
+	return fileName;
+
+}
