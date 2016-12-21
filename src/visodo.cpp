@@ -230,7 +230,7 @@ int main(int argc, char** argv) {
 #endif
 		//rectangle(traj, Point(10,30), Point(550, 50), PLOT_COLOR, CV_FILLED);
 
-		sprintf_s(text, "Coordinates: x = %02fm y = %02fm z = %02fm", x1, y1, z1);
+		sprintf(text, "Coordinates: x = %02fm y = %02fm z = %02fm", x1, y1, z1);
 		putText(traj, text, textOrg, fontFace, fontScale, Scalar::all(255),	thickness, 8);
 
 		// plot them
