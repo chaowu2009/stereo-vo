@@ -1,32 +1,33 @@
 import numpy as np
 import cv2
+import matplotlib.pylab as plt
 
-cap  = cv2.VideoCapture(0)
-cap2 = cv2.VideoCapture(1)
-
-toggle = 0
+left = 1
+rght = 2
 
 while(True):
+    cap1  = cv2.VideoCapture(left)
+    cap2 = cv2.VideoCapture(right)
+
     # Capture frame-by-frame
-    if (toggle == 0):
-        ret, frame = cap.read()
-    else:
-        ret, frame = cap2.read()
+    ret, frame1 = cap1.read()
+    ret, frame2 = cap2.read()
+   # Display the resulting frame
+    plt.subplot(121)
+    plt.imshow(frame1)
+    plt.title('left')
+    
+    plt.subplot(122)
+    plt.imshow(frame2)
+    plt.title('right')
 
-    # Our operations on the frame come here
-    gray = frame #cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-
-    # Display the resulting frame
-    if (toggle == 0):
-        cv2.imshow('frame',gray)
-        toggle = 1
-    else:
-        cv2.imshow('frame2',gray)
-        toggle = 0
-    if cv2.waitKey(1) & 0xFF == ord('q'):
-        break
-
-# When everything done, release the capture
-cap.release()
-cap2.release()
-cv2.destroyAllWindows()
+    plt.show()
+    
+    time_in_ms= 1000
+    cv2.waitKey(time_in_ms)
+    print('another capture', counter)
+    plt.close()
+    # When everything done, release the capture
+    cap1.release()
+    cap2.release()
+    cv2.destroyAllWindows()
