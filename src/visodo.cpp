@@ -12,8 +12,12 @@ using namespace std;
 
 // IMP: Change the file directories (4 places) according to where your dataset is saved before running!
 
-double focal = 718.8560;
-cv::Point2d pp(607.1928, 185.2157);
+//double focal = 718.8560;
+//cv::Point2d pp(607.1928, 185.2157);
+
+// new camera
+double focal = 8.3769737925956247e+02;
+cv::Point2D pp (3.3296486550136854e+02, 2.2037986827273829e+02);
 
 double scale = 1.00;
 char text[100];
@@ -23,6 +27,9 @@ int thickness = 0.5;
 cv::Point textOrg(10, 50);
 
 #define REAL_TIME 1
+
+int LEFT = 1;
+int RIGHT = 2;
 
 int main(int argc, char** argv) {
 
@@ -80,9 +87,9 @@ int main(int argc, char** argv) {
 		
 	//left camera
 	// get the second frame
-	getImage(1, img_2, leftEdge);
+	getImage(LEFT, img_2, leftEdge);
 	
-	getImage(2, previous_img_right, rightEdge);
+	getImage(RIGHT, previous_img_right, rightEdge);
 	
 	// display them
 	//cvShowManyImages("Left & Right", 2, current_img_left, current_img_right);
@@ -133,10 +140,10 @@ int main(int argc, char** argv) {
 #ifdef REAL_TIME
 	// new frame from left camera
 	previous_img_left = img_2;
-    getImage(1, current_img_left, leftEdge);
+    getImage(LEFT, current_img_left, leftEdge);
 
 	// new frame from right camera
-	getImage(2, current_img_right, rightEdge);
+	getImage(RIGHT, current_img_right, rightEdge);
 	
 #else
 	
