@@ -19,7 +19,7 @@ double fontScale = 1;
 int thickness = 0.5;
 cv::Point textOrg(10, 50);
 
-//#define REAL_TIME 1
+#define REAL_TIME 1
 
 #ifdef REAL_TIME
 // new camera
@@ -252,7 +252,7 @@ int main(int argc, char** argv) {
 		// Save the result
 		fout << numFrame << "\t";
 		fout << x1 << "\t" << y1 << "\t" << z1 << "\t" << x << "\t" << y << "\n";
-		waitKey(0.1);
+		waitKey(1);  //ms
 
 	}
 
