@@ -587,7 +587,7 @@ void addDelay( float N){
 void getImage(int portNumber, Mat &imgOut, Mat &edges)
 {
 	VideoCapture capture(portNumber);
-	sleep(1);  //sleep for 1 second
+	sleep(0.1);  //sleep for 1 second
 
 	if(!capture.isOpened()){
 		cout << "camera is not loaded correctly" << endl;

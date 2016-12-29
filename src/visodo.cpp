@@ -26,7 +26,7 @@ double fontScale = 1;
 int thickness = 0.5;
 cv::Point textOrg(10, 50);
 
-//#define REAL_TIME 1
+#define REAL_TIME 1
 
 int LEFT = 0;
 int RIGHT = 1;
@@ -37,12 +37,12 @@ int main(int argc, char** argv) {
     //linux code goes here
 	string localDataDir = "/home/cwu/Downloads";
 	string resultFile = "/home/cwu/project/stereo-vo/src/vo_result.txt";
-	cout << "localDataDir is " << localDataDir << endl;
+	//cout << "localDataDir is " << localDataDir << endl;
     #else
     // windows code goes here
 	string localDataDir = "d:/vision";
 	string resultFile   = "d:/vision/stereo-vo/src/vo_result.txt";
-	cout << "localDataDir is " << localDataDir << endl;
+	//cout << "localDataDir is " << localDataDir << endl;
     #endif
 	
 	Mat current_img_left, current_img_right;
@@ -57,9 +57,10 @@ int main(int argc, char** argv) {
 	Mat img_1, img_2;  // two consecutive images from the same camera
 
 #ifdef REAL_TIME
-	getImage(1, img_1, leftEdge);
-	namedWindow("first image", 0);
-	imshow("first image", img_1);
+        cout << "Running at real-time" <<endl;
+	getImage(LEFT, img_1, leftEdge);
+	//namedWindow("first image", 0);
+	//imshow("first image", img_1);
 #endif
 
 	//obtain truth for plot comparison
@@ -121,7 +122,7 @@ int main(int argc, char** argv) {
 
 	clock_t begin = clock();
 
-	namedWindow("Road facing camera", WINDOW_AUTOSIZE); // Create a window for display.
+	//namedWindow("Road facing camera", WINDOW_AUTOSIZE); // Create a window for display.
 	namedWindow("Trajectory", WINDOW_AUTOSIZE); // Create a window for display.
 
 	Mat traj = Mat::zeros(600, 600, CV_8UC3);
@@ -140,7 +141,7 @@ int main(int argc, char** argv) {
 #ifdef REAL_TIME
 	// new frame from left camera
 	previous_img_left = img_2;
-    getImage(LEFT, current_img_left, leftEdge);
+        getImage(LEFT, current_img_left, leftEdge);
 
 	// new frame from right camera
 	getImage(RIGHT, current_img_right, rightEdge);
@@ -188,11 +189,11 @@ int main(int argc, char** argv) {
 #ifdef REAL_TIME
 
 	   // Mat leftFrame;
-		getImage(1, current_img_left, leftEdge);
+		getImage(LEFT, current_img_left, leftEdge);
 		currImage_lc = current_img_left;
 		
       // Mat rightFrame;
-		getImage(2, current_img_right, rightEdge);
+		getImage(RIGHT, current_img_right, rightEdge);
 		currImage_rc = current_img_right;
 		
 #else
@@ -241,14 +242,14 @@ int main(int argc, char** argv) {
 		putText(traj, text, textOrg, fontFace, fontScale, Scalar::all(255),	thickness, 8);
 
 		// plot them
-		imshow("Road facing camera", currImage_lc);
+	//	imshow("Road facing camera", currImage_lc);
 		imshow("Trajectory", traj);
 		//imshow("Trajectory", trajTruth);
 
 		// Save the result
 		fout << numFrame << "\t";
 		fout << x1 << "\t" << y1 << "\t" << z1 << "\t" << x << "\t" << y << "\n";
-		waitKey(1);
+		waitKey(0.1);
 
 	}
 
