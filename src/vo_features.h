@@ -37,6 +37,8 @@ using namespace cv::xfeatures2d;
 #define MIN_NUM_FEAT 200
 #define MAX_FRAME 4541
 
+extern const double focal;
+extern const cv::Point2d pp;
 
 double getAbsoluteScale(int frame_id, int sequence_id, double z_cal)  {
   
@@ -183,8 +185,6 @@ void computeInitialPose(Mat &img_1,
 
 	//TODO: add a fucntion to load these values directly from KITTI's calib files
 	// WARNING: different sequences in the KITTI VO dataset have different intrinsic/extrinsic parameters
-	double focal = 718.8560;
-	cv::Point2d pp(607.1928, 185.2157);
 	//recovering the pose and the essential matrix
 	Mat E, R, t, mask;
 	E = findEssentialMat(points2, points1, focal, pp, RANSAC, 0.999, 1.0, mask);
@@ -213,8 +213,6 @@ void computeInitialStereoPose(Mat &previous_img_left,
 	featureTracking(previous_img_left, current_img_left, points1, points_left, status); //track those features to img_2
 
 	// WARNING: different sequences in the KITTI VO dataset have different intrinsic/extrinsic parameters
-	double focal = 718.8560;
-	cv::Point2d pp(607.1928, 185.2157);
 	//recovering the pose and the essential matrix
 	Mat E, R, t, mask;
 	E = findEssentialMat(points_left, points1, focal, pp, RANSAC, 0.999, 1.0, mask);
@@ -252,8 +250,6 @@ void updatePose(char filename[100],
 	featureTracking(prevImage, currImage,  prevFeatures, currFeatures,  status);
 
 	Mat E, R, t, mask;
-	double focal = 718.8560;
-	cv::Point2d pp(607.1928, 185.2157);
 	E = findEssentialMat(currFeatures, prevFeatures, focal, pp, RANSAC, 0.999,	1.0, mask);
 	recoverPose(E, currFeatures, prevFeatures, R, t, focal, pp, mask);
 
@@ -319,9 +315,6 @@ void stereoVision(Mat &current_img_left,
 		          Mat &R_f,
 		          Mat &t_f) 
 {
-
-	double focal = 718.8560;
-	cv::Point2d pp(607.1928, 185.2157);
 	double scale = 0.95;
 
 	// left camera feature tracking
@@ -407,8 +400,6 @@ void stereoVision(Mat &current_img_left,
 void stereoPoseUpdate(Mat &R_f, Mat &t_f, vector<Point2f> &previous_feature,
 		vector<Point2f> &current_feature) {
 
-	double focal = 718.8560;
-	cv::Point2d pp(607.1928, 185.2157);
 	double scale = 1.0;
 
 	Mat E, R, t, mask;

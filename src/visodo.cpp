@@ -12,13 +12,6 @@ using namespace std;
 
 // IMP: Change the file directories (4 places) according to where your dataset is saved before running!
 
-//double focal = 718.8560;
-//cv::Point2d pp(607.1928, 185.2157);
-
-// new camera
-double focal = 837.69737925956247;
-cv::Point2d pp (332.96486550136854, 220.37986827273829);
-
 double scale = 1.00;
 char text[100];
 int fontFace = FONT_HERSHEY_PLAIN;
@@ -26,7 +19,16 @@ double fontScale = 1;
 int thickness = 0.5;
 cv::Point textOrg(10, 50);
 
-#define REAL_TIME 1
+//#define REAL_TIME 1
+
+#ifdef REAL_TIME
+// new camera
+const double focal = 837.69737925956247;
+const cv::Point2d pp (332.96486550136854, 220.37986827273829);
+#else
+const double focal = 718.8560;
+const cv::Point2d pp(607.1928, 185.2157);
+#endif
 
 int LEFT = 0;
 int RIGHT = 1;
@@ -61,6 +63,8 @@ int main(int argc, char** argv) {
 	getImage(LEFT, img_1, leftEdge);
 	//namedWindow("first image", 0);
 	//imshow("first image", img_1);
+#else
+        cout << "Running at simulation mode!" << endl;
 #endif
 
 	//obtain truth for plot comparison
@@ -86,10 +90,9 @@ int main(int argc, char** argv) {
 	
 #ifdef REAL_TIME
 		
-	//left camera
-	// get the second frame
+	//left camera, second frame
 	getImage(LEFT, img_2, leftEdge);
-	
+        // right camera	
 	getImage(RIGHT, previous_img_right, rightEdge);
 	
 	// display them
@@ -170,10 +173,10 @@ int main(int argc, char** argv) {
 
 	for (int numFrame = 2; numFrame < MAX_FRAME; numFrame++) {
 		//filename = combineName(localDataDir + "/dataset/sequences/00/image_0/", numFrame);
-		//cout << "filename is " << filename;
+		cout << "numFrame is " << numFrame << endl;
 		
-		getline(infile, line);
-		getPosition(line, truthPosition);
+		//getline(infile, line);
+		//getPosition(line, truthPosition);
 
 #if 0
 		//scale = getAbsoluteScale(numFrame, 0, t_f.at<double>(2));
@@ -229,12 +232,12 @@ int main(int argc, char** argv) {
 		// output to the screen
 		cout << "vo: x = " << PL<< x1 << "\t y = " << PL<< y1 << "\t z = " << PL<< z1 << endl;
 #ifndef REAL_TIME
-		cout << "tr: x = " << PL<< truthPosition[0] << "\t y = " << PL<< truthPosition[1] << "\t z = " << PL<< truthPosition[2] << endl;
+		//cout << "tr: x = " << PL<< truthPosition[0] << "\t y = " << PL<< truthPosition[1] << "\t z = " << PL<< truthPosition[2] << endl;
 #endif
 		// current point
 		circle(traj, Point(x, y), 0.2, CV_RGB(255, 0, 0), 2);
 #ifndef REAL_TIME
-		circle(traj, Point(xTruth, yTruth), 0.2, CV_RGB(0, 0, 255), 2);
+		//circle(traj, Point(xTruth, yTruth), 0.2, CV_RGB(0, 0, 255), 2);
 #endif
 		//rectangle(traj, Point(10,30), Point(550, 50), PLOT_COLOR, CV_FILLED);
 
