@@ -19,7 +19,7 @@ double fontScale = 1;
 int thickness = 0.5;
 cv::Point textOrg(10, 50);
 
-//#define REAL_TIME 1
+#define REAL_TIME 1
 
 #ifdef REAL_TIME
 // new camera
@@ -59,8 +59,17 @@ int main(int argc, char** argv) {
 	Mat img_1, img_2;  // two consecutive images from the same camera
 
 #ifdef REAL_TIME
-        cout << "Running at real-time" <<endl;
-	getImage(LEFT, img_1, leftEdge);
+    cout << "Running at real-time" <<endl;
+
+    VideoCapture left_capture(LEFT);
+    //left_capture.set(CV_CAP_PROP_FPS,100);
+   left_capture.set(CV_CAP_PROP_BUFFERSIZE,3);
+	
+    VideoCapture right_capture(RIGHT);
+    //right_capture.set(CV_CAP_PROP_FPS,100);
+   right_capture.set(CV_CAP_PROP_BUFFERSIZE,3);
+	
+	getImage(left_capture, img_1, leftEdge);
 	//namedWindow("first image", 0);
 	//imshow("first image", img_1);
 #else
@@ -91,9 +100,9 @@ int main(int argc, char** argv) {
 #ifdef REAL_TIME
 		
 	//left camera, second frame
-	getImage(LEFT, img_2, leftEdge);
+	getImage(left_capture, img_2, leftEdge);
         // right camera	
-	getImage(RIGHT, previous_img_right, rightEdge);
+	getImage(right_capture, previous_img_right, rightEdge);
 	
 	// display them
 	//cvShowManyImages("Left & Right", 2, current_img_left, current_img_right);
@@ -144,10 +153,10 @@ int main(int argc, char** argv) {
 #ifdef REAL_TIME
 	// new frame from left camera
 	previous_img_left = img_2;
-        getImage(LEFT, current_img_left, leftEdge);
+    getImage(left_capture, current_img_left, leftEdge);
 
 	// new frame from right camera
-	getImage(RIGHT, current_img_right, rightEdge);
+	getImage(right_capture, current_img_right, rightEdge);
 	
 #else
 	
@@ -173,7 +182,7 @@ int main(int argc, char** argv) {
 
 	for (int numFrame = 2; numFrame < MAX_FRAME; numFrame++) {
 		//filename = combineName(localDataDir + "/dataset/sequences/00/image_0/", numFrame);
-		cout << "numFrame is " << numFrame << endl;
+		//cout << "numFrame is " << numFrame << endl;
 		
 		//getline(infile, line);
 		//getPosition(line, truthPosition);
@@ -192,11 +201,11 @@ int main(int argc, char** argv) {
 #ifdef REAL_TIME
 
 	   // Mat leftFrame;
-		getImage(LEFT, current_img_left, leftEdge);
+		getImage(left_capture, current_img_left, leftEdge);
 		currImage_lc = current_img_left;
 		
       // Mat rightFrame;
-		getImage(RIGHT, current_img_right, rightEdge);
+		getImage(right_capture, current_img_right, rightEdge);
 		currImage_rc = current_img_right;
 		
 #else
@@ -245,14 +254,14 @@ int main(int argc, char** argv) {
 		putText(traj, text, textOrg, fontFace, fontScale, Scalar::all(255),	thickness, 8);
 
 		// plot them
-	//	imshow("Road facing camera", currImage_lc);
+		imshow("Road facing camera", currImage_lc);
 		imshow("Trajectory", traj);
 		//imshow("Trajectory", trajTruth);
 
 		// Save the result
 		fout << numFrame << "\t";
 		fout << x1 << "\t" << y1 << "\t" << z1 << "\t" << x << "\t" << y << "\n";
-		waitKey(0.1);
+		waitKey(1);
 
 	}
 
