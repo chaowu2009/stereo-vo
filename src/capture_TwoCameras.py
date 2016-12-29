@@ -3,18 +3,28 @@ import cv2
 import time
 import matplotlib.pylab as plt
 
-left = 1
-right = 2
+left = 0
+right = 1
+
+time_in_ms= 1000/100
 
 fig = plt.figure()
 for counter in range(1,51):
 
-    cap1  = cv2.VideoCapture(left)
-    cap2 = cv2.VideoCapture(right)
-
+    cap1 = cv2.VideoCapture(left)
+#    cap1.set(3,160)
+#    cap1.set(3,120)
+    cv2.waitKey(time_in_ms)
     # Capture frame-by-frame
     ret, frame1 = cap1.read()
+    cap1.release()
+
+    cap2 = cv2.VideoCapture(right)
+#    cap2.set(3,160)
+#    cap2.set(3,120)
+    cv2.waitKey(time_in_ms)
     ret, frame2 = cap2.read()
+    cap2.release()
 
     # Display the resulting frame
     plt.subplot(121)
@@ -27,13 +37,13 @@ for counter in range(1,51):
 
     plt.show()
     
-    cv2.imwrite("D:/vision/dataset/calibrationImages/left_" + str(counter) + ".jpg",  frame1)
-    cv2.imwrite("D:/vision/dataset/calibrationImages/right_" + str(counter) + ".jpg", frame2)
+    #cv2.imwrite("D:/vision/dataset/calibrationImages/left_" + str(counter) + ".jpg",  frame1)
+    #cv2.imwrite("D:/vision/dataset/calibrationImages/right_" + str(counter) + ".jpg", frame2)
     time_in_ms= 1000
     cv2.waitKey(time_in_ms)
     print('another capture', counter)
     plt.close()
     # When everything done, release the capture
-    cap1.release()
-    cap2.release()
+
+
     cv2.destroyAllWindows()

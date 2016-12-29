@@ -3,30 +3,25 @@ import cv2
 import matplotlib.pylab as plt
 import time
 
+port = 1
 
-cap = cv2.VideoCapture(0)
-time.sleep(2)
-toggle = 0
 
 fig = plt.figure()
 
 while(True):
+    cap = cv2.VideoCapture(port)
+    if port == 1:
+        port = 0
+    else:
+        port = 1
+
     # Capture frame-by-frame
     ret, frame = cap.read()
 
-    # Our operations on the frame come here
-    gray = frame #cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    plt.imshow(frame)
+    plt.show()
+    cv2.waitKey(2)    
 
-    # Display the resulting frame
-    if gray.empty():
-        print('image not availabe')
-    else:
-        plt.imshow(gray)
-        plt.show()
-        
-    if cv2.waitKey(1) & 0xFF == ord('q'):
-        break
-
-# When everything done, release the capture
-cap.release()
-cv2.destroyAllWindows()		
+    # When everything done, release the capture
+    cap.release()
+    cv2.destroyAllWindows()		

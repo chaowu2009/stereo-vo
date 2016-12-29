@@ -16,8 +16,8 @@ using namespace std;
 //cv::Point2d pp(607.1928, 185.2157);
 
 // new camera
-double focal = 8.3769737925956247e+02;
-cv::Point2D pp (3.3296486550136854e+02, 2.2037986827273829e+02);
+double focal = 837.69737925956247;
+cv::Point2d pp (332.96486550136854, 220.37986827273829);
 
 double scale = 1.00;
 char text[100];
@@ -26,10 +26,10 @@ double fontScale = 1;
 int thickness = 0.5;
 cv::Point textOrg(10, 50);
 
-#define REAL_TIME 1
+//#define REAL_TIME 1
 
-int LEFT = 1;
-int RIGHT = 2;
+int LEFT = 0;
+int RIGHT = 1;
 
 int main(int argc, char** argv) {
 
