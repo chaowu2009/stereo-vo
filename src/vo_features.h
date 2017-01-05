@@ -591,39 +591,6 @@ void getImage(VideoCapture &capture, Mat &imgOut, Mat &edges)
 	//Canny(imgTemp, edges, 0, 30, 3);
 }
 
-void getImage(int portNumber, Mat &imgOut, Mat &edges)
-{
-    VideoCapture capture(portNumber);	
-    //sleep(0.1);  //sleep for 1 second
-
-	if(!capture.isOpened()){
-		cout << "camera is not loaded correctly" << endl;
-	}
-		
-	Mat currentFrame;
-	capture >> currentFrame; // get a new frame from camera
-	cvtColor(currentFrame, imgOut, COLOR_BGR2GRAY);
-
-	// filter image
-	//Mat imgTemp;
-	//GaussianBlur(imgOut, imgTemp, Size(7,7), 1.5, 1.5);
-	//Canny(imgTemp, edges, 0, 30, 3);
-}
-
-void getImage(int portNumber, Mat &imgOut)
-{
-    VideoCapture capture(portNumber);	
-    capture.set(CV_CAP_PROP_FPS, 30);
-
-	if(!capture.isOpened()){
-		cout << "camera is not loaded correctly" << endl;
-	}
-		
-	Mat currentFrame;
-	capture >> currentFrame; // get a new frame from camera
-	cvtColor(currentFrame, imgOut, COLOR_BGR2GRAY);
-}
-
 void loadImage(string fileName, Mat &imgOut, Mat &img_1_c){
 	
 	//read the image
