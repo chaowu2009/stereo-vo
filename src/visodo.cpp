@@ -1,8 +1,6 @@
 #include "vo_features.h"
 #include <iomanip>
 #include <fstream>
-#include <ctime>
-#include <Windows.h>
 
 unsigned int microseconds;
 //usleep(microseconds);
@@ -14,8 +12,6 @@ using namespace std;
 #define MIN_NUM_FEAT 200
 #define PLOT_COLOR CV_RGB(0, 0, 0)
 #define PL std::setprecision(3)
-
-// IMP: Change the file directories (4 places) according to where your dataset is saved before running!
 
 double scale = 1.00;
 char text[100];
@@ -82,13 +78,23 @@ int main(int argc, char** argv) {
     namedWindow("LEFT image", 0);
     namedWindow("RIGHT image", 1);
 
-
+    int numFrame = 0;
     while (1) {
         left_capture.read(current_img_left);
         right_capture.read(current_img_right);
 
         imshow("LEFT image", current_img_left);
         imshow("RIGHT image", current_img_right);
+        string imgDir="/home/cwu/project/dataset/images/1/";
+        stringstream ss;
+        ss << numFrame;
+        string idx = ss.str();
+        string leftImg  = imgDir + "img_0/" + idx + ".png";
+        string rightImg = imgDir + "img_1/" + idx + ".png";
+        cout << "leftImg = " << leftImg << endl;
+        imwrite(leftImg,  current_img_left);
+        imwrite(rightImg, current_img_right);
+        numFrame++;
         waitKey(1); //micro second
     }
 
