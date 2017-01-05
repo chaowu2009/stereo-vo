@@ -1,6 +1,11 @@
 #include "vo_features.h"
 #include <iomanip>
 #include <fstream>
+#include <ctime>
+#include <Windows.h>
+
+unsigned int microseconds;
+//usleep(microseconds);
 
 using namespace cv;
 using namespace std;
@@ -20,6 +25,7 @@ int thickness = 0.5;
 cv::Point textOrg(10, 50);
 
 #define REAL_TIME 1
+//#define SHOW_IMAGE_ONLY 1
 
 #ifdef REAL_TIME
 // new camera
@@ -62,16 +68,33 @@ int main(int argc, char** argv) {
     cout << "Running at real-time" <<endl;
 
     VideoCapture left_capture(LEFT);
-    //left_capture.set(CV_CAP_PROP_FPS,100);
-   left_capture.set(CV_CAP_PROP_BUFFERSIZE,3);
+    left_capture.set(CV_CAP_PROP_FPS,100);
+    left_capture.set(CV_CAP_PROP_BUFFERSIZE,3);
 	
     VideoCapture right_capture(RIGHT);
-    //right_capture.set(CV_CAP_PROP_FPS,100);
-   right_capture.set(CV_CAP_PROP_BUFFERSIZE,3);
+    right_capture.set(CV_CAP_PROP_FPS,100);
+    right_capture.set(CV_CAP_PROP_BUFFERSIZE,3);
 	
 	getImage(left_capture, img_1, leftEdge);
 	//namedWindow("first image", 0);
 	//imshow("first image", img_1);
+
+#ifdef SHOW_IMAGE_ONLY
+    namedWindow("LEFT image", 0);
+    namedWindow("RIGHT image", 1);
+
+   
+    while (1) {
+        left_capture.read(current_img_left);
+        right_capture.read(current_img_right);
+	            
+	    imshow("LEFT image", current_img_left);
+        imshow("RIGHT image", current_img_right);
+        waitKey(1); //micro second
+    }
+
+#endif
+
 #else
         cout << "Running at simulation mode!" << endl;
 #endif
@@ -101,14 +124,9 @@ int main(int argc, char** argv) {
 		
 	//left camera, second frame
 	getImage(left_capture, img_2, leftEdge);
-        // right camera	
+    // right camera	
 	getImage(right_capture, previous_img_right, rightEdge);
 	
-	// display them
-	//cvShowManyImages("Left & Right", 2, current_img_left, current_img_right);
-	//imshow("Left Camera", leftCameraMat);
-	//imshow("Right Camera", rightCameraMat);
-
 #else
 	// use the first two images from left camera to compute the init values.
 	loadImage(localDataDir + "/dataset/sequences/00/image_0/000000.png", img_1, currImage_lc);
@@ -153,11 +171,11 @@ int main(int argc, char** argv) {
 #ifdef REAL_TIME
 	// new frame from left camera
 	previous_img_left = img_2;
-    getImage(left_capture, current_img_left, leftEdge);
-
+    left_capture.read(current_img_left);
+    
 	// new frame from right camera
-	getImage(right_capture, current_img_right, rightEdge);
-	
+    right_capture.read(current_img_right);
+		
 #else
 	
 	// read the first two iamges from left camera
@@ -200,12 +218,12 @@ int main(int argc, char** argv) {
 #else
 #ifdef REAL_TIME
 
-	   // Mat leftFrame;
-		getImage(left_capture, current_img_left, leftEdge);
+	    // Mat leftFrame;
+        left_capture.read(current_img_left);
 		currImage_lc = current_img_left;
 		
       // Mat rightFrame;
-		getImage(right_capture, current_img_right, rightEdge);
+        right_capture.read(current_img_right);
 		currImage_rc = current_img_right;
 		
 #else
@@ -261,8 +279,8 @@ int main(int argc, char** argv) {
 		// Save the result
 		fout << numFrame << "\t";
 		fout << x1 << "\t" << y1 << "\t" << z1 << "\t" << x << "\t" << y << "\n";
-		waitKey(1);
 
+		waitKey(2);  //microsecond
 	}
 
 	imwrite(localDataDir + "/stereo-vo/src/final_map.png", traj);
