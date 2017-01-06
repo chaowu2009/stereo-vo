@@ -17,7 +17,7 @@ double fontScale = 1;
 int thickness = 1;
 cv::Point textOrg(10, 50);
 
-//#define REAL_TIME 1
+#define REAL_TIME 1
 //#define SHOW_IMAGE_ONLY 1
 
 #ifdef REAL_TIME

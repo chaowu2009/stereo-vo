@@ -626,7 +626,7 @@ void rectifyImage(Mat &img1,
   Mat K1, K2, R;
   Vec3d T;
   Mat D1, D2;
-  char *calib_file ="cam_stereo.yml";
+//  char *calib_file ="cam_stereo.yml";
 
   //cv::FileStorage fs1("cam_stereo.yml", cv::FileStorage::READ);
   cv::FileStorage fs1("../../src/cam_stereo.yml", cv::FileStorage::READ);
