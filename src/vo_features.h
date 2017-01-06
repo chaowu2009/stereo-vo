@@ -594,6 +594,7 @@ void getImage(VideoCapture &capture, Mat &imgOut, Mat &edges)
 void loadImage(string fileName, Mat &imgOut, Mat &img_1_c){
 	
 	//read the image
+    //cout << "image name = " << fileName << endl;
 	img_1_c = imread(fileName);
 	
 	if (!img_1_c.data) {
@@ -603,7 +604,6 @@ void loadImage(string fileName, Mat &imgOut, Mat &img_1_c){
 	// we work with grayscale images
 	cvtColor(img_1_c, imgOut, COLOR_BGR2GRAY);
 }
-
 
 string combineName(string localDataDir, int numFrame){
 	
@@ -617,19 +617,17 @@ string combineName(string localDataDir, int numFrame){
 
 }  
 
-void rectifyImage(char *calib_file, 
-	              Mat &img1,
+void rectifyImage(Mat &img1,
 	              Mat &img2,
-	              Mat &imgU1,
-	              Mat &imgU2 ){
-
+	              Mat &imgR1,
+	              Mat &imgR2 ){
 
   Mat R1, R2, P1, P2, Q;
   Mat K1, K2, R;
   Vec3d T;
   Mat D1, D2;
   //Mat img1 = imread(leftimg_filename, CV_LOAD_IMAGE_COLOR);
-  calib_file ="cam_stereo.yml";
+  char *calib_file ="cam_stereo.yml";
 
   cv::FileStorage fs1(calib_file, cv::FileStorage::READ);
   fs1["K1"] >> K1;
@@ -645,11 +643,13 @@ void rectifyImage(char *calib_file,
   fs1["P2"] >> P2;
   fs1["Q"] >> Q;
 
+  cout << "Q = " << Q << endl;
+
   cv::Mat lmapx, lmapy, rmapx, rmapy;
 
   cv::initUndistortRectifyMap(K1, D1, R1, P1, img1.size(), CV_32F, lmapx, lmapy);
   cv::initUndistortRectifyMap(K2, D2, R2, P2, img2.size(), CV_32F, rmapx, rmapy);
-  cv::remap(img1, imgU1, lmapx, lmapy, cv::INTER_LINEAR);
-  cv::remap(img2, imgU2, rmapx, rmapy, cv::INTER_LINEAR);
+  cv::remap(img1, imgR1, lmapx, lmapy, cv::INTER_LINEAR);
+  cv::remap(img2, imgR2, rmapx, rmapy, cv::INTER_LINEAR);
 
 }

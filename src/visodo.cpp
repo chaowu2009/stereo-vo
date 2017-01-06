@@ -2,14 +2,11 @@
 #include <iomanip>
 #include <fstream>
 
-unsigned int microseconds;
-//usleep(microseconds);
-
 using namespace cv;
 using namespace std;
 
-#define MAX_FRAME 4541
-#define MIN_NUM_FEAT 200
+//#define MAX_FRAME 200
+//#define MIN_NUM_FEAT 200
 #define PLOT_COLOR CV_RGB(0, 0, 0)
 #define PL std::setprecision(3)
 
@@ -20,8 +17,8 @@ double fontScale = 1;
 int thickness = 1;
 cv::Point textOrg(10, 50);
 
-#define REAL_TIME 1
-#define SHOW_IMAGE_ONLY 1
+//#define REAL_TIME 1
+//#define SHOW_IMAGE_ONLY 1
 
 #ifdef REAL_TIME
 // new camera
@@ -42,10 +39,13 @@ int main(int argc, char** argv) {
     string localDataDir = "/home/cwu/Downloads";
     string resultFile = "/home/cwu/project/stereo-vo/src/vo_result.txt";
     //cout << "localDataDir is " << localDataDir << endl;
+    string imgDir="/home/cwu/project/dataset/images/1/";
 #else
     // windows code goes here
-    string localDataDir = "d:/vision";
+  //  string localDataDir = "d:/vision";
     string resultFile   = "d:/vision/stereo-vo/src/vo_result.txt";
+    string imgDir       = "d:/vision/dataset/images/1/";
+    string localDataDir = "d:/vision/dataset//images/1/";
     //cout << "localDataDir is " << localDataDir << endl;
 #endif
 
@@ -78,24 +78,29 @@ int main(int argc, char** argv) {
     namedWindow("LEFT image", 0);
     namedWindow("RIGHT image", 1);
 
-    int numFrame = 0;
+    int numFrame = 1;
     while (1) {
         left_capture.read(current_img_left);
         right_capture.read(current_img_right);
 
         imshow("LEFT image", current_img_left);
         imshow("RIGHT image", current_img_right);
-        string imgDir="/home/cwu/project/dataset/images/1/";
+        
         stringstream ss;
         ss << numFrame;
         string idx = ss.str();
-        string leftImg  = imgDir + "img_0/" + idx + ".png";
-        string rightImg = imgDir + "img_1/" + idx + ".png";
-        cout << "leftImg = " << leftImg << endl;
+        string leftImg  = imgDir + "img_left/" + idx + ".png";
+        string rightImg = imgDir + "img_right/" + idx + ".png";
+        //cout << "leftImg = " << leftImg << endl;
+        Mat imgOut;
+        cvtColor(current_img_left, imgOut, COLOR_BGR2GRAY);
         imwrite(leftImg,  current_img_left);
-        imwrite(rightImg, current_img_right);
+
+        cvtColor(current_img_right, imgOut, COLOR_BGR2GRAY);
+        imwrite(rightImg, imgOut);
         numFrame++;
-        waitKey(1); //micro second
+        if (numFrame > 300) {return 0;}
+        waitKey(100); //micro second
     }
 
 #endif
@@ -112,8 +117,8 @@ int main(int argc, char** argv) {
     float truthPosition[3] ;
     Mat truthOrientation;
 
-    getline(infile, line);
-    getPosition(line, truthPosition);
+    //getline(infile, line);
+    //getPosition(line, truthPosition);
 
     // Open a txt file to store the results
     ofstream fout(resultFile.c_str());
@@ -134,8 +139,10 @@ int main(int argc, char** argv) {
 
 #else
     // use the first two images from left camera to compute the init values.
-    loadImage(localDataDir + "/dataset/sequences/00/image_0/000000.png", img_1, currImage_lc);
-    loadImage(localDataDir + "/dataset/sequences/00/image_0/000001.png", img_2, currImage_lc);
+    //loadImage(localDataDir + "/dataset/sequences/00/image_0/000000.png", img_1, currImage_lc);
+    //loadImage(localDataDir + "/dataset/sequences/00/image_0/000001.png", img_2, currImage_lc);
+    loadImage(localDataDir + "/img_left/1.png", img_1, currImage_lc);
+    loadImage(localDataDir + "/img_right/1.png", img_2, currImage_lc);
 
 #endif
 
@@ -184,12 +191,18 @@ int main(int argc, char** argv) {
 #else
 
     // read the first two iamges from left camera
-    loadImage(localDataDir + "/dataset/sequences/00/image_0/000000.png", previous_img_left, currImage_lc );
-    loadImage(localDataDir + "/dataset/sequences/00/image_0/000001.png", current_img_left,  currImage_lc);
+    //loadImage(localDataDir + "/dataset/sequences/00/image_0/000000.png", previous_img_left, currImage_lc );
+    //loadImage(localDataDir + "/dataset/sequences/00/image_0/000001.png", current_img_left,  currImage_lc);
+
+    loadImage(localDataDir + "/img_left/1.png", previous_img_left, currImage_lc );
+    loadImage(localDataDir + "/img_left/2.png", current_img_left,  currImage_lc);
 
     // read the first two iamges from right camera
-    loadImage(localDataDir + "/dataset/sequences/00/image_1/000001.png", previous_img_right, currImage_rc);
-    loadImage(localDataDir + "/dataset/sequences/00/image_1/000001.png", current_img_right, currImage_rc);
+    loadImage(localDataDir + "/img_right/1.png", previous_img_right, currImage_rc);
+    loadImage(localDataDir + "/img_right/2.png", current_img_right, currImage_rc);
+
+    rectifyImage(previous_img_left, previous_img_right, previous_img_left, previous_img_right);
+    rectifyImage(current_img_left, current_img_right, current_img_left, current_img_right);
 
 #endif
     computeInitialStereoPose(previous_img_left,
@@ -232,14 +245,21 @@ int main(int argc, char** argv) {
 
 #else
 
-        string filename1 =  combineName(localDataDir + "/dataset/sequences/00/image_0/", numFrame);
-        string filename2 =  combineName(localDataDir + "/dataset/sequences/00/image_1/", numFrame);
+        //string filename1 =  combineName(localDataDir + "/dataset/sequences/00/image_0/", numFrame);
+        //string filename2 =  combineName(localDataDir + "/dataset/sequences/00/image_1/", numFrame);
+        stringstream ss;
+        ss << numFrame;
+        string idx = ss.str();
+
+        string filename1 =  localDataDir + "/img_left/" + idx + ".png";
+        string filename2 =  localDataDir + "/img_right/" + idx + ".png";
 
         loadImage(filename1, current_img_left, currImage_lc);
         loadImage(filename2, current_img_right, currImage_rc);
 
-#endif
+        rectifyImage(current_img_left, current_img_right, current_img_left, current_img_right);
 
+#endif
         stereoVision(current_img_left,
             current_img_right,
             currImage_lc, 
@@ -276,7 +296,9 @@ int main(int argc, char** argv) {
         putText(traj, text, textOrg, fontFace, fontScale, Scalar::all(255),	thickness, 8);
 
         // plot them
-        //imshow("Road facing camera", currImage_lc);
+#ifndef REAL_TIME
+        imshow("Road facing camera", currImage_lc);
+#endif
         imshow("Trajectory", traj);
         //imshow("Trajectory", trajTruth);
 
@@ -287,7 +309,7 @@ int main(int argc, char** argv) {
         waitKey(2);  //microsecond
     }
 
-    imwrite(localDataDir + "/stereo-vo/src/final_map.png", traj);
+    imwrite(localDataDir + "/final_map.png", traj);
 
     clock_t end = clock();
     double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
