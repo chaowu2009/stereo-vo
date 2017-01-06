@@ -1,3 +1,4 @@
+#sudo ddrescue -D --force ubuntu-mate-16.04-desktop-armhf-raspberry-pi.img /dev/sdx
 sudo apt-get update
 sudo apt-get -y upgrade
 sudo apt-get install -y build-essential cmake pkg-config git
@@ -7,6 +8,7 @@ sudo apt-get install -y libxvidcore-dev libx264-dev
 sudo apt-get install -y libgtk-3-dev
 sudo apt-get install -y libatlas-base-dev gfortran
 sudo apt-get install -y python2.7-dev python3.5-dev
+sudo apt-get install -y python-opencv
 cd ~
 wget -O opencv.zip https://github.com/Itseez/opencv/archive/3.1.0.zip
 unzip opencv.zip

@@ -46,5 +46,7 @@ int main(int argc, char** argv) {
     imshow("right image before", current_img_right);
     imshow("right image after", rectified_img_right);
     
+	waitKey(0);
+
     return 0;
 }

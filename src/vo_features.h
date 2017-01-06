@@ -626,10 +626,11 @@ void rectifyImage(Mat &img1,
   Mat K1, K2, R;
   Vec3d T;
   Mat D1, D2;
-  //Mat img1 = imread(leftimg_filename, CV_LOAD_IMAGE_COLOR);
   char *calib_file ="cam_stereo.yml";
 
-  cv::FileStorage fs1(calib_file, cv::FileStorage::READ);
+  //cv::FileStorage fs1("cam_stereo.yml", cv::FileStorage::READ);
+  cv::FileStorage fs1("../../src/cam_stereo.yml", cv::FileStorage::READ);
+  if (!fs1.isOpened()) { cout << "unable to open yml file" << endl; }
   fs1["K1"] >> K1;
   fs1["K2"] >> K2;
   fs1["D1"] >> D1;
