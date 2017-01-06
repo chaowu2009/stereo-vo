@@ -1,6 +1,6 @@
 sudo apt-get update
 sudo apt-get -y upgrade
-sudo apt-get install -y build-essential cmake pkg-config
+sudo apt-get install -y build-essential cmake pkg-config git
 sudo apt-get install -y libjpeg8-dev libtiff5-dev libjasper-dev libpng12-dev
 sudo apt-get install -y libavcodec-dev libavformat-dev libswscale-dev libv4l-dev
 sudo apt-get install -y libxvidcore-dev libx264-dev
@@ -24,7 +24,6 @@ cmake -D CMAKE_BUILD_TYPE=RELEASE \
     -D INSTALL_PYTHON_EXAMPLES=ON \
     -D INSTALL_C_EXAMPLES=OFF \
     -D OPENCV_EXTRA_MODULES_PATH=~/opencv_contrib-3.1.0/modules \
-    -D PYTHON_EXECUTABLE=~/.virtualenvs/cv/bin/python \
     -D BUILD_EXAMPLES=ON ..
 make -j2
 sudo make install
