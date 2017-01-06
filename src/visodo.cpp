@@ -287,12 +287,9 @@ int main(int argc, char** argv) {
 #endif
         // current point
         circle(traj, Point(x, y), 0.2, CV_RGB(255, 0, 0), 2);
-#ifndef REAL_TIME
-        //circle(traj, Point(xTruth, yTruth), 0.2, CV_RGB(0, 0, 255), 2);
-#endif
-        //rectangle(traj, Point(10,30), Point(550, 50), PLOT_COLOR, CV_FILLED);
+        rectangle(traj, Point(10,30), Point(550, 50), PLOT_COLOR, CV_FILLED);
 
-        sprintf(text, "Coordinates: x = %02fm y = %02fm z = %02fm", x1, y1, z1);
+        sprintf(text, "Coordinates: x = %04fm y = %04fm z = %04fm", x1, y1, z1);
         putText(traj, text, textOrg, fontFace, fontScale, Scalar::all(255),	thickness, 8);
 
         // plot them

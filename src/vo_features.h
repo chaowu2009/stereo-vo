@@ -644,7 +644,7 @@ void rectifyImage(Mat &img1,
   fs1["P2"] >> P2;
   fs1["Q"] >> Q;
 
-  cout << "Q = " << Q << endl;
+  //cout << "Q = " << Q << endl;
 
   cv::Mat lmapx, lmapy, rmapx, rmapy;
 
