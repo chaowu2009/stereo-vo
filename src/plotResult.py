@@ -1,7 +1,7 @@
 import numpy as np
 from matplotlib.pyplot import *
 
-resultFile = '/home/cwu/project/stereo-vo/src/result.txt'
+resultFile = '/home/cwu/project/stereo-vo/src/vo_result.txt'
 
 
 position3D = [];

@@ -5,7 +5,7 @@
 using namespace cv;
 using namespace std;
 
-//#define MAX_FRAME 200
+#define MAX_FRAME 1001
 //#define MIN_NUM_FEAT 200
 #define PLOT_COLOR CV_RGB(0, 0, 0)
 #define PL std::setprecision(3)
@@ -17,7 +17,7 @@ double fontScale = 1;
 int thickness = 1;
 cv::Point textOrg(10, 50);
 
-#define REAL_TIME 1
+//#define REAL_TIME 1
 //#define SHOW_IMAGE_ONLY 1
 
 #ifdef REAL_TIME
@@ -36,10 +36,11 @@ int main(int argc, char** argv) {
 
 #ifdef __linux__ 
     //linux code goes here
-    string localDataDir = "/home/cwu/Downloads";
+//    string localDataDir = "/home/cwu/Downloads";
+    string localDataDir = "/home/cwu/project/dataset/images/2/";
     string resultFile = "/home/cwu/project/stereo-vo/src/vo_result.txt";
     //cout << "localDataDir is " << localDataDir << endl;
-    string imgDir="/home/cwu/project/dataset/images/1/";
+    string imgDir="/home/cwu/project/dataset/images/2/";
 #else
     // windows code goes here
   //  string localDataDir = "d:/vision";
@@ -73,7 +74,6 @@ int main(int argc, char** argv) {
 
     left_capture.read(img_1);
 
-
 #ifdef SHOW_IMAGE_ONLY
     namedWindow("LEFT image", 0);
     namedWindow("RIGHT image", 1);
@@ -99,7 +99,7 @@ int main(int argc, char** argv) {
         cvtColor(current_img_right, imgOut, COLOR_BGR2GRAY);
         imwrite(rightImg, imgOut);
         numFrame++;
-        if (numFrame > 300) {return 0;}
+        if (numFrame > MAX_FRAME) {return 0;}
         waitKey(100); //micro second
     }
 
@@ -148,9 +148,9 @@ int main(int argc, char** argv) {
 
     computeInitialPose(img_1, R_f, t_f, img_2, keyFeatures);
 
-    fout << 1 << "\t";
-    fout << t_f.at<double>(0) << "\t" << t_f.at<double>(1) << "\t" << t_f.at<double>(2) << "\t";
-    fout << 0 << "\t" << 0 << "\n";
+    //fout << 1 << "\t";
+    //fout << t_f.at<double>(0) << "\t" << t_f.at<double>(1) << "\t" << t_f.at<double>(2) << "\t";
+    //fout << 0 << "\t" << 0 << "\n";
 
     // assign them to be previous
     Mat prevImage = img_2;
@@ -281,7 +281,7 @@ int main(int argc, char** argv) {
         int yTruth = int(truthPosition[2])+ 100;
 
         // output to the screen
-        cout << "vo: x = " << PL<< x1 << "\t y = " << PL<< y1 << "\t z = " << PL<< z1 << endl;
+        cout << "numFrame:" << numFrame <<" vo: x = " << PL<< x1 << "\t y = " << PL<< y1 << "\t z = " << PL<< z1 << endl;
 #ifndef REAL_TIME
         //cout << "tr: x = " << PL<< truthPosition[0] << "\t y = " << PL<< truthPosition[1] << "\t z = " << PL<< truthPosition[2] << endl;
 #endif

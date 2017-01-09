@@ -39,7 +39,7 @@ for counter in range(1,51):
     
     #cv2.imwrite("D:/vision/dataset/calibrationImages/left_" + str(counter) + ".jpg",  frame1)
     #cv2.imwrite("D:/vision/dataset/calibrationImages/right_" + str(counter) + ".jpg", frame2)
-    time_in_ms= 1000
+
     cv2.waitKey(time_in_ms)
     print('another capture', counter)
     plt.close()

@@ -35,7 +35,6 @@ using namespace std;
 using namespace cv::xfeatures2d;
 
 #define MIN_NUM_FEAT 200
-#define MAX_FRAME 4541
 
 extern const double focal;
 extern const cv::Point2d pp;
@@ -594,7 +593,7 @@ void getImage(VideoCapture &capture, Mat &imgOut, Mat &edges)
 void loadImage(string fileName, Mat &imgOut, Mat &img_1_c){
 	
 	//read the image
-    //cout << "image name = " << fileName << endl;
+//    cout << "image name = " << fileName << endl;
 	img_1_c = imread(fileName);
 	
 	if (!img_1_c.data) {
@@ -629,7 +628,7 @@ void rectifyImage(Mat &img1,
 //  char *calib_file ="cam_stereo.yml";
 
   //cv::FileStorage fs1("cam_stereo.yml", cv::FileStorage::READ);
-  cv::FileStorage fs1("../../src/cam_stereo.yml", cv::FileStorage::READ);
+  cv::FileStorage fs1("/home/cwu/project/stereo-vo/src/cam_stereo.yml", cv::FileStorage::READ);
   if (!fs1.isOpened()) { cout << "unable to open yml file" << endl; }
   fs1["K1"] >> K1;
   fs1["K2"] >> K2;
