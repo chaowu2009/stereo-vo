@@ -1,17 +1,20 @@
 import numpy as np
 import cv2
+import argparse
 
+videoName = "linearlyMovingChessBoard.avi"
+#videoName = "rotatingChessBoard.avi"
 
-cap = cv2.VideoCapture('output.avi')
+cap = cv2.VideoCapture(videoName)
 
 # params for ShiTomasi corner detection
 feature_params = dict( maxCorners = 100,
                         qualityLevel = 0.3,
-                        minDistance = 7,
-                        blockSize = 7 )
+                        minDistance = 3,
+                        blockSize = 5 )
 
 # Parameters for lucas kanade optical flow
-lk_params = dict( winSize  = (15,15),
+lk_params = dict( winSize  = (10,10),
                   maxLevel = 2,
                   criteria = (cv2.TERM_CRITERIA_EPS | cv2.TERM_CRITERIA_COUNT, 10, 0.03))
  
@@ -43,6 +46,7 @@ while(1):
         c,d = old.ravel()
         mask = cv2.line(mask, (a,b),(c,d), color[i].tolist(), 2)
         frame = cv2.circle(frame,(a,b),5,color[i].tolist(),-1)
+        
     img = cv2.add(frame,mask)
 
     cv2.imshow('frame',img)
