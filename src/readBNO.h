@@ -45,7 +45,7 @@ void enableSensor(unsigned char sensorId, unsigned int interval, int fd)
 	return;
 }
 
-void printSensor(const unsigned char* buf, int len)
+void printSensor(const unsigned char* buf, int len, float quaternion[4])
 {
 	float i,j,k,r,acc = 0;
 	if(len<14)
@@ -59,6 +59,10 @@ void printSensor(const unsigned char* buf, int len)
 		k = read16(&buf[10]) * SCALE_Q(14);
 		r = read16(&buf[12]) * SCALE_Q(14);
 		printf("Game Rotation Vector: %.3f, %.3f, %.3f, %.3f\n", i, j, k, r);
+		quaternion[0] = r;  // w
+		quaternion[1] = i;  // x
+		quaternion[2] = j;  // y
+		quaternion[3] = k;  // z
 	} else if(0x05 == buf[2]) {	
 		i = read16(&buf[6]) * SCALE_Q(14);
 		j = read16(&buf[8]) * SCALE_Q(14);
@@ -119,22 +123,14 @@ int initBNO(){
     return fd;
 }
 
-int main()
+void readQuaternion(int fd, float quaternion[4])
 {
-    int fd = initBNO();
-
-	while(1)
-	{
-		if(0 == flagInt) {
-			flagInt = 1;
-			int count = read(fd, buf_recv, 18);
-			unsigned char tmpBuf[20];
-			memcpy(tmpBuf, buf_recv, 18);
-			printSensor(tmpBuf, count);//buf_recv, count);
-			usleep(100);
-		}
-		
+    if(0 == flagInt) {
+	    flagInt = 1;
+		int count = read(fd, buf_recv, 18);
+		unsigned char tmpBuf[20];
+		memcpy(tmpBuf, buf_recv, 18);
+		printSensor(tmpBuf, count, quaternion);
 	}
 	
-	return 0;
 }
