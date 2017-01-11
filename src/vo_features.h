@@ -628,7 +628,12 @@ void rectifyImage(Mat &img1,
 //  char *calib_file ="cam_stereo.yml";
 
   //cv::FileStorage fs1("cam_stereo.yml", cv::FileStorage::READ);
+#ifdef __linux__ 
   cv::FileStorage fs1("/home/cwu/project/stereo-vo/src/cam_stereo.yml", cv::FileStorage::READ);
+#else
+  cv::FileStorage fs1("d:/vision/stereo-vo/src/cam_stereo.yml", cv::FileStorage::READ);
+#endif
+
   if (!fs1.isOpened()) { cout << "unable to open yml file" << endl; }
   fs1["K1"] >> K1;
   fs1["K2"] >> K2;
