@@ -58,7 +58,7 @@ void printSensor(const unsigned char* buf, int len, float quaternion[4])
 		j = read16(&buf[8]) * SCALE_Q(14);
 		k = read16(&buf[10]) * SCALE_Q(14);
 		r = read16(&buf[12]) * SCALE_Q(14);
-		printf("Game Rotation Vector: %.3f, %.3f, %.3f, %.3f\n", i, j, k, r);
+		//printf("Game Rotation Vector: %.3f, %.3f, %.3f, %.3f\n", i, j, k, r);
 		quaternion[0] = r;  // w
 		quaternion[1] = i;  // x
 		quaternion[2] = j;  // y
@@ -76,7 +76,7 @@ void printSensor(const unsigned char* buf, int len, float quaternion[4])
 }
 
 volatile int flagInt = 1;
-unsigned char buf_recv[100];
+static unsigned char buf_recv[100];
 
 void intnCallback()
 {
@@ -123,14 +123,15 @@ int initBNO(){
     return fd;
 }
 
-void readQuaternion(int fd, float quaternion[4])
+void readQuaternion(int fd, float q[4])
 {
     if(0 == flagInt) {
 	    flagInt = 1;
 		int count = read(fd, buf_recv, 18);
 		unsigned char tmpBuf[20];
 		memcpy(tmpBuf, buf_recv, 18);
-		printSensor(tmpBuf, count, quaternion);
+		printSensor(tmpBuf, count, q);
+		printf("Game Rotation Vector (w,x,y,z): %.6f, %.6f, %.6f, %.6f\n", q[0], q[1], q[2], q[3]);
 	}
 	
 }

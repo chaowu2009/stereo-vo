@@ -8,15 +8,13 @@ set(CMAKE_CONFIGURATION_TYPES RELEASE)
 
 include_directories( ${OpenCV_INCLUDE_DIRS} )
 
-#add_executable(vo ${viso} )
-#target_link_libraries( vo ${OpenCV_LIBS} )
+#SET(GCC_COVERAGE_LINK_FLAGS "-lwiringPi -lm -lrt")
 
-add_executable(vo "src/vo_features.h" "src/visodo.cpp")
-target_link_libraries(vo ${OpenCV_LIBS})
+add_executable(vo "src/readBNO.h" "src/vo_features.h" "src/visodo.cpp")
+target_link_libraries(vo ${OpenCV_LIBS} wiringPi m rt)
 
 add_executable(rectify "src/vo_features.h" "src/test.cpp" "src/cam_stereo.yml")
 target_link_libraries(rectify ${OpenCV_LIBS})
-
 
 #add_executable(testImage ${ti} )
 #target_link_libraries( testImage ${OpenCV_LIBS} )

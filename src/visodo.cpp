@@ -1,6 +1,10 @@
 #include "vo_features.h"
 #include <iomanip>
 #include <fstream>
+#include <ostream>
+#include <string>
+
+#include "readBNO.h"
 
 using namespace cv;
 using namespace std;
@@ -17,8 +21,9 @@ double fontScale = 1;
 int thickness = 1;
 cv::Point textOrg(10, 50);
 
-//#define REAL_TIME 1
-//#define SHOW_IMAGE_ONLY 1
+#define REAL_TIME 1
+#define SHOW_IMAGE_ONLY 1
+#define BNO
 
 #ifdef REAL_TIME
 // new camera
@@ -34,13 +39,19 @@ int RIGHT = 1;
 
 int main(int argc, char** argv) {
 
+    int fd = initBNO();
+    float q[4];
+
 #ifdef __linux__ 
     //linux code goes here
 //    string localDataDir = "/home/cwu/Downloads";
-    string localDataDir = "/home/cwu/project/dataset/images/2/";
-    string resultFile = "/home/cwu/project/stereo-vo/src/vo_result.txt";
+    std::string localDataDir = "/home/cwu/project/dataset/images/2/";
+    std::string resultFile = "/home/cwu/project/stereo-vo/src/vo_result.txt";
     //cout << "localDataDir is " << localDataDir << endl;
-    string imgDir="/home/cwu/project/dataset/images/2/";
+    std::string imgDir="/home/cwu/project/dataset/images/3/";
+    std::string quaternionFile = imgDir + "q.txt";
+    std::ofstream myfile;
+    myfile.open(quaternionFile.c_str());
 #else
     // windows code goes here
   //  string localDataDir = "d:/vision";
@@ -98,8 +109,15 @@ int main(int argc, char** argv) {
 
         cvtColor(current_img_right, imgOut, COLOR_BGR2GRAY);
         imwrite(rightImg, imgOut);
+#ifdef BNO
+        readQuaternion(fd, q);
+        myfile << q[0] << q[1] << q[2] << q[3] << endl;
+#endif
         numFrame++;
-        if (numFrame > MAX_FRAME) {return 0;}
+        if (numFrame > MAX_FRAME) {
+            myfile.close();
+            return 0;
+        }
         waitKey(100); //micro second
     }
 
@@ -147,7 +165,8 @@ int main(int argc, char** argv) {
 #endif
 
     computeInitialPose(img_1, R_f, t_f, img_2, keyFeatures);
-
+    readQuaternion(fd, q);
+    
     //fout << 1 << "\t";
     //fout << t_f.at<double>(0) << "\t" << t_f.at<double>(1) << "\t" << t_f.at<double>(2) << "\t";
     //fout << 0 << "\t" << 0 << "\n";
@@ -258,6 +277,8 @@ int main(int argc, char** argv) {
         loadImage(filename2, current_img_right, currImage_rc);
 
         rectifyImage(current_img_left, current_img_right, current_img_left, current_img_right);
+        
+        readQuaternion(fd, q); // read IMU
 
 #endif
         stereoVision(current_img_left,

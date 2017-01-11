@@ -8,7 +8,6 @@ int main()
 	while(1)
 	{
 		readQuaternion(fd, quaternion);
-		
 	}
 	
 	return 0;
