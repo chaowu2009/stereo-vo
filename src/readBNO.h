@@ -131,7 +131,7 @@ void readQuaternion(int fd, float q[4])
 		unsigned char tmpBuf[20];
 		memcpy(tmpBuf, buf_recv, 18);
 		printSensor(tmpBuf, count, q);
-		printf("Game Rotation Vector (w,x,y,z): %.6f, %.6f, %.6f, %.6f\n", q[0], q[1], q[2], q[3]);
+//		printf("Game Rotation Vector (w,x,y,z): %.6f, %.6f, %.6f, %.6f\n", q[0], q[1], q[2], q[3]);
 	}
 	
 }

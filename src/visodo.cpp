@@ -22,8 +22,8 @@ int thickness = 1;
 cv::Point textOrg(10, 50);
 
 #define REAL_TIME 1
-#define SHOW_IMAGE_ONLY 1
-#define BNO
+//#define SHOW_IMAGE_ONLY 1
+//#define BNO
 
 #ifdef REAL_TIME
 // new camera
@@ -48,7 +48,7 @@ int main(int argc, char** argv) {
     std::string localDataDir = "/home/cwu/project/dataset/images/2/";
     std::string resultFile = "/home/cwu/project/stereo-vo/src/vo_result.txt";
     //cout << "localDataDir is " << localDataDir << endl;
-    std::string imgDir="/home/cwu/project/dataset/images/3/";
+    std::string imgDir="/home/cwu/project/dataset/images/4/";
     std::string quaternionFile = imgDir + "q.txt";
     std::ofstream myfile;
     myfile.open(quaternionFile.c_str());
@@ -114,6 +114,7 @@ int main(int argc, char** argv) {
         myfile << q[0] << q[1] << q[2] << q[3] << endl;
 #endif
         numFrame++;
+        cout << "numFrame = " << numFrame << endl;
         if (numFrame > MAX_FRAME) {
             myfile.close();
             return 0;
