@@ -27,23 +27,27 @@ cv::Point textOrg(10, 50);
 //#define SHOW_IMAGE_ONLY 1
 //#define BNO
 
-#ifdef REAL_TIME
 // new camera
 const double focal = 837.69737925956247;
 const cv::Point2d pp (332.96486550136854, 220.37986827273829);
-#else
-const double focal = 718.8560;
-const cv::Point2d pp(607.1928, 185.2157);
-#endif
+//  kittk camera
+//const double focal = 718.8560;
+//const cv::Point2d pp(607.1928, 185.2157);
+
 
 int LEFT = 0;
 int RIGHT = 1;
 
 int main(int argc, char** argv) {
-
+	
+	float q[4];
+	q[0] = 1.0; q[1] = 0.0; q[2] = 0.0; q[3] = 0.0;
+	Mat dcm;
+	dcm = (cv::Mat_<float>(3, 3) << 1.0, 0.0, 0.0, 0.0,1.0,0.0, 0.0, 0.0, 1.0);
+	
 #ifdef __linux__ 
     int fd = initBNO();
-    float q[4];
+    
     readQuaternion(fd, q);  //the first sample is bad. So clean the buffer
 #endif
 
@@ -63,7 +67,9 @@ int main(int argc, char** argv) {
     string resultFile   = "d:/vision/stereo-vo/src/vo_result.txt";
     string imgDir       = "d:/vision/dataset/images/3/";
     string localDataDir = "d:/vision/dataset/images/3/";
-    //cout << "localDataDir is " << localDataDir << endl;
+	std::string quaternionFile = imgDir + "q.txt";
+	std::fstream infile(quaternionFile);
+	std::string line;
 #endif
 
     Mat current_img_left, current_img_right;
@@ -136,10 +142,10 @@ int main(int argc, char** argv) {
 #endif
 
     //obtain truth for plot comparison
-    string posePath = localDataDir + "/dataset/poses/00.txt";
-    std::ifstream infile(posePath.c_str());
+   // string posePath = localDataDir + "/dataset/poses/00.txt";
+   // std::ifstream infile(posePath.c_str());
 
-    std::string line; 
+    //std::string line; 
     float truthPosition[3] ;
     Mat truthOrientation;
 
@@ -157,7 +163,6 @@ int main(int argc, char** argv) {
     vector < Point2f > keyFeatures;
 
 #ifdef REAL_TIME
-
     //left camera, second frame
     left_capture.read(img_2);
     // right camera	
@@ -173,7 +178,13 @@ int main(int argc, char** argv) {
 #endif
 
     computeInitialPose(img_1, R_f, t_f, img_2, keyFeatures);
- //   readQuaternion(fd, q);
+#ifdef BNO
+    readQuaternion(fd, q);
+#else
+	std::getline(infile, line);
+
+#endif
+	
     
     //fout << 1 << "\t";
     //fout << t_f.at<double>(0) << "\t" << t_f.at<double>(1) << "\t" << t_f.at<double>(2) << "\t";
@@ -243,6 +254,9 @@ int main(int argc, char** argv) {
         t_f_right, 
         previous_feature_right);
 
+	R_f_left = dcm;
+	R_f_right = dcm;
+	
     for (int numFrame = 2; numFrame < MAX_FRAME; numFrame++) {
         //filename = combineName(localDataDir + "/dataset/sequences/00/image_0/", numFrame);
         //cout << "numFrame is " << numFrame << endl;
@@ -288,6 +302,12 @@ int main(int argc, char** argv) {
 #ifdef BNO        
         readQuaternion(fd, q); // read IMU
 #endif
+		std::getline(infile, line);
+		std::istringstream iss(line);
+		if (!(iss >> q[0] >> q[1] >> q[2] >> q[3])) { break; }
+		//cout << "q=" << q[0] << " "<< q[1] << " " << q[2] << " " << q[3]  << endl;
+		q2Dcm(q, dcm);
+		//cout <<"dcm " << dcm <<  endl;
 
 #endif
         stereoVision(current_img_left,
@@ -296,7 +316,7 @@ int main(int argc, char** argv) {
             currImage_rc,
             previous_img_left,  previous_feature_left,  current_feature_left, 
             previous_img_right, previous_feature_right, current_feature_right,
-            R_f, t_f); 
+            R_f, t_f, dcm); 
 #endif
 
         // for plotting purpose

@@ -1,0 +1,41 @@
+import numpy as np
+import cv2
+import argparse
+import sys
+
+LEFT = 0
+RIGHT = 1
+   
+cap_left  = cv2.VideoCapture(LEFT)
+cap_right = cv2.VideoCapture(RIGHT)
+
+#cap_left.set(cv2.cv.CAP_PROP_FPS , 60)
+#cap_right.set(cv2.cv.CAP_PROP_FPS , 60)
+
+# Define the codec and create VideoWriter object
+fourcc = cv2.VideoWriter_fourcc(*'XVID')
+out_left  = cv2.VideoWriter("left_video" + '.avi',fourcc, 20.0, (640,480))
+out_right = cv2.VideoWriter("right_video" + '.avi',fourcc, 20.0, (640,480))
+
+while(cap_left.isOpened() and cap_right.isOpend()):
+    ret_left, frame_left  = cap_left.read()
+    ret_right, frame_right = cap_right.read()
+
+    if ret_left ==True and ret_right == True:
+        # write the flipped frame
+        out_left.write(frame_left)
+        out_right.write(frame_right)
+
+        cv2.imshow('left',frame_left)
+        cv2.imshow('right',frame_right)
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            break
+    else:
+        break
+
+# Release everything if job is finished
+cap_left.release()
+cap_right.release()
+out_left.release()
+out_right.release()
+cv2.destroyAllWindows()
