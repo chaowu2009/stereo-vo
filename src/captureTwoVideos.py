@@ -9,15 +9,15 @@ RIGHT = 1
 cap_left  = cv2.VideoCapture(LEFT)
 cap_right = cv2.VideoCapture(RIGHT)
 
-#cap_left.set(cv2.cv.CAP_PROP_FPS , 60)
-#cap_right.set(cv2.cv.CAP_PROP_FPS , 60)
+cap_left.set(cv2.CAP_PROP_FPS , 60)
+cap_right.set(cv2.CAP_PROP_FPS , 60)
 
 # Define the codec and create VideoWriter object
 fourcc = cv2.VideoWriter_fourcc(*'XVID')
-out_left  = cv2.VideoWriter("left_video" + '.avi',fourcc, 20.0, (640,480))
-out_right = cv2.VideoWriter("right_video" + '.avi',fourcc, 20.0, (640,480))
+out_left  = cv2.VideoWriter("video_leftCamera" + '.avi',fourcc, 20.0, (640,480))
+out_right = cv2.VideoWriter("video_rightCamera" + '.avi',fourcc, 20.0, (640,480))
 
-while(cap_left.isOpened() and cap_right.isOpend()):
+while(cap_left.isOpened() and cap_right.isOpened()):
     ret_left, frame_left  = cap_left.read()
     ret_right, frame_right = cap_right.read()
 

@@ -57,10 +57,10 @@ int main(int argc, char** argv) {
     std::string localDataDir = "/home/cwu/project/dataset/images/2/";
     std::string resultFile = "/home/cwu/project/stereo-vo/src/vo_result.txt";
     //cout << "localDataDir is " << localDataDir << endl;
-    std::string imgDir="/home/cwu/project/dataset/images/3/";
-    std::string quaternionFile = imgDir + "q.txt";
-    std::ofstream myfile;
-    myfile.open(quaternionFile.c_str());
+    std::string imgDir="/home/cwu/project/dataset/images/4/";
+	std::string quaternionFile = imgDir + "q.txt";
+	std::fstream infile(quaternionFile.c_str());
+	std::string line;
 #else
     // windows code goes here
   //  string localDataDir = "d:/vision";
