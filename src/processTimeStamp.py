@@ -1,5 +1,7 @@
+import matplotlib.pylab as plt
+import numpy as np
 
-folder = "/home/cwu/project/dataset/images/7/"
+folder = "/home/cwu/project/dataset/images/9/"
 
 fileName = folder + "timeStamp.txt"
 
@@ -12,8 +14,17 @@ with open(fileName) as fp:
         timeStamp.append(float(ln[1]))
 
 deltaTime = []
+timeScale = 1.0;
 for k in range(1,len(timeStamp)):
-    deltaTime.append((timeStamp[k] - timeStamp[k-1])/1e3)        
+    deltaTime.append((timeStamp[k] - timeStamp[k-1])/timeScale)        
     
-for dt in deltaTime:
-    print("freq(HZ) = ",1.0/dt)
+freq = [1.0/x for x in deltaTime]
+#print("freq(HZ) = ", freq)
+
+flg = plt.figure()
+plt.plot(freq)
+plt.xlabel('Sample')
+plt.ylabel('Hz')
+plt.grid(True)
+plt.title('Freq')
+plt.show()

@@ -23,8 +23,8 @@ double fontScale = 1;
 int thickness = 1;
 cv::Point textOrg(10, 50);
 
-#define REAL_TIME 1
-#define SHOW_IMAGE_ONLY 1
+//#define REAL_TIME 1
+//#define SHOW_IMAGE_ONLY 1
 //#define BNO
 
 // new camera
@@ -59,11 +59,9 @@ int main(int argc, char** argv) {
 #ifdef __linux__ 
     //linux code goes here
     std::string resultFile = "/home/cwu/project/stereo-vo/src/vo_result.txt";
-    std::string imgDir="/home/cwu/project/dataset/images/7/";
+    std::string imgDir="/home/cwu/project/dataset/images/9/";
     std::string imgFormat = ".jpg";
     std::string timeStampFile = imgDir + "timeStamp.txt";
-    cout << "time stamp file name is " << timeStampFile << endl;
-	std::fstream fpTimeStamp(timeStampFile.c_str());
     MAX_FRAME = 1000;
     
 	std::string quaternionFile = imgDir + "q.txt";
@@ -93,6 +91,8 @@ int main(int argc, char** argv) {
 
 #ifdef REAL_TIME
     cout << "Running at real-time" <<endl;
+	std::ofstream fpTimeStamp;
+	fpTimeStamp.open(timeStampFile.c_str());
 
     VideoCapture left_capture(LEFT);
    // left_capture.set(CV_CAP_PROP_FPS,100);
@@ -137,12 +137,13 @@ int main(int argc, char** argv) {
 #ifdef __linux__ 
 #ifdef BNO
     //    readQuaternion(fd, q);
-        myfile << q[0] <<" " << q[1] <<" "<< q[2] <<" "<< q[3] << endl;
+    //    myfile << q[0] <<" " << q[1] <<" "<< q[2] <<" "<< q[3] << endl;
 #endif
 #endif
         numFrame++;
   //    cout << "numFrame = " << numFrame << endl;
         if (numFrame > MAX_FRAME) {
+            fpTimeStamp.close();
             cout << "capture done" << endl;
             return 0;
         }
@@ -362,7 +363,7 @@ int main(int argc, char** argv) {
         waitKey(2);  //microsecond
     }
 
-    imwrite(imgDir + "/final_map.png", traj);
+    imwrite(imgDir + "/final_map" + imgFormat, traj);
 
     clock_t end = clock();
     double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;

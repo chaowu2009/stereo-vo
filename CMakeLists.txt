@@ -10,8 +10,15 @@ include_directories( ${OpenCV_INCLUDE_DIRS} )
 
 #SET(GCC_COVERAGE_LINK_FLAGS "-lwiringPi -lm -lrt")
 
+add_executable(readBNO "src/readBNO.h" "src/readBNO_test.cpp")
+target_link_libraries(readBNO ${OpenCV_LIBS} wiringPi m rt)
+
+
 add_executable(vo "src/readBNO.h" "src/vo_features.h" "src/visodo.cpp")
 target_link_libraries(vo ${OpenCV_LIBS} wiringPi m rt)
+
+add_executable(cri "src/vo_features.h" "src/captureRealImage.cpp")
+target_link_libraries(cri ${OpenCV_LIBS})
 
 add_executable(rectify "src/vo_features.h" "src/test.cpp" "src/cam_stereo.yml")
 target_link_libraries(rectify ${OpenCV_LIBS})
