@@ -23,8 +23,8 @@ double fontScale = 1;
 int thickness = 1;
 cv::Point textOrg(10, 50);
 
-//#define REAL_TIME 1
-//#define SHOW_IMAGE_ONLY 1
+#define REAL_TIME 1
+#define SHOW_IMAGE_ONLY 1
 //#define BNO
 
 // new camera
@@ -39,8 +39,11 @@ int LEFT = 0;
 int RIGHT = 1;
 
 int main(int argc, char** argv) {
-	
-   int MAX_FRAME = 1000;
+
+    clock_t begin = clock();
+	clock_t currentFrameClock;
+	float deltaTinSecond = 0.0f;
+    int MAX_FRAME = 1000;
 	    
 	float q[4];
 	q[0] = 1.0; q[1] = 0.0; q[2] = 0.0; q[3] = 0.0;
@@ -56,10 +59,12 @@ int main(int argc, char** argv) {
 #ifdef __linux__ 
     //linux code goes here
     std::string resultFile = "/home/cwu/project/stereo-vo/src/vo_result.txt";
-    std::string imgDir="/home/cwu/project/dataset/images/5/";
+    std::string imgDir="/home/cwu/project/dataset/images/7/";
     std::string imgFormat = ".jpg";
-    
-    MAX_FRAME = 754;
+    std::string timeStampFile = imgDir + "timeStamp.txt";
+    cout << "time stamp file name is " << timeStampFile << endl;
+	std::fstream fpTimeStamp(timeStampFile.c_str());
+    MAX_FRAME = 1000;
     
 	std::string quaternionFile = imgDir + "q.txt";
 	std::fstream infile(quaternionFile.c_str());
@@ -90,26 +95,27 @@ int main(int argc, char** argv) {
     cout << "Running at real-time" <<endl;
 
     VideoCapture left_capture(LEFT);
-    left_capture.set(CV_CAP_PROP_FPS,100);
-    left_capture.set(CV_CAP_PROP_BUFFERSIZE,3);
+   // left_capture.set(CV_CAP_PROP_FPS,100);
+   // left_capture.set(CV_CAP_PROP_BUFFERSIZE,3);
 
     VideoCapture right_capture(RIGHT);
-    right_capture.set(CV_CAP_PROP_FPS,100);
-    right_capture.set(CV_CAP_PROP_BUFFERSIZE,3);
+   // right_capture.set(CV_CAP_PROP_FPS,100);
+   // right_capture.set(CV_CAP_PROP_BUFFERSIZE,3);
 
     left_capture.read(img_1);
+    begin = clock();
 
 #ifdef SHOW_IMAGE_ONLY
-    namedWindow("LEFT image", 0);
-    namedWindow("RIGHT image", 1);
+  //  namedWindow("LEFT image", 0);
+  //  namedWindow("RIGHT image", 1);
 
     int numFrame = 1;
     while (1) {
         left_capture.read(current_img_left);
         right_capture.read(current_img_right);
 
-        imshow("LEFT image", current_img_left);
-        imshow("RIGHT image", current_img_right);
+       // imshow("LEFT image", current_img_left);
+       // imshow("RIGHT image", current_img_right);
         
         stringstream ss;
         ss << numFrame;
@@ -123,21 +129,26 @@ int main(int argc, char** argv) {
 
         cvtColor(current_img_right, imgOut, COLOR_BGR2GRAY);
         imwrite(rightImg, imgOut);
+        
+        currentFrameClock = clock();
+        deltaTinSecond = double(currentFrameClock-begin)/CLOCKS_PER_SEC;
+        fpTimeStamp << numFrame << "," << deltaTinSecond << endl;
+        
 #ifdef __linux__ 
 #ifdef BNO
-        readQuaternion(fd, q);
+    //    readQuaternion(fd, q);
         myfile << q[0] <<" " << q[1] <<" "<< q[2] <<" "<< q[3] << endl;
 #endif
 #endif
         numFrame++;
-        cout << "numFrame = " << numFrame << endl;
+  //    cout << "numFrame = " << numFrame << endl;
         if (numFrame > MAX_FRAME) {
-  //          myfile.close();
+            cout << "capture done" << endl;
             return 0;
         }
-        waitKey(100); //micro second
+   //     waitKey(100); //micro second
     }
-
+    
 #endif
 
 #else
@@ -202,8 +213,6 @@ int main(int argc, char** argv) {
 
     string filename;
     Mat E, R, t, mask;
-
-    clock_t begin = clock();
 
     //namedWindow("Road facing camera", WINDOW_AUTOSIZE); // Create a window for display.
     namedWindow("Trajectory", WINDOW_AUTOSIZE); // Create a window for display.
