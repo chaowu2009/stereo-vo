@@ -51,8 +51,12 @@ int main(int argc, char** argv) {
 	fpTimeStamp.open(timeStampFile.c_str());
 
     VideoCapture left_capture(LEFT);
+    left_capture.set(CV_CAP_PROP_FRAME_WIDTH, 320);
+    left_capture.set(CV_CAP_PROP_FRAME_HEIGHT, 240);
 
     VideoCapture right_capture(RIGHT);
+    right_capture.set(CV_CAP_PROP_FRAME_WIDTH, 320);
+    right_capture.set(CV_CAP_PROP_FRAME_HEIGHT, 240);
 
     left_capture.read(img_1);
     begin = clock();
@@ -61,6 +65,12 @@ int main(int argc, char** argv) {
     while (1) {
         left_capture.read(current_img_left);
         right_capture.read(current_img_right);
+        if(!left_capture.isOpened()) { // check if we succeeded
+            cout << "left camera is not opend" << endl;
+        }
+        if(!right_capture.isOpened()) { // check if we succeeded
+            cout << "right camera is not opend" << endl;
+        }
 
        // imshow("LEFT image", current_img_left);
        // imshow("RIGHT image", current_img_right);
@@ -74,7 +84,7 @@ int main(int argc, char** argv) {
         //cout << "leftImg = " << leftImg << endl;
         Mat imgOut;
         cvtColor(current_img_left, imgOut, COLOR_BGR2GRAY);
-        imwrite(leftImg,  current_img_left);
+        imwrite(leftImg,  imgOut);
 
         cvtColor(current_img_right, imgOut, COLOR_BGR2GRAY);
         imwrite(rightImg, imgOut);

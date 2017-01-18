@@ -23,7 +23,7 @@ double fontScale = 1;
 int thickness = 1;
 cv::Point textOrg(10, 50);
 
-//#define REAL_TIME 1
+#define REAL_TIME 1
 //#define SHOW_IMAGE_ONLY 1
 //#define BNO
 
@@ -95,12 +95,12 @@ int main(int argc, char** argv) {
 	fpTimeStamp.open(timeStampFile.c_str());
 
     VideoCapture left_capture(LEFT);
-   // left_capture.set(CV_CAP_PROP_FPS,100);
-   // left_capture.set(CV_CAP_PROP_BUFFERSIZE,3);
+    left_capture.set(CV_CAP_PROP_FRAME_WIDTH, 320);
+    left_capture.set(CV_CAP_PROP_FRAME_HEIGHT, 240);
 
     VideoCapture right_capture(RIGHT);
-   // right_capture.set(CV_CAP_PROP_FPS,100);
-   // right_capture.set(CV_CAP_PROP_BUFFERSIZE,3);
+    right_capture.set(CV_CAP_PROP_FRAME_WIDTH, 320);
+    right_capture.set(CV_CAP_PROP_FRAME_HEIGHT, 240);
 
     left_capture.read(img_1);
     begin = clock();
