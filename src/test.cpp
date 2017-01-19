@@ -1,4 +1,4 @@
-#include "vo_features.h"
+#include <opencv2/opencv.hpp>
 #include <iomanip>
 #include <fstream>
 
@@ -6,47 +6,42 @@ using namespace cv;
 using namespace std;
 
 
-#ifdef REAL_TIME
-// new camera
-const double focal = 837.69737925956247;
-const cv::Point2d pp (332.96486550136854, 220.37986827273829);
-#else
-const double focal = 718.8560;
-const cv::Point2d pp(607.1928, 185.2157);
-#endif
-
 
 int main(int argc, char** argv) {
 
-#ifdef __linux__ 
-    //linux code goes here
-    string localDataDir = "/home/cwu/Downloads";
-    string resultFile = "/home/cwu/project/stereo-vo/src/vo_result.txt";
-    //cout << "localDataDir is " << localDataDir << endl;
-    string imgDir="/home/cwu/project/dataset/images/1/";
-#else
-    // windows code goes here
-  //  string localDataDir = "d:/vision";
-    string resultFile   = "d:/vision/stereo-vo/src/vo_result.txt";
-    string imgDir       = "d:/vision/dataset/images/1/";
-    string localDataDir = "d:/vision/dataset//images/1/";
-    //cout << "localDataDir is " << localDataDir << endl;
-#endif
+    string imgFile="/home/cwu/project/dataset/images/9/img_left/1.jpg";
+    Mat  src = imread(imgFile);
+   if (src.empty()){
+       cout << "error loading picture " << endl;
+    }
 
-    Mat current_img_left, current_img_right;
-    Mat rectified_img_left, rectified_img_right;
-
-    current_img_left  = imread(localDataDir + "/img_left/2.png");
-    current_img_right = imread(localDataDir + "/img_right/2.png");
-
-    rectifyImage(current_img_left, current_img_right, rectified_img_left, rectified_img_right);
-
-    imshow("left image before", current_img_left);
-    imshow("left image after", rectified_img_left);
-    imshow("right image before", current_img_right);
-    imshow("right image after", rectified_img_right);
     
-	waitKey(0);
+    Point2f srcQuad[] ={
+        Point2f(0,0),
+        Point2f(src.cols-1,0),
+        Point2f(src.cols-1,src.rows-1),
+        Point2f(0,src.rows-1)
+        };
+        
+    Point2f dstQuad[] ={
+        Point2f(src.cols*0.5f, src.rows*0.33f),
+        Point2f(src.cols*0.9f, src.rows*0.25f),
+        Point2f(src.cols*0.8f, src.rows*0.9f),
+        Point2f(src.cols*0.2f, src.rows*0.7f)
+        };
 
+     Mat warp_mat = getPerspectiveTransform(srcQuad, dstQuad);
+     cout <<"warp_mat" <<warp_mat << endl;
+     Mat dst;
+     warpPerspective(src,dst, warp_mat, src.size(), INTER_LINEAR, BORDER_CONSTANT, Scalar());
+     
+     for(int i = 0; i < 4; i++){
+     
+        circle(dst, dstQuad[i], 5, Scalar(255,0,255), -1, 0);
+    }    
+    
+    imshow("Perspective Transfomr Test", dst);
+    waitKey();
+    
     return 0;
 }

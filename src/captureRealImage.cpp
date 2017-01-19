@@ -25,7 +25,7 @@ int main(int argc, char** argv) {
 	    
     //linux code goes here
     std::string resultFile = "/home/cwu/project/stereo-vo/src/vo_result.txt";
-    std::string imgDir="/home/cwu/project/dataset/images/9/";
+    std::string imgDir="/home/cwu/project/dataset/images/10/";
     cout << "capturing data only, saved at " << imgDir << endl;
     std::string imgFormat = ".jpg";
     std::string timeStampFile = imgDir + "timeStamp.txt";
@@ -53,10 +53,14 @@ int main(int argc, char** argv) {
     VideoCapture left_capture(LEFT);
     left_capture.set(CV_CAP_PROP_FRAME_WIDTH, 320);
     left_capture.set(CV_CAP_PROP_FRAME_HEIGHT, 240);
+//    left_capture.set(CV_CAP_PROP_EXPOSURE, 1);
+//     int exposureTime = left_capture.get(CV_CAP_PROP_EXPOSURE);
+//     cout << "exposure time is " << exposureTime << endl;
 
     VideoCapture right_capture(RIGHT);
     right_capture.set(CV_CAP_PROP_FRAME_WIDTH, 320);
     right_capture.set(CV_CAP_PROP_FRAME_HEIGHT, 240);
+//    right_capture.set(CV_CAP_PROP_EXPOSURE, 1);
 
     left_capture.read(img_1);
     begin = clock();

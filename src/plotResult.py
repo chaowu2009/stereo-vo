@@ -1,8 +1,11 @@
 import numpy as np
 from matplotlib.pyplot import *
 
-resultFile = '/home/cwu/project/stereo-vo/src/vo_result.txt'
+imgDir="/home/cwu/project/dataset/images/9/";
 
+resultFile = imgDir+ 'vo_result.txt'
+
+print("result location is " , imgDir);
 
 position3D = [];
 position2D = [] ;
@@ -22,7 +25,6 @@ labels=['x','y','z']
 [xl,yl,zl] = plot(position3D)
 legend([xl,yl,zl], ['x','y','z'], loc=1)
 title('position3D')
-legend()
 grid(True)
 
 subplot(212)
@@ -30,10 +32,9 @@ labels=['x','y']
 plot(position2D[:,0],position2D[:,1])
 #legend([xl,yl], ['x','y'], loc=1)
 title('position2D( image plane)')
-legend()
+xlabel('x')
+ylabel('y')
 grid(True)
-
-
 show()
 
 

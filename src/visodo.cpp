@@ -23,7 +23,7 @@ double fontScale = 1;
 int thickness = 1;
 cv::Point textOrg(10, 50);
 
-#define REAL_TIME 1
+//#define REAL_TIME 1
 //#define SHOW_IMAGE_ONLY 1
 //#define BNO
 
@@ -58,10 +58,12 @@ int main(int argc, char** argv) {
 
 #ifdef __linux__ 
     //linux code goes here
-    std::string resultFile = "/home/cwu/project/stereo-vo/src/vo_result.txt";
+
     std::string imgDir="/home/cwu/project/dataset/images/9/";
     std::string imgFormat = ".jpg";
     std::string timeStampFile = imgDir + "timeStamp.txt";
+    std::string resultFile = imgDir + "vo_result.txt";
+ 
     MAX_FRAME = 1000;
     
 	std::string quaternionFile = imgDir + "q.txt";
