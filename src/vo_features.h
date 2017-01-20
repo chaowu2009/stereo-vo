@@ -619,7 +619,7 @@ string combineName(string localDataDir, int numFrame){
 
 }  
 
-void rectifyImage(Mat &img1,
+void rectifyStereoImage(Mat &img1,
 	              Mat &img2,
 	              Mat &imgR1,
 	              Mat &imgR2 ){
@@ -659,6 +659,34 @@ void rectifyImage(Mat &img1,
   cv::initUndistortRectifyMap(K2, D2, R2, P2, img2.size(), CV_32F, rmapx, rmapy);
   cv::remap(img1, imgR1, lmapx, lmapy, cv::INTER_LINEAR);
   cv::remap(img2, imgR2, rmapx, rmapy, cv::INTER_LINEAR);
+
+}
+
+void rectifyImage(Mat &imgIn,
+	              Mat &imgOut)
+{
+
+  Mat R1, R2, P1, P2, Q;
+  Mat K1, K2, R;
+  Vec3d T;
+  Mat D1, D2;
+//  char *calib_file ="cam_stereo.yml";
+
+  //cv::FileStorage fs1("cam_stereo.yml", cv::FileStorage::READ);
+#ifdef __linux__ 
+  cv::FileStorage fs1("/home/cwu/project/stereo-vo/src/cam_left.yml", cv::FileStorage::READ);
+#else
+  cv::FileStorage fs1("d:/vision/stereo-vo/src/cam_left.yml",cv::FileStorage::READ);
+#endif
+
+  if (!fs1.isOpened()) { cout << "unable to open yml file" << endl; }
+  fs1["K"] >> K;
+  fs1["D"] >> D;
+
+  cv::Mat lmapx, lmapy, rmapx, rmapy;
+
+  cv::initUndistortRectifyMap(K1, D1, R1, P1, img1.size(), CV_32F, lmapx, lmapy);
+  cv::remap(imgIn, imgOut, lmapx, lmapy, cv::INTER_LINEAR);
 
 }
 

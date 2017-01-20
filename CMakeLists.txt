@@ -17,6 +17,9 @@ target_link_libraries(readBNO ${OpenCV_LIBS} wiringPi m rt)
 add_executable(vo "src/readBNO.h" "src/vo_features.h" "src/visodo.cpp")
 target_link_libraries(vo ${OpenCV_LIBS} wiringPi m rt)
 
+add_executable(singleCamera "src/readBNO.h" "src/vo_features.h" "src/singleCamera.cpp")
+target_link_libraries(singleCamera ${OpenCV_LIBS} wiringPi m rt)
+
 add_executable(cri "src/vo_features.h" "src/captureRealImage.cpp")
 target_link_libraries(cri ${OpenCV_LIBS})
 
