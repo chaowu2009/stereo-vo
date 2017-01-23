@@ -1,7 +1,7 @@
 import numpy as np
 from matplotlib.pyplot import *
 
-imgDir="/home/cwu/project/dataset/images/9/";
+imgDir="/home/cwu/project/dataset/images/10/";
 
 resultFile = imgDir+ 'vo_result.txt'
 
@@ -16,7 +16,6 @@ with open(resultFile) as fp:
 #        print(data)
         position3D.append([data[1], data[2],data[3]])
         position2D.append([data[4], data[5]])
-        
 
 position2D = np.asarray(position2D)
 

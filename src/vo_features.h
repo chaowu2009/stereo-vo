@@ -235,7 +235,7 @@ void computeInitialStereoPose(Mat &previous_img_left,
 }
 
 
-void updatePose(char filename[100], 
+void updatePose(string filename, 
 	            Mat &prevImage,
 		        vector<Point2f> &prevFeatures,
 		        vector<Point2f> &currFeatures, 
@@ -596,7 +596,7 @@ void getImage(VideoCapture &capture, Mat &imgOut, Mat &edges)
 void loadImage(string fileName, Mat &imgOut, Mat &img_1_c){
 	
 	//read the image
-//    cout << "image name = " << fileName << endl;
+  //  cout << "image name = " << fileName << endl;
 	img_1_c = imread(fileName);
 	
 	if (!img_1_c.data) {
@@ -666,11 +666,8 @@ void rectifyImage(Mat &imgIn,
 	              Mat &imgOut)
 {
 
-  Mat R1, R2, P1, P2, Q;
-  Mat K1, K2, R;
-  Vec3d T;
-  Mat D1, D2;
-//  char *calib_file ="cam_stereo.yml";
+  Mat K;   // cameraMatrix
+  Mat D;   // distCoeffs, 5
 
   //cv::FileStorage fs1("cam_stereo.yml", cv::FileStorage::READ);
 #ifdef __linux__ 
@@ -683,10 +680,7 @@ void rectifyImage(Mat &imgIn,
   fs1["K"] >> K;
   fs1["D"] >> D;
 
-  cv::Mat lmapx, lmapy, rmapx, rmapy;
-
-  cv::initUndistortRectifyMap(K1, D1, R1, P1, img1.size(), CV_32F, lmapx, lmapy);
-  cv::remap(imgIn, imgOut, lmapx, lmapy, cv::INTER_LINEAR);
+  cv::undistort(imgIn, imgOut, K, D);
 
 }
 

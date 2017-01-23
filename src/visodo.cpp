@@ -59,7 +59,7 @@ int main(int argc, char** argv) {
 #ifdef __linux__ 
     //linux code goes here
 
-    std::string imgDir="/home/cwu/project/dataset/images/9/";
+    std::string imgDir="/home/cwu/project/dataset/images/10/";
     std::string imgFormat = ".jpg";
     std::string timeStampFile = imgDir + "timeStamp.txt";
     std::string resultFile = imgDir + "vo_result.txt";
@@ -254,8 +254,8 @@ int main(int argc, char** argv) {
     loadImage(imgDir + "/img_right/1"+ imgFormat, previous_img_right, currImage_rc);
     loadImage(imgDir + "/img_right/2"+ imgFormat, current_img_right, currImage_rc);
 
-    rectifyImage(previous_img_left, previous_img_right, previous_img_left, previous_img_right);
-    rectifyImage(current_img_left, current_img_right, current_img_left, current_img_right);
+    rectifyStereoImage(previous_img_left, previous_img_right, previous_img_left, previous_img_right);
+    rectifyStereoImage(current_img_left, current_img_right, current_img_left, current_img_right);
 
 #endif
     computeInitialStereoPose(previous_img_left,
@@ -278,17 +278,6 @@ int main(int argc, char** argv) {
         //getline(infile, line);
         //getPosition(line, truthPosition);
 
-#if 0
-        //scale = getAbsoluteScale(numFrame, 0, t_f.at<double>(2));
-        //cout << "scale is " << scale << endl;
-
-        updatePose(filename, 
-            prevImage, 
-            prevFeatures, 
-            currFeatures, 
-            R_f, t_f);
-
-#else
 #ifdef REAL_TIME
 
         // Mat leftFrame;
@@ -305,13 +294,14 @@ int main(int argc, char** argv) {
         ss << numFrame;
         string idx = ss.str();
 
+        //idx = "3";
         string filename1 =  imgDir + "/img_left/" + idx + imgFormat;
         string filename2 =  imgDir + "/img_right/" + idx + imgFormat;
 
         loadImage(filename1, current_img_left, currImage_lc);
         loadImage(filename2, current_img_right, currImage_rc);
 
-        rectifyImage(current_img_left, current_img_right, current_img_left, current_img_right);
+        rectifyStereoImage(current_img_left, current_img_right, current_img_left, current_img_right);
 #ifdef BNO        
         readQuaternion(fd, q); // read IMU
 #endif
@@ -330,7 +320,6 @@ int main(int argc, char** argv) {
             previous_img_left,  previous_feature_left,  current_feature_left, 
             previous_img_right, previous_feature_right, current_feature_right,
             R_f, t_f, dcm); 
-#endif
 
         // for plotting purpose
         double x1 = t_f.at<double>(0);

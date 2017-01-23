@@ -59,7 +59,7 @@ int main(int argc, char** argv) {
 #ifdef __linux__ 
     //linux code goes here
 
-    std::string imgDir="/home/cwu/project/dataset/images/9/";
+    std::string imgDir="/home/cwu/project/dataset/images/4";
     std::string imgFormat = ".jpg";
     std::string timeStampFile = imgDir + "timeStamp.txt";
     std::string resultFile = imgDir + "vo_result.txt";
@@ -133,7 +133,7 @@ int main(int argc, char** argv) {
     vector < Point2f > prevFeatures = keyFeatures;
 
     Mat currImage;
-    vector < Point2f > currFeatures;
+    vector < Point2f > currFeatures = keyFeatures;
 
     string filename;
     Mat E, R, t, mask;
@@ -143,7 +143,6 @@ int main(int argc, char** argv) {
     Mat traj = Mat::zeros(640, 480, CV_8UC3);
     Mat trajTruth = Mat::zeros(640, 480, CV_8UC3);
 
-    string fileFolder = imgDir + "/dataset/sequences/00/"; 
     Mat R_f_left, t_f_left;
     Mat previous_img_left = img_2;
 
@@ -170,10 +169,10 @@ int main(int argc, char** argv) {
         t_f_left, 
         previous_feature_left);
 
-	R_f_left = dcm;
+//	R_f_left = dcm;
 	
     for (int numFrame = 2; numFrame < MAX_FRAME; numFrame++) {
-
+        cout <<"numFrame = " << numFrame << endl;
 #ifdef REAL_TIME
 
         // Mat leftFrame;
@@ -205,7 +204,8 @@ int main(int argc, char** argv) {
             prevImage, 
             prevFeatures, 
             currFeatures, 
-            R_f, t_f);
+            R_f, 
+            t_f);
 
         // for plotting purpose
         double x1 = t_f.at<double>(0);
