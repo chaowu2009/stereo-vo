@@ -9,11 +9,7 @@
 
 #include "opencv2/xfeatures2d.hpp"
 
-using namespace cv;
-using namespace std;
-
-
-void q2Dcm(const float q[4], Mat &dcm) {
+void q2Dcm(const float q[4], cv::Mat &dcm) {
 	float q00, q01, q02, q03, q11, q12, q13, q22, q23, q33;
 	float w, x, y, z;
 	w = q[0];
@@ -48,7 +44,7 @@ void q2Dcm(const float q[4], Mat &dcm) {
 	//cout << "dcm = " << dcm << endl;
 }
 
- void dcm2q(const Mat dcm, float q[4]) {
+ void dcm2q(const cv::Mat dcm, float q[4]) {
 	 float wSq4, xSq4, ySq4, zSq4; // sometimes <0
 	 float DCM[3][3];
 	 for (int i = 0; i < 3; i++)

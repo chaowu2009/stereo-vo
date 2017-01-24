@@ -34,6 +34,11 @@ using namespace std;
 
 using namespace cv::xfeatures2d;
 
+// new camera
+const double focal = 837.69737925956247;
+const cv::Point2d pp(332.96486550136854, 220.37986827273829);
+
+
 #define MIN_NUM_FEAT 200
 
 extern const double focal;
@@ -242,9 +247,11 @@ void updatePose(string filename,
 		        Mat &R_f, 
 		        Mat &t_f) 
 {
+	cout << "entering pose estimation loop " << endl;
 	Mat currImage_c = imread(filename);
 	Mat currImage; 
-	cvtColor(currImage_c, currImage, COLOR_BGR2GRAY);
+	//cvtColor(currImage_c, currImage, COLOR_BGR2GRAY);
+	currImage = currImage_c.clone();
 	vector < uchar > status;
 	featureTracking(prevImage, currImage,  prevFeatures, currFeatures,  status);
 
@@ -271,7 +278,7 @@ void updatePose(string filename,
 
 	if ((scale > 0.1) && (t.at<double>(2) > t.at<double>(0))
 			&& (t.at<double>(2) > t.at<double>(1))) {
-
+		cout << "computing pose" << endl;
 		t_f = t_f + scale * (R_f * t);
 		R_f = R * R_f;
 
@@ -607,6 +614,21 @@ void loadImage(string fileName, Mat &imgOut, Mat &img_1_c){
 	cvtColor(img_1_c, imgOut, COLOR_BGR2GRAY);
 }
 
+void loadImage(string fileName, Mat &imgOut) {
+
+	//read the image
+	//  cout << "image name = " << fileName << endl;
+	Mat img_1_c = imread(fileName);
+
+	if (!img_1_c.data) {
+		std::cout << " --(!) Error reading images " << std::endl;
+	}
+
+	// we work with grayscale images
+	imgOut = img_1_c.clone();
+	//cvtColor(img_1_c, imgOut, COLOR_BGR2GRAY);
+}
+
 string combineName(string localDataDir, int numFrame){
 	
 	 std::ostringstream ostr;
@@ -669,7 +691,6 @@ void rectifyImage(Mat &imgIn,
   Mat K;   // cameraMatrix
   Mat D;   // distCoeffs, 5
 
-  //cv::FileStorage fs1("cam_stereo.yml", cv::FileStorage::READ);
 #ifdef __linux__ 
   cv::FileStorage fs1("/home/cwu/project/stereo-vo/src/cam_left.yml", cv::FileStorage::READ);
 #else
@@ -679,9 +700,12 @@ void rectifyImage(Mat &imgIn,
   if (!fs1.isOpened()) { cout << "unable to open yml file" << endl; }
   fs1["K"] >> K;
   fs1["D"] >> D;
+  //imshow("original image", imgIn);
 
   cv::undistort(imgIn, imgOut, K, D);
 
+ // imshow("corrected image", imgOut);
+ // waitKey(1);
 }
 
 

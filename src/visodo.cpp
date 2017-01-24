@@ -1,6 +1,6 @@
 #include "rotation.h"
 #include "vo_features.h"
-#include <iomanip>
+//#include <iomanip>
 #include <fstream>
 #include <ostream>
 #include <string>
@@ -29,8 +29,8 @@ cv::Point textOrg(10, 50);
 //#define BNO
 
 // new camera
-const double focal = 837.69737925956247;
-const cv::Point2d pp (332.96486550136854, 220.37986827273829);
+//const double focal = 837.69737925956247;
+//const cv::Point2d pp (332.96486550136854, 220.37986827273829);
 //  kittk camera
 //const double focal = 718.8560;
 //const cv::Point2d pp(607.1928, 185.2157);
@@ -72,10 +72,11 @@ int main(int argc, char** argv) {
 	std::string line;
 #else
     // windows code goes here
-  //  string localDataDir = "d:/vision";
-    string resultFile   = "d:/vision/stereo-vo/src/vo_result.txt";
+  	std::string imgFormat = ".jpg";
+  
     string imgDir       = "d:/vision/dataset/images/3/";
-   
+	string resultFile = imgDir + "vo_result.txt";
+
 	std::string quaternionFile = imgDir + "q.txt";
 	std::fstream infile(quaternionFile);
 	std::string line;

@@ -9,8 +9,8 @@ using namespace std;
 
 
 // new camera
-const double focal = 837.69737925956247;
-const cv::Point2d pp (332.96486550136854, 220.37986827273829);
+//const double focal = 837.69737925956247;
+//const cv::Point2d pp (332.96486550136854, 220.37986827273829);
 
 
 int LEFT = 0;

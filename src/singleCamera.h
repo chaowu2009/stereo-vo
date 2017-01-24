@@ -1,32 +1,25 @@
-#include "rotation.h"
-#include "vo_features.h"
-#include <fstream>
-#include <ostream>
-#include <string>
+#pragma once
 
-#ifdef __linux__ 
-#include "readBNO.h"
-#endif
+int main(int argc, char ** argv) {
 
-using namespace cv;
-using namespace std;
+	using namespace cv;
+	using namespace std;
 
-
-//#define MIN_NUM_FEAT 200
+	//#define MIN_NUM_FEAT 200
 #define PLOT_COLOR CV_RGB(0, 0, 0)
 #define PL std::setprecision(3)
 
-double scale = 1.00;
-char text[100];
-int fontFace = FONT_HERSHEY_PLAIN;
-double fontScale = 1;
-int thickness = 1;
-cv::Point textOrg(10, 50);
+	double scale = 1.00;
+	char text[100];
+	int fontFace = FONT_HERSHEY_PLAIN;
+	double fontScale = 1;
+	int thickness = 1;
+	cv::Point textOrg(10, 50);
 
-int LEFT = 0;
-int RIGHT = 1;
+	// new camera
+	const double focal = 837.69737925956247;
+	const cv::Point2d pp(332.96486550136854, 220.37986827273829);
 
-int main(int argc, char** argv) {
 
 	clock_t begin = clock();
 	clock_t currentFrameClock;
@@ -58,23 +51,29 @@ int main(int argc, char** argv) {
 	std::fstream infile(quaternionFile.c_str());
 	std::string line;
 #else
-	// windows code goes here
+							// windows code goes here
 	string imgDir = "d:/vision/dataset/sequences/5/";
-	string resultFile = imgDir + "vo_result.txt";
+	string resultFile = imgDir + "/vo_result.txt";
 	std::string imgFormat = ".jpg";
+
 	std::string quaternionFile = imgDir + "q.txt";
 	std::fstream infile(quaternionFile);
+	if (!infile) { cout << "q file is not available!" << endl; }
 	std::string line;
+
+
 #endif
 
 	// Open a txt file to store the results
 	ofstream fout(resultFile.c_str());
 	if (!fout) {
-		cout << "Result file not opened!" << endl;
+		cout << "File not opened!" << endl;
 		return 1;
 	}
 
-	Mat current_img, previous_img, temp;
+	Mat current_img_left, current_img_right;
+
+	Mat leftEdge;
 
 	// for plotting purpose
 	Mat currImage_lc;
@@ -83,44 +82,88 @@ int main(int argc, char** argv) {
 
 	Mat img_1, img_2;  // two consecutive images from the same camera
 
-	cout << "Running at simulation mode!" << endl;
-	vector < Point2f > points1, points2; //vectors to store the coordinates of the feature points
-	
-    
-	loadImage(imgDir + "/img_left/1" + imgFormat, temp);
-	rectifyImage(temp, previous_img);
+#ifdef REAL_TIME
+	cout << "Running at real-time" << endl;
+	std::ofstream fpTimeStamp;
+	fpTimeStamp.open(timeStampFile.c_str());
 
-	loadImage(imgDir + "/img_left/2" + imgFormat, temp);
-	rectifyImage(temp, current_img);
+	VideoCapture left_capture(LEFT);
+	left_capture.set(CV_CAP_PROP_FRAME_WIDTH, 320);
+	left_capture.set(CV_CAP_PROP_FRAME_HEIGHT, 240);
+
+	left_capture.read(img_1);
+	begin = clock();
+
+#else
+	cout << "Running at simulation mode!" << endl;
+#endif
 
 	// features
 	vector < Point2f > keyFeatures;
 
-	featureDetection(previous_img, keyFeatures);        //detect features in img_1
+#ifdef REAL_TIME
+	//left camera, second frame
+	left_capture.read(img_2);
+
+#else
+	loadImage(imgDir + "/img_left/1" + imgFormat, img_1, currImage_lc);
+
+#endif
+
+	computeInitialPose(img_1, R_f, t_f, img_2, keyFeatures);
+
+	// assign them to be previous
+	Mat prevImage = img_2;
 	vector < Point2f > prevFeatures = keyFeatures;
-	
-	featureDetection(current_img, keyFeatures);        //detect features in img_1
+
+	Mat currImage;
 	vector < Point2f > currFeatures = keyFeatures;
 
 	string filename;
 	Mat E, R, t, mask;
-
-    vector < uchar > status;
-	featureTracking(previous_img, current_img, prevFeatures, currFeatures, status);
-
-	E = findEssentialMat(currFeatures, prevFeatures, focal, pp, RANSAC, 0.999, 1.0, mask);
-	recoverPose(E, currFeatures, prevFeatures, R, t, focal, pp, mask);
-
-	R_f = R.clone();
-	t_f = t.clone();
 
 	namedWindow("Trajectory", WINDOW_AUTOSIZE); // Create a window for display.
 
 	Mat traj = Mat::zeros(640, 480, CV_8UC3);
 	Mat trajTruth = Mat::zeros(640, 480, CV_8UC3);
 
-	for (int numFrame = 3; numFrame < MAX_FRAME; numFrame++) {
+	Mat R_f_left, t_f_left;
+	Mat previous_img_left = img_2;
+
+	vector<Point2f> previous_feature_left = keyFeatures;;
+	vector<Point2f> current_feature_left;
+
+
+#ifdef REAL_TIME
+	// new frame from left camera
+	previous_img_left = img_2;
+	left_capture.read(current_img_left);
+
+#else
+
+	loadImage(imgDir + "/img_left/1" + imgFormat, previous_img_left, currImage_lc);
+	loadImage(imgDir + "/img_left/2" + imgFormat, current_img_left, currImage_lc);
+
+	rectifyImage(previous_img_left, previous_img_left);
+
+#endif
+	computeInitialPose(previous_img_left,
+		current_img_left,
+		R_f_left,
+		t_f_left,
+		previous_feature_left);
+
+	//	R_f_left = dcm;
+
+	for (int numFrame = 2; numFrame < MAX_FRAME; numFrame++) {
 		cout << "numFrame = " << numFrame << endl;
+#ifdef REAL_TIME
+
+		// Mat leftFrame;
+		bool readSuccess1 = left_capture.read(current_img_left);
+		if (readSuccess1) { currImage_lc = current_img_left; }
+
+#else
 
 		stringstream ss;
 		ss << numFrame;
@@ -128,23 +171,25 @@ int main(int argc, char** argv) {
 
 		string filename1 = imgDir + "/img_left/" + idx + imgFormat;
 
-		loadImage(filename1, temp);
+		loadImage(filename1, current_img_left, currImage_lc);
 
-		rectifyImage(temp, current_img);
+		rectifyImage(current_img_left, current_img_left);
 
-		//updatePose(filename,	previous_img,		prevFeatures,		currFeatures,		R_f,		t_f);
-		featureTracking(previous_img, current_img, prevFeatures, currFeatures, status);
-		previous_img = current_img.clone();
+		std::getline(infile, line);
+		std::istringstream iss(line);
+		if (!(iss >> q[0] >> q[1] >> q[2] >> q[3])) { break; }
+		//cout << "q=" << q[0] << " "<< q[1] << " " << q[2] << " " << q[3]  << endl;
+		q2Dcm(q, dcm);
+		//cout <<"dcm " << dcm <<  endl;
 
-		E = findEssentialMat(currFeatures, prevFeatures, focal, pp, RANSAC, 0.999, 1.0, mask);
-		recoverPose(E, currFeatures, prevFeatures, R_f, t_f, focal, pp, mask);
+#endif
 
-		if ((t.at<double>(2) > t.at<double>(0)) && (t.at<double>(2) > t.at<double>(1))) {
-			cout << "computing pose" << endl;
-			t_f = t_f + scale * (R_f * t);
-			R_f = R * R_f;
-
-		}
+		updatePose(filename,
+			prevImage,
+			prevFeatures,
+			currFeatures,
+			R_f,
+			t_f);
 
 		// for plotting purpose
 		double x1 = t_f.at<double>(0);
@@ -164,7 +209,7 @@ int main(int argc, char** argv) {
 		putText(traj, text, textOrg, fontFace, fontScale, Scalar::all(255), thickness, 8);
 
 		// plot them
-		imshow("Left camera", current_img);
+		imshow("Left camera", currImage_lc);
 		imshow("Trajectory", traj);
 
 		// Save the result
