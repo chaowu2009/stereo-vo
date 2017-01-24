@@ -163,7 +163,7 @@ int main(int argc, char** argv) {
 
     rectifyImage(previous_img_left, previous_img_left);
 
-#endif
+#endif17
     computeInitialPose(previous_img_left,
         current_img_left,
         R_f_left, 

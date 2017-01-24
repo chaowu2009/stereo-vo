@@ -13,7 +13,7 @@ using namespace cv;
 using namespace std;
 
 
-void q2Dcm(float q[4], Mat &dcm) {
+void q2Dcm(const float q[4], Mat &dcm) {
 	float q00, q01, q02, q03, q11, q12, q13, q22, q23, q33;
 	float w, x, y, z;
 	w = q[0];
@@ -48,7 +48,7 @@ void q2Dcm(float q[4], Mat &dcm) {
 	//cout << "dcm = " << dcm << endl;
 }
 
- void dcm2q(Mat dcm, float q[4]) {
+ void dcm2q(const Mat dcm, float q[4]) {
 	 float wSq4, xSq4, ySq4, zSq4; // sometimes <0
 	 float DCM[3][3];
 	 for (int i = 0; i < 3; i++)
@@ -62,14 +62,16 @@ void q2Dcm(float q[4], Mat &dcm) {
 	 zSq4 = 1 - DCM[0][0] - DCM[1][1] + DCM[2][2];
 
 	 float w2, x2, y2, z2;
-	 if ((wSq4 >= xSq4) && (wSq4 >= ySq4) && (wSq4 >= zSq4)) { // wSq4 is the largest
+	 if ((wSq4 >= xSq4) && (wSq4 >= ySq4) && (wSq4 >= zSq4)) { 
+	     // wSq4 is the largest
 		 w2 = sqrt(wSq4);
 		 x2 = (DCM[2][1] - DCM[1][2]) / w2;
 		 y2 = -(DCM[2][0] - DCM[0][2]) / w2;
 		 z2 = (DCM[1][0] - DCM[0][1]) / w2;
 
 	 }
-	 else if ((xSq4 >= ySq4) && (xSq4 >= zSq4)) { // xSq4 is the largest
+	 else if ((xSq4 >= ySq4) && (xSq4 >= zSq4)) { 
+	     // xSq4 is the largest
 		 x2 = sqrt(xSq4);
 		 w2 = (DCM[2][1] - DCM[1][2]) / x2;
 		 y2 = (DCM[1][0] + DCM[0][1]) / x2;
@@ -96,59 +98,59 @@ void q2Dcm(float q[4], Mat &dcm) {
 	 q[3] = z2/ 2.0f;
  }
 
-void qmult(float q1[4], float q2[4], float qOut[4]){
+void qmult(const float q1[4], const float q2[4], float qOut[4]){
 
-qOut[0] = q1[0]*q2[0] - q1[1]*q2[1] - q1[2]*q2[2] - q1[3]*q2[3];
-qOut[1] = q1[0]*q2[1] + q1[1]*q2[0] + q1[2]*q2[3] - q1[3]*q2[2]; 
-qOut[2] = q1[0]*q2[2] - q1[1]*q2[3] + q1[2]*q2[0] + q1[3]*q2[1]; 
-qOut[3] = q1[0]*q2[3] + q1[1]*q2[2] - q1[2]*q2[1] + q1[3]*q2[0];  
-
-}
-
-
-void qConj(float qIn[4], float qOut[4]){
-
-for(int i = 1; i<4; i++){
-     qOut [i ] = -qIn[i];
-}
-
-qOut[0] = qIn[0];
-
-}
-
-void qNorm(float qIn[4], float qOut[4]){
-
-float norm= 0;
-for(int i = 0; i<4; i++){
-     norm += qIn[i]*qIn[i];
-     qOut[i] = qIn[i];
-}
-
-norm = sqrt(norm);
-
-for(int i = 0; i<4; i++){
-     qOut[i] /= norm;
-}
+    qOut[0] = q1[0]*q2[0] - q1[1]*q2[1] - q1[2]*q2[2] - q1[3]*q2[3];
+    qOut[1] = q1[0]*q2[1] + q1[1]*q2[0] + q1[2]*q2[3] - q1[3]*q2[2]; 
+    qOut[2] = q1[0]*q2[2] - q1[1]*q2[3] + q1[2]*q2[0] + q1[3]*q2[1]; 
+    qOut[3] = q1[0]*q2[3] + q1[1]*q2[2] - q1[2]*q2[1] + q1[3]*q2[0];  
 
 }
 
 
-void qvrot(float qIn[4], float vIn[3], float vOut[3]){
+void qConj(const float qIn[4], float qOut[4]){
 
-float vAugmented[4], q2[4];
-vAugmented[0] = 0;
-for(int i = 0; i<3; i++){
-    vAugmented[i+1] = vIn[i];
+    for(int i = 1; i<4; i++){
+         qOut [i ] = -qIn[i];
+    }
+
+    qOut[0] = qIn[0];
+
 }
 
-float qTemp[4], qconj[4];
-qConj(qIn, qconj);
+void qNorm(const float qIn[4], float qOut[4]){
 
-qmult(qIn, vAugmented, qTemp);
+    float norm= 0;
+    for(int i = 0; i<4; i++){
+         norm += qIn[i]*qIn[i];
+         qOut[i] = qIn[i];
+    }
 
-qmult(qTemp, qconj, q2);
-for(int i = 1; i<3; i++){
-    vOut[i-1] = q2[i];
+    norm = sqrt(norm);
+
+    for(int i = 0; i<4; i++){
+         qOut[i] /= norm;
 }
+
+}
+
+
+void qvrot(const float qIn[4], const float vIn[3], float vOut[3]){
+
+    float vAugmented[4], q2[4];
+    vAugmented[0] = 0;
+    for(int i = 0; i<3; i++){
+        vAugmented[i+1] = vIn[i];
+    }
+
+    float qTemp[4], qconj[4];
+    qConj(qIn, qconj);
+
+    qmult(qIn, vAugmented, qTemp);
+
+    qmult(qTemp, qconj, q2);
+    for(int i = 1; i<3; i++){
+        vOut[i-1] = q2[i];
+    }
 
 }
