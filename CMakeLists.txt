@@ -14,16 +14,16 @@ add_executable(readBNO "src/readBNO.h" "src/readBNO_test.cpp")
 target_link_libraries(readBNO ${OpenCV_LIBS} wiringPi m rt)
 
 
-add_executable(vo "src/readBNO.h" "src/vo_features.h" "src/visodo.cpp")
+add_executable(vo "src/readBNO.h" "src/rotation.h" "src/vo_features.h" "src/visodo.cpp")
 target_link_libraries(vo ${OpenCV_LIBS} wiringPi m rt)
 
-add_executable(singleCamera "src/readBNO.h" "src/vo_features.h" "src/singleCamera.cpp")
+add_executable(singleCamera "src/readBNO.h" "src/rotation.h" "src/vo_features.h" "src/singleCamera.cpp")
 target_link_libraries(singleCamera ${OpenCV_LIBS} wiringPi m rt)
 
-add_executable(cri "src/vo_features.h" "src/captureRealImage.cpp")
+add_executable(cri "src/rotation.h" "src/vo_features.h" "src/captureRealImage.cpp")
 target_link_libraries(cri ${OpenCV_LIBS})
 
-add_executable(rectify "src/vo_features.h" "src/test.cpp" "src/cam_stereo.yml")
+add_executable(rectify "src/rotation.h" "src/vo_features.h" "src/test.cpp" "src/cam_stereo.yml")
 target_link_libraries(rectify ${OpenCV_LIBS})
 
 add_executable(test "src/test.cpp" )

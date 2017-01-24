@@ -1,3 +1,4 @@
+#include "rotation.h"
 #include "vo_features.h"
 #include <iomanip>
 #include <fstream>
