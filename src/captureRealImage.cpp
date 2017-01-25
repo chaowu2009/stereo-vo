@@ -25,7 +25,7 @@ int main(int argc, char** argv) {
 	    
     //linux code goes here
     std::string resultFile = "/home/cwu/project/stereo-vo/src/vo_result.txt";
-    std::string imgDir="/home/cwu/project/dataset/images/10/";
+    std::string imgDir="/home/cwu/project/dataset/images/planar/";
     cout << "capturing data only, saved at " << imgDir << endl;
     std::string imgFormat = ".jpg";
     std::string timeStampFile = imgDir + "timeStamp.txt";
@@ -50,16 +50,19 @@ int main(int argc, char** argv) {
 	std::ofstream fpTimeStamp;
 	fpTimeStamp.open(timeStampFile.c_str());
 
+    int WIDTH = 1280;
+    int HEIGHT = 720;
+    
     VideoCapture left_capture(LEFT);
-    left_capture.set(CV_CAP_PROP_FRAME_WIDTH, 320);
-    left_capture.set(CV_CAP_PROP_FRAME_HEIGHT, 240);
+    left_capture.set(CV_CAP_PROP_FRAME_WIDTH, WIDTH);
+    left_capture.set(CV_CAP_PROP_FRAME_HEIGHT, HEIGHT);
 //    left_capture.set(CV_CAP_PROP_EXPOSURE, 1);
 //     int exposureTime = left_capture.get(CV_CAP_PROP_EXPOSURE);
 //     cout << "exposure time is " << exposureTime << endl;
 
     VideoCapture right_capture(RIGHT);
-    right_capture.set(CV_CAP_PROP_FRAME_WIDTH, 320);
-    right_capture.set(CV_CAP_PROP_FRAME_HEIGHT, 240);
+    right_capture.set(CV_CAP_PROP_FRAME_WIDTH, WIDTH);
+    right_capture.set(CV_CAP_PROP_FRAME_HEIGHT, HEIGHT);
 //    right_capture.set(CV_CAP_PROP_EXPOSURE, 1);
 
     left_capture.read(img_1);
