@@ -90,7 +90,7 @@ int main(int argc, char** argv) {
 	rectifyImage(temp, current_img);
 
 	// features
-	vector < Point2f > prevFeatures, currFeatures;
+	vector < Point2f > prevFeatures, currFeatures, keyFeatures;
 
 	featureDetection(previous_img, prevFeatures);        //detect features in img_1
 	
@@ -127,6 +127,7 @@ int main(int argc, char** argv) {
 		rectifyImage(temp, current_img);
 
 		featureDetection(current_img, currFeatures);        //detect features in img_1
+		keyFeatures = currFeatures;
 		cout << "numFrame = " << numFrame << " currFeatures numbers = " << currFeatures.size() << endl;
 
 		featureTracking(previous_img, current_img, prevFeatures, currFeatures, status);
@@ -135,10 +136,10 @@ int main(int argc, char** argv) {
 			if (status[i] == 1)	anyFeatureTracked++;
 		}
 		cout << "numFrame = " << numFrame << " currFeatures numbers = " << currFeatures.size() << " feature tracked =" << anyFeatureTracked << endl;
-		if (anyFeatureTracked == 0) {
+		if (anyFeatureTracked < 10) {
 			// copy for next loop
 			previous_img = current_img.clone();
-			prevFeatures = currFeatures;
+			prevFeatures = keyFeatures;
 			continue; 
 		}
 

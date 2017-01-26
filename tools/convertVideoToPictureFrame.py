@@ -13,7 +13,7 @@ print(success)
 count = 1
 success = True
 
-while success:
+while count < frameNumber :
   success,image = vidcap.read()
   print ('Read a new frame: ', success, " frame number: ", count)
   cv2.imwrite(imgFolder +"%d.jpg" % count, image)     # save frame as JPEG file
