@@ -3,14 +3,16 @@
 #include <fstream>
 #include <ostream>
 #include <string>
-
-#ifdef __linux__ 
-#include "readBNO.h"
-#endif
+#include <stdio.h>
+#include <iostream>
+#include "opencv2/core.hpp"
+#include "opencv2/features2d.hpp"
+#include "opencv2/xfeatures2d.hpp"
+#include "opencv2/highgui.hpp"
 
 using namespace cv;
 using namespace std;
-
+using namespace cv::xfeatures2d;
 
 //#define MIN_NUM_FEAT 200
 #define PLOT_COLOR CV_RGB(0, 0, 0)
@@ -25,7 +27,7 @@ cv::Point textOrg(10, 50);
 
 int LEFT = 0;
 int RIGHT = 1;
-
+#if 1
 int main(int argc, char** argv) {
 
 	clock_t begin = clock();
@@ -58,8 +60,8 @@ int main(int argc, char** argv) {
 	std::fstream infile(quaternionFile.c_str());
 	std::string line;
 #else
-	// windows code goes here
-	string imgDir = "d:/vision/dataset/sequences/5/";
+							// windows code goes here
+	string imgDir = "d:/vision/dataset/sequences/planar/";
 	string resultFile = imgDir + "vo_result.txt";
 	std::string imgFormat = ".jpg";
 	std::string quaternionFile = imgDir + "q.txt";
@@ -76,17 +78,11 @@ int main(int argc, char** argv) {
 
 	Mat current_img, previous_img, temp;
 
-	// for plotting purpose
-	Mat currImage_lc;
-
+	// for plotting purpose 
 	Mat R_f, t_f; //the final rotation and translation vectors
 
-	Mat img_1, img_2;  // two consecutive images from the same camera
-
 	cout << "Running at simulation mode!" << endl;
-	vector < Point2f > points1, points2; //vectors to store the coordinates of the feature points
-	
-    
+
 	loadImage(imgDir + "/img_left/1" + imgFormat, temp);
 	rectifyImage(temp, previous_img);
 
@@ -94,19 +90,19 @@ int main(int argc, char** argv) {
 	rectifyImage(temp, current_img);
 
 	// features
-	vector < Point2f > keyFeatures;
+	vector < Point2f > prevFeatures, currFeatures;
 
-	featureDetection(previous_img, keyFeatures);        //detect features in img_1
-	vector < Point2f > prevFeatures = keyFeatures;
+	featureDetection(previous_img, prevFeatures);        //detect features in img_1
 	
-	featureDetection(current_img, keyFeatures);        //detect features in img_1
-	vector < Point2f > currFeatures = keyFeatures;
-
+	featureDetection(current_img, currFeatures);        //detect features in img_2
+	
 	string filename;
 	Mat E, R, t, mask;
 
-    vector < uchar > status;
+	vector < uchar > status;
 	featureTracking(previous_img, current_img, prevFeatures, currFeatures, status);
+	cout << "prevFeatures numbers = " << prevFeatures.size() << endl;
+	cout << "currFeatures numbers = " << currFeatures.size() << endl;
 
 	E = findEssentialMat(currFeatures, prevFeatures, focal, pp, RANSAC, 0.999, 1.0, mask);
 	recoverPose(E, currFeatures, prevFeatures, R, t, focal, pp, mask);
@@ -117,10 +113,8 @@ int main(int argc, char** argv) {
 	namedWindow("Trajectory", WINDOW_AUTOSIZE); // Create a window for display.
 
 	Mat traj = Mat::zeros(640, 480, CV_8UC3);
-	Mat trajTruth = Mat::zeros(640, 480, CV_8UC3);
-
-	for (int numFrame = 3; numFrame < MAX_FRAME; numFrame++) {
-		cout << "numFrame = " << numFrame << endl;
+	
+	for (int numFrame = 3; numFrame < MAX_FRAME+1; numFrame++) {
 
 		stringstream ss;
 		ss << numFrame;
@@ -132,20 +126,33 @@ int main(int argc, char** argv) {
 
 		rectifyImage(temp, current_img);
 
-		//updatePose(filename,	previous_img,		prevFeatures,		currFeatures,		R_f,		t_f);
+		featureDetection(current_img, currFeatures);        //detect features in img_1
+		cout << "numFrame = " << numFrame << " currFeatures numbers = " << currFeatures.size() << endl;
+
 		featureTracking(previous_img, current_img, prevFeatures, currFeatures, status);
-		previous_img = current_img.clone();
+		int anyFeatureTracked = 0;
+		for (uint i = 0; i < status.size(); i++) {
+			if (status[i] == 1)	anyFeatureTracked++;
+		}
+		cout << "numFrame = " << numFrame << " currFeatures numbers = " << currFeatures.size() << " feature tracked =" << anyFeatureTracked << endl;
+		if (anyFeatureTracked == 0) {
+			// copy for next loop
+			previous_img = current_img.clone();
+			prevFeatures = currFeatures;
+			continue; 
+		}
 
 		E = findEssentialMat(currFeatures, prevFeatures, focal, pp, RANSAC, 0.999, 1.0, mask);
 		recoverPose(E, currFeatures, prevFeatures, R_f, t_f, focal, pp, mask);
 
-		if ((t.at<double>(2) > t.at<double>(0)) && (t.at<double>(2) > t.at<double>(1))) {
-			cout << "computing pose" << endl;
-			t_f = t_f + scale * (R_f * t);
-			R_f = R * R_f;
+        // update pose
+		t_f = t_f + scale * (R_f * t);
+		R_f = R * R_f;
 
-		}
-
+		// copy for next loop
+		previous_img = current_img.clone();
+		prevFeatures = currFeatures;
+		
 		// for plotting purpose
 		double x1 = t_f.at<double>(0);
 		double y1 = t_f.at<double>(1);
@@ -182,3 +189,71 @@ int main(int argc, char** argv) {
 
 	return 0;
 }
+
+#else
+
+void readme();
+
+/** @function main */
+int main(int argc, char** argv)
+{
+	Mat temp, previous_img, current_img;
+	string imgDir = "d:/vision/dataset/sequences/planar_lower/";
+	std::string imgFormat = ".jpg";
+
+	int MAX_FRAME = 1000;
+
+	Mat img_1 = imread(imgDir + "/img_left/1" + imgFormat, IMREAD_GRAYSCALE);
+
+	if (!img_1.data)
+	{
+		std::cout << " --(!) Error reading images " << std::endl; return -1;
+	}
+
+
+	//-- Step 1: Detect the keypoints using SURF Detector
+	int minHessian = 400;
+
+	Ptr<SURF> detector = SURF::create(minHessian);
+
+	std::vector<KeyPoint> keypoints_1;
+
+	for (int numFrame = 3; numFrame < MAX_FRAME; numFrame++) {
+
+
+		stringstream ss;
+		ss << numFrame;
+		string idx = ss.str();
+
+		string filename1 = imgDir + "/img_left/" + idx + imgFormat;
+
+
+		img_1 = imread(filename1, IMREAD_GRAYSCALE);
+
+
+		detector->detect(img_1, keypoints_1);
+
+		cout << "numFrame = " << numFrame << " numOfKeyPoints =" << keypoints_1.size() << endl;
+
+		//-- Draw keypoints
+		Mat img_keypoints_1;
+
+		drawKeypoints(img_1, keypoints_1, img_keypoints_1, Scalar::all(-1), DrawMatchesFlags::DEFAULT);
+
+		//-- Show detected (drawn) keypoints
+		imshow("Keypoints 1", img_keypoints_1);
+
+
+		waitKey(1);
+	}
+
+	return 0;
+}
+
+/** @function readme */
+void readme()
+{
+	std::cout << " Usage: ./SURF_detector <img1> <img2>" << std::endl;
+}
+
+#endif

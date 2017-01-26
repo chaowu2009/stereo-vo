@@ -140,7 +140,8 @@ void featureTracking(Mat img_1,
 //this function automatically gets rid of points for which tracking fails
 
 	vector<float> err;
-	Size winSize = Size(21, 21);
+	//Size winSize = Size(21, 21);
+	Size winSize = Size(61, 61);
 	TermCriteria termcrit = TermCriteria(
 			TermCriteria::COUNT + TermCriteria::EPS, 30, 0.01);
 

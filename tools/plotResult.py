@@ -2,6 +2,7 @@ import numpy as np
 from matplotlib.pyplot import *
 
 imgDir="/home/cwu/project/dataset/images/10/";
+imgDir ="D:/vision/dataset/sequences/planar/"
 
 resultFile = imgDir+ 'vo_result.txt'
 
@@ -18,22 +19,37 @@ with open(resultFile) as fp:
         position2D.append([data[4], data[5]])
 
 position2D = np.asarray(position2D)
+position3D = np.asarray(position3D)
 
-subplot(211)
+subplot(411)
 labels=['x','y','z']
 [xl,yl,zl] = plot(position3D)
 legend([xl,yl,zl], ['x','y','z'], loc=1)
 title('position3D')
 grid(True)
 
-subplot(212)
-labels=['x','y']
-plot(position2D[:,0],position2D[:,1])
-#legend([xl,yl], ['x','y'], loc=1)
+subplot(412)
+plot(position3D[:,0],position3D[:,1])
 title('position2D( image plane)')
 xlabel('x')
 ylabel('y')
 grid(True)
+
+subplot(413)
+plot(position3D[:,0],position3D[:,2])
+title('position2D( image plane)')
+xlabel('x')
+ylabel('z')
+grid(True)
+
+subplot(414)
+plot(position3D[:,1],position3D[:,2])
+title('position2D( image plane)')
+xlabel('y')
+ylabel('z')
+grid(True)
+
+
 show()
 
 
