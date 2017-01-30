@@ -32,7 +32,6 @@ int main(int argc, char** argv) {
 
 	clock_t begin = clock();
 	clock_t currentFrameClock;
-	float deltaTinSecond = 0.0f;
 	int MAX_FRAME = 1000;
 
 	float q[4];
@@ -61,11 +60,13 @@ int main(int argc, char** argv) {
 	std::string line;
 #else
 							// windows code goes here
-	string imgDir = "d:/vision/dataset/sequences/planar/";
-	string resultFile = imgDir + "vo_result.txt";
-	std::string imgFormat = ".jpg";
-	std::string quaternionFile = imgDir + "q.txt";
-	std::fstream infile(quaternionFile);
+	//string imgDir = "d:/vision/dataset/sequences/planar/";
+	string imgDir = "d:/vision/dataset/sequences/00/image_0/";
+	string resultFile = "vo_result.txt";
+
+	std::string imgFormat = ".png";
+	//std::string quaternionFile = imgDir + "q.txt";
+	//std::fstream infile(quaternionFile);
 	std::string line;
 #endif
 
@@ -83,11 +84,11 @@ int main(int argc, char** argv) {
 
 	cout << "Running at simulation mode!" << endl;
 
-	loadImage(imgDir + "/img_left/1" + imgFormat, temp);
-	rectifyImage(temp, previous_img);
-
-	loadImage(imgDir + "/img_left/2" + imgFormat, temp);
-	rectifyImage(temp, current_img);
+	loadImage(imgDir + "000000" + imgFormat, previous_img);
+	//rectifyImage(temp, previous_img);
+	 
+	loadImage(imgDir + "000001" + imgFormat, current_img);
+//	rectifyImage(temp, current_img);
 
 	// features
 	vector < Point2f > prevFeatures, currFeatures, keyFeatures;
@@ -101,8 +102,8 @@ int main(int argc, char** argv) {
 
 	vector < uchar > status;
 	featureTracking(previous_img, current_img, prevFeatures, currFeatures, status);
-	cout << "prevFeatures numbers = " << prevFeatures.size() << endl;
-	cout << "currFeatures numbers = " << currFeatures.size() << endl;
+	//cout << "prevFeatures numbers = " << prevFeatures.size() << endl;
+	//cout << "currFeatures numbers = " << currFeatures.size() << endl;
 
 	E = findEssentialMat(currFeatures, prevFeatures, focal, pp, RANSAC, 0.999, 1.0, mask);
 	recoverPose(E, currFeatures, prevFeatures, R, t, focal, pp, mask);
@@ -120,27 +121,29 @@ int main(int argc, char** argv) {
 		ss << numFrame;
 		string idx = ss.str();
 
-		string filename1 = imgDir + "/img_left/" + idx + imgFormat;
+		//string filename1 = imgDir + "/img_left/" + idx + imgFormat;
+		string filename1 = combineName(imgDir, numFrame, imgFormat);
 
-		loadImage(filename1, temp);
+		loadImage(filename1, current_img);
 
-		rectifyImage(temp, current_img);
-
+	//	rectifyImage(temp, current_img);
+		 
 		featureDetection(current_img, currFeatures);        //detect features in img_1
 		keyFeatures = currFeatures;
-		cout << "numFrame = " << numFrame << " currFeatures numbers = " << currFeatures.size() << endl;
+		//cout << "numFrame = " << numFrame << " currFeatures numbers = " << currFeatures.size() << endl;
+		cout << "numFrame = " << numFrame  << endl;
 
 		featureTracking(previous_img, current_img, prevFeatures, currFeatures, status);
 		int anyFeatureTracked = 0;
 		for (uint i = 0; i < status.size(); i++) {
 			if (status[i] == 1)	anyFeatureTracked++;
 		}
-		cout << "numFrame = " << numFrame << " currFeatures numbers = " << currFeatures.size() << " feature tracked =" << anyFeatureTracked << endl;
+	//	cout << "numFrame = " << numFrame << " currFeatures numbers = " << currFeatures.size() << " feature tracked =" << anyFeatureTracked << endl;
 		if (anyFeatureTracked < 10) {
 			// copy for next loop
-			previous_img = current_img.clone();
-			prevFeatures = keyFeatures;
-			continue; 
+		//	previous_img = current_img.clone();
+		//	prevFeatures = keyFeatures;
+		//	continue; 
 		}
 
 		E = findEssentialMat(currFeatures, prevFeatures, focal, pp, RANSAC, 0.999, 1.0, mask);
@@ -151,7 +154,7 @@ int main(int argc, char** argv) {
 		R_f = R * R_f;
 
 		// copy for next loop
-		previous_img = current_img.clone();
+		previous_img = current_img;
 		prevFeatures = currFeatures;
 		
 		// for plotting purpose
@@ -179,7 +182,7 @@ int main(int argc, char** argv) {
 		fout << numFrame << "\t";
 		fout << x1 << "\t" << y1 << "\t" << z1 << "\t" << x << "\t" << y << "\n";
 
-		waitKey(2);  //microsecond
+		waitKey(1);  //microsecond
 	}
 
 	imwrite(imgDir + "/final_map" + imgFormat, traj);

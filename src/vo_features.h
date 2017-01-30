@@ -34,12 +34,16 @@ using namespace std;
 
 using namespace cv::xfeatures2d;
 
-// new camera
-const double focal = 837.69737925956247;
-const cv::Point2d pp(332.96486550136854, 220.37986827273829);
+// new Logitec Camera
+//const double focal = 837.69737925956247;
+//const cv::Point2d pp(332.96486550136854, 220.37986827273829);
+
+//  kittk camera
+const double focal = 718.8560;
+const cv::Point2d pp(607.1928, 185.2157);
 
 
-#define MIN_NUM_FEAT 200
+#define MIN_NUM_FEAT 2000
 
 extern const double focal;
 extern const cv::Point2d pp;
@@ -131,35 +135,32 @@ void getPosition(string line, float vout[3]){
 
 
 
-void featureTracking(Mat img_1, 
-	                 Mat img_2, 
-	                 vector<Point2f>& points1,
-		             vector<Point2f>& points2, 
+void featureTracking(Mat prevImage, 
+	                 Mat currImage, 
+	                 vector<Point2f>& prevFeatures,
+		             vector<Point2f>& currentFeatures, 
 		             vector<uchar>& status) {
 
-//this function automatically gets rid of points for which tracking fails
+    //this function automatically gets rid of points for which tracking fails
 
 	vector<float> err;
 	//Size winSize = Size(21, 21);
 	Size winSize = Size(61, 61);
-	TermCriteria termcrit = TermCriteria(
-			TermCriteria::COUNT + TermCriteria::EPS, 30, 0.01);
+	TermCriteria termcrit = TermCriteria(TermCriteria::COUNT + TermCriteria::EPS, 30, 0.01);
 
-    // img_1, pointers1 previous frame
-    // img_2, pointers2 previous frame
-	calcOpticalFlowPyrLK(img_1,  img_2, points1, points2, status, err, winSize,
-			3, termcrit, 0, 0.001);
+	calcOpticalFlowPyrLK(prevImage, currImage, prevFeatures, currentFeatures, status, err, winSize,	3, termcrit, 0, 0.001);
 
 	//getting rid of points for which the KLT tracking failed or those who have gone outside the frame
 	int indexCorrection = 0;
 	for (uint i = 0; i < status.size(); i++) {
-		Point2f pt = points2.at(i - indexCorrection);
-		if ((status.at(i) == 0) || (pt.x < 0) || (pt.y < 0)) {
-			if ((pt.x < 0) || (pt.y < 0)) {
-				status.at(i) = 0;
+		Point2f pt = currentFeatures.at(i - indexCorrection);
+		//if ((status.at(i) == 0) || (pt.x < 0) || (pt.y < 0)) {
+		if (status.at(i) == 0) {
+		     if ((pt.x < 0) || (pt.y < 0)) {
+			//	status.at(i) = 0;
 			}
-			points1.erase(points1.begin() + (i - indexCorrection));
-			points2.erase(points2.begin() + (i - indexCorrection));
+			prevFeatures.erase(prevFeatures.begin() + (i - indexCorrection));
+			currentFeatures.erase(currentFeatures.begin() + (i - indexCorrection));
 			indexCorrection++;
 		}
 
@@ -168,12 +169,12 @@ void featureTracking(Mat img_1,
 }
 
 //uses FAST as of now, modify parameters as necessary
-void featureDetection(Mat img_1, vector<Point2f>& points1) {
+void featureDetection(Mat img_1, vector<Point2f>& keyFeatures) {
 	vector < KeyPoint > keypoints_1;
 	int fast_threshold = 20;
 	bool nonmaxSuppression = true;
 	FAST(img_1, keypoints_1, fast_threshold, nonmaxSuppression);
-	KeyPoint::convert(keypoints_1, points1, vector<int>());
+	KeyPoint::convert(keypoints_1, keyFeatures, vector<int>());
 }
 
 void computeInitialPose(Mat &img_1, 
@@ -188,9 +189,6 @@ void computeInitialPose(Mat &img_1,
 	vector < uchar > status;
 	featureTracking(img_1, img_2, points1, points2, status); //track those features to img_2
 
-	//TODO: add a fucntion to load these values directly from KITTI's calib files
-	// WARNING: different sequences in the KITTI VO dataset have different intrinsic/extrinsic parameters
-	//recovering the pose and the essential matrix
 	Mat E, R, t, mask;
 	E = findEssentialMat(points2, points1, focal, pp, RANSAC, 0.999, 1.0, mask);
 	recoverPose(E, points2, points1, R, t, focal, pp, mask);
@@ -217,7 +215,6 @@ void computeInitialStereoPose(Mat &previous_img_left,
 	vector < uchar > status;
 	featureTracking(previous_img_left, current_img_left, points1, points_left, status); //track those features to img_2
 
-	// WARNING: different sequences in the KITTI VO dataset have different intrinsic/extrinsic parameters
 	//recovering the pose and the essential matrix
 	Mat E, R, t, mask;
 	E = findEssentialMat(points_left, points1, focal, pp, RANSAC, 0.999, 1.0, mask);
@@ -252,7 +249,7 @@ void updatePose(string filename,
 	Mat currImage_c = imread(filename);
 	Mat currImage; 
 	//cvtColor(currImage_c, currImage, COLOR_BGR2GRAY);
-	currImage = currImage_c.clone();
+	currImage = currImage_c;
 	vector < uchar > status;
 	featureTracking(prevImage, currImage,  prevFeatures, currFeatures,  status);
 
@@ -309,14 +306,12 @@ void stereoVisionIntialPose(Mat &img_left, vector<Point2f> &feature_left,
 			feature_right);
 }
 
-void stereoVision(Mat &current_img_left,
+void stereoVision(Mat &previous_img_left, 
+	              Mat &current_img_left,
+ 	              Mat &previous_img_right,
 	              Mat & current_img_right,
-	              Mat &currImage_lc, 
-	              Mat &currImage_rc, 
-	              Mat &previous_img_left, 
 		          vector<Point2f> &previous_feature_left, 
 		          vector<Point2f> &current_feature_left, 
-		          Mat &previous_img_right, 
 		          vector<Point2f> &previous_feature_right, 
 		          vector<Point2f> &current_feature_right, 
 		          Mat &R_f,
@@ -378,14 +373,14 @@ void stereoVision(Mat &current_img_left,
 		}
     }
    
-   //R = dcm;
-   //R= R1 * detlaR;
+   //R = dcm;          //use the IMU DCM
+   //R= R1 * detlaR;   // use corrected DCM
     
-	if ( (t.at<double>(2) > t.at<double>(0)) && (t.at<double>(2) > t.at<double>(1))) {
+	//if ( (t.at<double>(2) > t.at<double>(0)) && (t.at<double>(2) > t.at<double>(1))) {
 		//R_f = dcm;
 		t_f = t_f + scale * (R_f * t);
 	    R_f = R * R_f;
-	}
+	//}
 
     // a redetection is triggered in case the number of feautres being trakced go below a particular threshold
 	if (previous_feature_left.size() < MIN_NUM_FEAT) {
@@ -418,7 +413,6 @@ void stereoPoseUpdate(Mat &R_f, Mat &t_f, vector<Point2f> &previous_feature,
 	E = findEssentialMat(current_feature, previous_feature, focal, pp, RANSAC,
 			0.999, 1.0, mask);
 	recoverPose(E, current_feature, previous_feature, R, t, focal, pp, mask);
-
 
 }
 
@@ -618,7 +612,7 @@ void loadImage(string fileName, Mat &imgOut, Mat &img_1_c){
 void loadImage(string fileName, Mat &imgOut) {
 
 	//read the image
-	//  cout << "image name = " << fileName << endl;
+	//cout << "image name = " << fileName << endl;
 	Mat img_1_c = imread(fileName);
 
 	if (!img_1_c.data) {
@@ -626,17 +620,17 @@ void loadImage(string fileName, Mat &imgOut) {
 	}
 
 	// we work with grayscale images
-	imgOut = img_1_c.clone();
+	imgOut = img_1_c;
 	//cvtColor(img_1_c, imgOut, COLOR_BGR2GRAY);
 }
 
-string combineName(string localDataDir, int numFrame){
+string combineName(string localDataDir, int numFrame, string imgFormat){
 	
 	 std::ostringstream ostr;
 
 	 ostr << std::setfill('0') << std::setw(6) << numFrame ;
 
-	string fileName  = localDataDir +  ostr.str() + ".png";
+	string fileName  = localDataDir +  ostr.str() + imgFormat;
 
 	return fileName;
 
@@ -709,4 +703,49 @@ void rectifyImage(Mat &imgIn,
  // waitKey(1);
 }
 
+void process(Mat &pre_img_left, 
+	         Mat &curr_img_left,
+	         Mat &pre_img_right,
+	         Mat &curr_img_right, 
+	         Mat &R, Mat &t) {
 
+	// ref http://avisingh599.github.io/vision/visual-odometry-full/
+	// capture two consecutive images from both left and right cameras
+
+	// undistort( compensating for lens distortion), rectify the above images(Then all the epipolar lines become parallel to the horizontal).
+
+	// compute the disparity map D(t) from pre_img_left and pre_img_right
+    //                           D(t+1) from curr_img_left and curr_img_right
+	//-- 2. Call the constructor for StereoBM
+	int ndisparities = 16 * 5;   /**< Range of disparity */
+	int SADWindowSize = 21; /**< Size of the block window. Must be odd */
+
+	Ptr<StereoBM> sbm = StereoBM::create(ndisparities, SADWindowSize);
+
+	Mat Dt_previous;
+	sbm->compute(pre_img_left, pre_img_right, Dt_previous);
+	Mat Dt_current;
+	sbm->compute(curr_img_left, curr_img_right, Dt_current);
+
+	// use FAST algorith to detect featurs in pre_img_left and curr_img_left and match them
+
+	// use the disparity maps D(t) and D(t+1) to calculate the 3D positions of the features detected in the previous stpes.
+	// Two point clouds W(t) and W(t+1) will be obtained.
+
+	// Select a subset of points from the above point cloud such that all the matches are mutually compatible
+
+	// Estimate R, t from the inliners that were detected in the previous step.
+	
+	
+}
+
+void featureRotation(Mat &featureIn, Mat &featureOut) {
+	float c_x = 800.0f, c_y = 600.0f;
+	float f = 120.0f; // focal length of the first camera
+	float T_x = 0.5; // the x-coordinate of the right camera with respect to the first camera( in meters)
+
+	Mat M = (Mat_<double>(4, 4) << 1, 0, 0, -c_x, 0, 1, 0, -c_y, 0, 0, 0 - f, 0, 0 - 1 / T_x, 0);
+
+	featureOut = M * featureIn;
+
+}

@@ -72,10 +72,10 @@ int main(int argc, char** argv) {
 	std::string line;
 #else
     // windows code goes here
-  	std::string imgFormat = ".jpg";
-  
-    string imgDir       = "d:/vision/dataset/images/3/";
+	//string imgDir = "d:/vision/dataset/sequences/planar/";
+	string imgDir = "d:/vision/dataset/sequences/00/";
 	string resultFile = imgDir + "vo_result.txt";
+	std::string imgFormat = ".png";
 
 	std::string quaternionFile = imgDir + "q.txt";
 	std::fstream infile(quaternionFile);
@@ -87,7 +87,7 @@ int main(int argc, char** argv) {
     Mat leftEdge, rightEdge;
 
     // for plotting purpose
-    Mat currImage_lc, currImage_rc; 
+    Mat temp; 
 
     Mat R_f, t_f; //the final rotation and translation vectors
 
@@ -189,10 +189,12 @@ int main(int argc, char** argv) {
 
 #else
     // use the first two images from left camera to compute the init values.
-    //loadImage(localDataDir + "/dataset/sequences/00/image_0/000000.png", img_1, currImage_lc);
-    //loadImage(localDataDir + "/dataset/sequences/00/image_0/000001.png", img_2, currImage_lc);
-    loadImage(imgDir + "/img_left/1" + imgFormat, img_1, currImage_lc);
-    loadImage(imgDir + "/img_right/1"+ imgFormat, img_2, currImage_lc);
+    loadImage(imgDir + "/image_0/000000.png", temp);
+	img_1 = temp;
+    loadImage(imgDir + "/image_0/000001.png", temp);
+	img_2 = temp;
+    //loadImage(imgDir + "/img_left/1" + imgFormat, img_1, currImage_lc);
+    //loadImage(imgDir + "/img_right/1"+ imgFormat, img_2, currImage_lc);
 
 #endif
 
@@ -204,11 +206,6 @@ int main(int argc, char** argv) {
 
 #endif
 	
-    
-    //fout << 1 << "\t";
-    //fout << t_f.at<double>(0) << "\t" << t_f.at<double>(1) << "\t" << t_f.at<double>(2) << "\t";
-    //fout << 0 << "\t" << 0 << "\n";
-
     // assign them to be previous
     Mat prevImage = img_2;
     vector < Point2f > prevFeatures = keyFeatures;
@@ -246,18 +243,21 @@ int main(int argc, char** argv) {
 #else
 
     // read the first two iamges from left camera
-    //loadImage(localDataDir + "/dataset/sequences/00/image_0/000000.png", previous_img_left, currImage_lc );
-    //loadImage(localDataDir + "/dataset/sequences/00/image_0/000001.png", current_img_left,  currImage_lc);
+    loadImage(imgDir + "/image_0/000000.png", previous_img_left );
+    loadImage(imgDir + "image_0/000001.png", current_img_left);
 
-    loadImage(imgDir + "/img_left/1"+ imgFormat, previous_img_left, currImage_lc );
-    loadImage(imgDir + "/img_left/2" +imgFormat, current_img_left,  currImage_lc);
+    //loadImage(imgDir + "/img_left/1"+ imgFormat, previous_img_left, currImage_lc );
+    //loadImage(imgDir + "/img_left/2" +imgFormat, current_img_left,  currImage_lc);
 
     // read the first two iamges from right camera
-    loadImage(imgDir + "/img_right/1"+ imgFormat, previous_img_right, currImage_rc);
-    loadImage(imgDir + "/img_right/2"+ imgFormat, current_img_right, currImage_rc);
+	loadImage(imgDir + "/image_1/000000.png", previous_img_left);
+	loadImage(imgDir + "image_1/000001.png", current_img_left);
 
-    rectifyStereoImage(previous_img_left, previous_img_right, previous_img_left, previous_img_right);
-    rectifyStereoImage(current_img_left, current_img_right, current_img_left, current_img_right);
+	//loadImage(imgDir + "/img_right/1"+ imgFormat, previous_img_right, currImage_rc);
+    //loadImage(imgDir + "/img_right/2"+ imgFormat, current_img_right, currImage_rc);
+
+    //rectifyStereoImage(previous_img_left, previous_img_right, previous_img_left, previous_img_right);
+    //rectifyStereoImage(current_img_left, current_img_right, current_img_left, current_img_right);
 
 #endif
     computeInitialStereoPose(previous_img_left,
@@ -297,13 +297,16 @@ int main(int argc, char** argv) {
         string idx = ss.str();
 
         //idx = "3";
-        string filename1 =  imgDir + "/img_left/" + idx + imgFormat;
-        string filename2 =  imgDir + "/img_right/" + idx + imgFormat;
+        //string filename1 =  imgDir + "/img_left/" + idx + imgFormat;
+        //string filename2 =  imgDir + "/img_right/" + idx + imgFormat;
 
-        loadImage(filename1, current_img_left, currImage_lc);
-        loadImage(filename2, current_img_right, currImage_rc);
+		string filename1 = imgDir + "/image_0/" + idx + imgFormat;
+		string filename2 = imgDir + "/image_1/" + idx + imgFormat;
 
-        rectifyStereoImage(current_img_left, current_img_right, current_img_left, current_img_right);
+        loadImage(filename1, current_img_left);
+        loadImage(filename2, current_img_right);
+
+        //rectifyStereoImage(current_img_left, current_img_right, current_img_left, current_img_right);
 #ifdef BNO        
         readQuaternion(fd, q); // read IMU
 #endif
@@ -315,13 +318,11 @@ int main(int argc, char** argv) {
 		//cout <<"dcm " << dcm <<  endl;
 
 #endif
-        stereoVision(current_img_left,
-            current_img_right,
-            currImage_lc, 
-            currImage_rc,
-            previous_img_left,  previous_feature_left,  current_feature_left, 
-            previous_img_right, previous_feature_right, current_feature_right,
-            R_f, t_f, dcm); 
+        stereoVision(previous_img_left, current_img_left, 
+			         previous_img_right, current_img_right,
+                     previous_feature_left,  current_feature_left, 
+                     previous_feature_right, current_feature_right,
+                     R_f, t_f, dcm); 
 
         // for plotting purpose
         double x1 = t_f.at<double>(0);
@@ -345,7 +346,7 @@ int main(int argc, char** argv) {
 
         // plot them
 #ifndef REAL_TIME
-        imshow("Left camera", currImage_lc);
+        imshow("Left camera", current_img_left);
 #endif
         imshow("Trajectory", traj);
 
