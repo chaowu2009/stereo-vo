@@ -1,6 +1,10 @@
 import numpy as np
 import cv2
-from matplotlib import pyplot as plt
+
+def reconstruct3Dfrom2D():
+    # reconstruct 3D from 2D image
+ #   P1= K1 * [I3 |0]
+ #   P2 = K2 * {R12 |t12]
 
    
 cap = cv2.VideoCapture(0)
