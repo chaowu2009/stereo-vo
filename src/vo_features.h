@@ -728,6 +728,7 @@ void process(Mat &pre_img_left,
 	sbm->compute(curr_img_left, curr_img_right, Dt_current);
 
 	// use FAST algorith to detect featurs in pre_img_left and curr_img_left and match them
+	
 
 	// use the disparity maps D(t) and D(t+1) to calculate the 3D positions of the features detected in the previous stpes.
 	// Two point clouds W(t) and W(t+1) will be obtained.

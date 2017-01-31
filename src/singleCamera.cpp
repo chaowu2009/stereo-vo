@@ -31,7 +31,6 @@ int RIGHT = 1;
 int main(int argc, char** argv) {
 
 	clock_t begin = clock();
-	clock_t currentFrameClock;
 	int MAX_FRAME = 1000;
 
 	float q[4];

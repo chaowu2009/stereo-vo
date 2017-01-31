@@ -10,12 +10,16 @@ include_directories( ${OpenCV_INCLUDE_DIRS} )
 
 SET(GCC_COVERAGE_LINK_FLAGS "wiringPi m rt")
 
+add_executable(tracker "src/stats.h" "src/utils.h" "src/tracker.cpp")
+target_link_libraries(tracker ${OpenCV_LIBS})
+
 IF (WIN32)
 	add_executable(vo_win32 "src/rotation.h" "src/vo_features.h" "src/visodo.cpp")
 	target_link_libraries(vo_win32 ${OpenCV_LIBS})
 
 	add_executable(singleCamera_win32 "src/rotation.h" "src/vo_features.h" "src/singleCamera.cpp")
 	target_link_libraries(singleCamera_win32 ${OpenCV_LIBS})
+	
 ENDIF()
 
 IF(LINUX)
