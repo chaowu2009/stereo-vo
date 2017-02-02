@@ -39,6 +39,9 @@ target_link_libraries(cri ${OpenCV_LIBS})
 add_executable(rectify "src/rotation.h" "src/vo_features.h" "src/test.cpp" "src/cam_stereo.yml")
 target_link_libraries(rectify ${OpenCV_LIBS})
 
+add_executable(singleCamera "src/rotation.h" "src/vo_features.h" "src/singleCamera.cpp" "src/cam_stereo.yml")
+target_link_libraries(singleCamera ${OpenCV_LIBS})
+
 add_executable(test "src/test.cpp" )
 target_link_libraries(test ${OpenCV_LIBS})
 

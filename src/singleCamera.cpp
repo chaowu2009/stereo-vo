@@ -9,12 +9,18 @@ using namespace std;
 #define LEFT 0
 #define RIGHT 1
 
-//#define REAL_TIME
+#define REAL_TIME
 
 int main(int argc, char** argv) {
 
+	char text[100];
+	int fontFace = FONT_HERSHEY_PLAIN;
+	double fontScale = 1;
+	int thickness = 1;
+	cv::Point textOrg(10, 50);
+
 	Mat img_1, img_2;
-	
+	Mat img_1_c, img_2_c;
 	Mat R_f, t_f; //the final rotation and tranlation vectors containing the 
 
 	ofstream myfile;
@@ -28,12 +34,11 @@ int main(int argc, char** argv) {
 	left_capture.set(CV_CAP_PROP_FRAME_WIDTH, 320);
 	left_capture.set(CV_CAP_PROP_FRAME_HEIGHT, 240);
 
-	left_capture.read(img_1);
-	cvtColor(img_1, img_1, COLOR_BGR2GRAY);
+	left_capture.read(img_1_c);
+	cvtColor(img_1_c, img_1, COLOR_BGR2GRAY);
 	
-	left_capture.read(img_2);
-	cvtColor(img_2, img_2, COLOR_BGR2GRAY);
-
+	left_capture.read(img_2_c);
+	cvtColor(img_2_c, img_2, COLOR_BGR2GRAY);
 
 #else
 	double scale = 1.00;
@@ -42,22 +47,18 @@ int main(int argc, char** argv) {
 	sprintf(filename1, "D:/vision/dataset/sequences/00/image_1/%06d.png", 0);
 	sprintf(filename2, "D:/vision/dataset/sequences/00/image_1/%06d.png", 1);
 
-	char text[100];
-	int fontFace = FONT_HERSHEY_PLAIN;
-	double fontScale = 1;
-	int thickness = 1;
-	cv::Point textOrg(10, 50);
 
 	//read the first two frames from the dataset
-	img_1 = imread(filename1);
-	img_2 = imread(filename2);
+	img_1_c = imread(filename1);
+	img_2_c = imread(filename2);
+	cvtColor(img_1_c, img_1, COLOR_BGR2GRAY);
+	cvtColor(img_2_c, img_2, COLOR_BGR2GRAY);
+
 #endif
 	if (!img_1.data || !img_2.data) {
 		std::cout << " --(!) Error reading images " << std::endl; return -1;
 	}
 
-	cvtColor(img_1, img_1, COLOR_BGR2GRAY);
-	cvtColor(img_2, img_2, COLOR_BGR2GRAY);
 
 	// feature detection, tracking
 	vector<Point2f> points1, points2;        //vectors to store the coordinates of the feature points
