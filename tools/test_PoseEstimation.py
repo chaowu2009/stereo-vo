@@ -40,6 +40,41 @@ def reconstruct3Dfrom2D():
  #   P2 = K2 * {R12 |t12]
     print("reconstruct3Dfrom2D")
 
+# params for ShiTomasi corner detection
+feature_params = dict( maxCorners = 100,
+					   qualityLevel = 0.3,
+					   minDistance = 7,
+					   blockSize = 7 )
+
+# Parameters for lucas kanade optical flow
+lk_params = dict( winSize  = (15,15),
+				  maxLevel = 2,
+				  criteria = (cv2.TERM_CRITERIA_EPS | cv2.TERM_CRITERIA_COUNT, 10, 0.03))
+
+# Create some random colors
+color = np.random.randint(0,255,(100,3))
+p0 = cv2.goodFeaturesToTrack(old_gray, mask = None, **feature_params)
+
+def opticalFlowTracking(old_gray, frame_gray, p0):
+	
+    # calculate optical flow
+    p1, st, err = cv2.calcOpticalFlowPyrLK(old_gray, frame_gray, p0, None, **lk_params)
+
+    # Select good points
+    good_new = p1[st==1]
+    good_old = p0[st==1]
+
+    # draw the tracks
+    for i,(new,old) in enumerate(zip(good_new,good_old)):
+        a,b = new.ravel()
+        c,d = old.ravel()
+        mask = cv2.line(mask, (a,b),(c,d), color[i].tolist(), 2)
+        frame = cv2.circle(frame,(a,b),5,color[i].tolist(),-1)
+	
+	old_frame = frame_gray.copy()
+	p0 = good_new.reshape(-1,1,2)
+	
+	
 img1 = cv2.imread("L1.jpg")
 
 img1 = cv2.cvtColor(img1,cv2.COLOR_BGR2GRAY)
@@ -80,15 +115,17 @@ matches = sorted(matches, key = lambda x:x.distance)
 matchNumber = 499
 imgOut = cv2.drawMatches(img1 , kp1, img2, kp2, matches[:matchNumber], 2)
 
-cv2.imshow("matching",imgOut)
+#cv2.imshow("matching",imgOut)
 
 #    cv2.drawKeypoints(img2, kp2, imgOut)
 #    im_with_keypoints = cv2.drawKeypoints(img2, kp2, np.array([]))
 #    cv2.imshow("matching",im_with_kypoints)
-#point1 = convertMatchedKeyPoint(kp1, matches)
-#point2 = convertMatchedKeyPoint(kp2, matches)
-#F,msk = cv2.findFundamentalMat(point1, point2)
-#print(DCM)
+point1 = convertMatchedKeyPoint(kp1, matches)
+point2 = convertMatchedKeyPoint(kp2, matches)
+print(point1)
+print(point2)
+F,msk = cv2.findFundamentalMat(point1, point2)
+print(F)
 #retval,R,t, mask = cv2.recoverPose(F, kp1, kp2, focal, pp)
 #        print("t= ", t)
 
