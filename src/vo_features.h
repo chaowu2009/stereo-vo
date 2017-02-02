@@ -34,14 +34,17 @@ using namespace std;
 
 using namespace cv::xfeatures2d;
 
-// new Logitec Camera
-//const double focal = 837.69737925956247;
-//const cv::Point2d pp(332.96486550136854, 220.37986827273829);
+#define LOGITEC
 
+#ifdef LOGITEC
+// new Logitec Camera
+const double focal = 837.69737925956247;
+const cv::Point2d pp(332.96486550136854, 220.37986827273829);
+#else
 //  kittk camera
 const double focal = 718.8560;
 const cv::Point2d pp(607.1928, 185.2157);
-
+#endif
 
 #define MIN_NUM_FEAT 2000
 
@@ -672,6 +675,24 @@ void rectifyStereoImage(Mat &img1,
   cv::remap(img1, imgR1, lmapx, lmapy, cv::INTER_LINEAR);
   cv::remap(img2, imgR2, rmapx, rmapy, cv::INTER_LINEAR);
 
+}
+
+void loadCameraParameters(Mat &K, Mat &D){
+
+  Mat K1, D1;
+#ifdef __linux__ 
+  cv::FileStorage fs1("/home/cwu/project/stereo-vo/src/cam_left.yml", cv::FileStorage::READ);
+#else
+  cv::FileStorage fs1("d:/vision/stereo-vo/src/cam_left.yml",cv::FileStorage::READ);
+#endif
+
+  if (!fs1.isOpened()) { cout << "unable to open yml file" << endl; }
+  fs1["K"] >> K1;
+  fs1["D"] >> D1;
+
+  K = K1;
+  D = D1;
+ 
 }
 
 void rectifyImage(Mat &imgIn,

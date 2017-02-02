@@ -10,6 +10,9 @@ using namespace std;
 #define RIGHT 1
 
 #define REAL_TIME
+#define PLOT_COLOR CV_RGB(0, 0, 0)
+#define PL std::setprecision(6)
+
 
 int main(int argc, char** argv) {
 
@@ -18,6 +21,9 @@ int main(int argc, char** argv) {
 	double fontScale = 1;
 	int thickness = 1;
 	cv::Point textOrg(10, 50);
+
+        Mat K, D;
+        loadCameraParameters(K,D);
 
 	Mat img_1, img_2;
 	Mat img_1_c, img_2_c;
@@ -36,9 +42,11 @@ int main(int argc, char** argv) {
 
 	left_capture.read(img_1_c);
 	cvtColor(img_1_c, img_1, COLOR_BGR2GRAY);
+//        undistort(img_1, img_1, K, D);
 	
 	left_capture.read(img_2_c);
 	cvtColor(img_2_c, img_2, COLOR_BGR2GRAY);
+//        undistort(img_2, img_2, K, D);
 
 #else
 	double scale = 1.00;
@@ -46,7 +54,6 @@ int main(int argc, char** argv) {
 	char filename2[200];
 	sprintf(filename1, "D:/vision/dataset/sequences/00/image_1/%06d.png", 0);
 	sprintf(filename2, "D:/vision/dataset/sequences/00/image_1/%06d.png", 1);
-
 
 	//read the first two frames from the dataset
 	img_1_c = imread(filename1);
@@ -91,6 +98,7 @@ int main(int argc, char** argv) {
 	for (int numFrame = 2; numFrame < MAX_FRAME; numFrame++) {
 #ifdef REAL_TIME
 		left_capture.read(img_1);
+             //   undistort(img_1, img_1, K, D);
 #else
 		sprintf(filename, "D:/vision/dataset/sequences/00/image_1/%06d.png", numFrame);
 		Mat img_1 = imread(filename);
@@ -98,48 +106,45 @@ int main(int argc, char** argv) {
 		cvtColor(img_1, currImage, COLOR_BGR2GRAY);
 		vector<uchar> status;
 		featureTracking(prevImage, currImage, prevFeatures, currFeatures, status);
+                int trackedFeatureNumber = 0;
+                for ( int m = 0 ; m < status.size(); m++){
+                    if (status[m]>0) {trackedFeatureNumber ++;}
+                }
 
-		E = findEssentialMat(currFeatures, prevFeatures, focal, pp, RANSAC, 0.999, 1.0, mask);
-		recoverPose(E, currFeatures, prevFeatures, R, t, focal, pp, mask);
-
-		Mat prevPts(2, prevFeatures.size(), CV_64F), currPts(2, currFeatures.size(), CV_64F);
-		
-		for (int i = 0; i<prevFeatures.size(); i++) {   //this (x,y) combination makes sense as observed from the source code of triangulatePoints on GitHub
-			prevPts.at<double>(0, i) = prevFeatures.at(i).x;
-			prevPts.at<double>(1, i) = prevFeatures.at(i).y;
-
-			currPts.at<double>(0, i) = currFeatures.at(i).x;
-			currPts.at<double>(1, i) = currFeatures.at(i).y;
-		}
+                if (trackedFeatureNumber > 10){
+		    E = findEssentialMat(currFeatures, prevFeatures, focal, pp, RANSAC, 0.999, 1.0, mask);
+            	    recoverPose(E, currFeatures, prevFeatures, R, t, focal, pp, mask);
+                } else{
+                    cout << "untracked and no update!" <<endl;
+                }
 
 		if ((t.at<double>(2) > t.at<double>(0)) && (t.at<double>(2) > t.at<double>(1))) {
 
 			t_f = t_f + (R_f*t);
 			R_f = R*R_f;
-
 		}
 
-		else {
-			//cout << "scale below 0.1, or incorrect translation" << endl;
-		}
 
-		// lines for printing results
-		// myfile << t_f.at<double>(0) << " " << t_f.at<double>(1) << " " << t_f.at<double>(2) << endl;
-
-		// a redetection is triggered in case the number of feautres being trakced go below a particular threshold
+		// update featurs if trakced features go below a particular threshold
 		if (prevFeatures.size() < MIN_NUM_FEAT) {
 			//cout << "Number of tracked features reduced to " << prevFeatures.size() << endl;
 			//cout << "trigerring redection" << endl;
 			featureDetection(prevImage, prevFeatures);
 			featureTracking(prevImage, currImage, prevFeatures, currFeatures, status);
-
 		}
 
 		prevImage = currImage.clone();
 		prevFeatures = currFeatures;
 
-		int x = int(t_f.at<double>(0)) + 300;
-		int y = int(t_f.at<double>(2)) + 100;
+                double x1 = t_f.at<double>(0);
+                double y1 = t_f.at<double>(1);
+                double z1 = t_f.at<double>(2);
+
+                int x = int(x1) +320;
+                int y = int(z1) +240;
+
+                cout << "numFrame:" << numFrame <<" mo: x = " << PL<< x1 << "\t y = " << PL<< y1 << "\t z = " << PL<< z1 << endl;
+
 		circle(traj, Point(x, y), 1, CV_RGB(255, 0, 0), 2);
 
 		rectangle(traj, Point(10, 30), Point(550, 50), CV_RGB(0, 0, 0), CV_FILLED);
