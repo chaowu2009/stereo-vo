@@ -4,7 +4,7 @@ import numpy as np
 videoName = "linearlyMovingChessBoard.avi"
 #videoName = "rotatingChessBoard.avi"
 
-cap = cv2.VideoCapture(videoName)
+cap = cv2.VideoCapture(0)
 
 ret, frame1 = cap.read()
 prvs = cv2.cvtColor(frame1,cv2.COLOR_BGR2GRAY)
@@ -33,3 +33,4 @@ while(1):
 
 cap.release()
 cv2.destroyAllWindows()
+print("DONE")

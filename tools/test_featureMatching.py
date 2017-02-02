@@ -28,11 +28,15 @@ def convertKeyPoint(kp):
 def convertMatchedKeyPoint(kp, matches):
     point =[]
     for k in range(0,len(matches)):
-        m = matches[k].imgIdx  #get the matched index
-        x,y = kp[m].pt         #then get the keypoint index
-        point.append([x, y])   #then get the keypoint value
-    print("point", point)
-    return (np.asarray(point))
+        print("matches[k].distance=", matches[k].distance)
+        if matches[k].distance < 100:
+           
+            m = matches[k].imgIdx  #get the matched index
+            x,y = kp[m].pt         #then get the keypoint index
+            point.append(kp[m].pt)   #then get the keypoint value
+    #print("point", point)
+    point = np.array(point, dtype = np.float32)
+    return (point)
 
 def reconstruct3Dfrom2D():
     # reconstruct 3D from 2D image
@@ -87,12 +91,18 @@ while(cap.isOpened()):
 	#    cv2.imshow("matching",im_with_kypoints)
 	point1 = convertMatchedKeyPoint(kp1, matches)
 	point2 = convertMatchedKeyPoint(kp2, matches)
-        F,msk = cv2.findFundamentalMat(point1, point2)
+        DCM,mask = cv2.findFundamentalMat(point1, point2)
         print(DCM)
-        retval,R,t, mask = cv2.recoverPose(F, kp1, kp2, focal, pp)
+        # select only inlier points
+       # point1 = point1[mask.ravel()==1]
+       # point2 = point2[mask.ravel()==1]
+        retval,R,t, mask = cv2.recoverPose(DCM, point1, point2, focal, pp)
 #        print("t= ", t)
  
 	cv2.waitKey(1)
+        k = cv2.waitKey(30) & 0xff
+        if k == 27:
+            break
 
 	#udpate previous frame
 	img1 = img2;

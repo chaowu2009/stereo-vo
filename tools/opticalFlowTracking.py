@@ -5,7 +5,7 @@ import argparse
 videoName = "linearlyMovingChessBoard.avi"
 #videoName = "rotatingChessBoard.avi"
 
-cap = cv2.VideoCapture(videoName)
+cap = cv2.VideoCapture(0)
 
 # params for ShiTomasi corner detection
 feature_params = dict( maxCorners = 100,
@@ -60,3 +60,4 @@ while(1):
   
 cv2.destroyAllWindows()
 cap.release()
+print("DONE")
