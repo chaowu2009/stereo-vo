@@ -1,5 +1,6 @@
 
 #include "vo_features.h"
+//#include <opencv2/viz.hpp>
 
 using namespace cv;
 using namespace std;
@@ -16,14 +17,23 @@ using namespace std;
 
 int main(int argc, char** argv) {
 
+    cv::KalmanFilter KF;
+    int nStates = 18;
+    int nMeasurements = 6;
+    int nInputs = 0;
+
+    double dt = 1.0f / 30.0f;
+
+    initKalmanFilter(KF, nStates, nMeasurements, nInputs, dt);
+
 	char text[100];
 	int fontFace = FONT_HERSHEY_PLAIN;
 	double fontScale = 1;
 	int thickness = 1;
 	cv::Point textOrg(10, 50);
 
-        Mat K, D;
-        loadCameraParameters(K,D);
+	Mat K, D;
+	loadCameraParameters(K, D);
 
 	Mat img_1, img_2;
 	Mat img_1_c, img_2_c;
@@ -35,18 +45,18 @@ int main(int argc, char** argv) {
 #ifdef REAL_TIME
 
 	cout << "Running at real-time" << endl;
-	
+
 	VideoCapture left_capture(LEFT);
-	left_capture.set(CV_CAP_PROP_FRAME_WIDTH, 320);
-	left_capture.set(CV_CAP_PROP_FRAME_HEIGHT, 240);
+	left_capture.set(CV_CAP_PROP_FRAME_WIDTH, 640);
+	left_capture.set(CV_CAP_PROP_FRAME_HEIGHT, 480);
 
 	left_capture.read(img_1_c);
 	cvtColor(img_1_c, img_1, COLOR_BGR2GRAY);
-//        undistort(img_1, img_1, K, D);
-	
+	//        undistort(img_1, img_1, K, D);
+
 	left_capture.read(img_2_c);
 	cvtColor(img_2_c, img_2, COLOR_BGR2GRAY);
-//        undistort(img_2, img_2, K, D);
+	//        undistort(img_2, img_2, K, D);
 
 #else
 	double scale = 1.00;
@@ -90,15 +100,15 @@ int main(int argc, char** argv) {
 
 	clock_t begin = clock();
 
-	namedWindow("Road facing camera", WINDOW_AUTOSIZE);// Create a window for display.
-	namedWindow("Trajectory", WINDOW_AUTOSIZE);// Create a window for display.
+	namedWindow("Road facing camera", WINDOW_AUTOSIZE); // Create a window for display.
+	namedWindow("Trajectory", WINDOW_AUTOSIZE);         // Create a window for display.
 
 	Mat traj = Mat::zeros(600, 600, CV_8UC3);
 
 	for (int numFrame = 2; numFrame < MAX_FRAME; numFrame++) {
 #ifdef REAL_TIME
 		left_capture.read(img_1);
-             //   undistort(img_1, img_1, K, D);
+		//   undistort(img_1, img_1, K, D);
 #else
 		sprintf(filename, "D:/vision/dataset/sequences/00/image_1/%06d.png", numFrame);
 		Mat img_1 = imread(filename);
@@ -106,17 +116,18 @@ int main(int argc, char** argv) {
 		cvtColor(img_1, currImage, COLOR_BGR2GRAY);
 		vector<uchar> status;
 		featureTracking(prevImage, currImage, prevFeatures, currFeatures, status);
-                int trackedFeatureNumber = 0;
-                for ( int m = 0 ; m < status.size(); m++){
-                    if (status[m]>0) {trackedFeatureNumber ++;}
-                }
+		int trackedFeatureNumber = 0;
+		for (int m = 0; m < status.size(); m++) {
+			if (status[m] > 0) { trackedFeatureNumber++; }
+		}
 
-                if (trackedFeatureNumber > 10){
-		    E = findEssentialMat(currFeatures, prevFeatures, focal, pp, RANSAC, 0.999, 1.0, mask);
-            	    recoverPose(E, currFeatures, prevFeatures, R, t, focal, pp, mask);
-                } else{
-                    cout << "untracked and no update!" <<endl;
-                }
+		if (trackedFeatureNumber > 10) {
+			E = findEssentialMat(currFeatures, prevFeatures, focal, pp, RANSAC, 0.999, 1.0, mask);
+			recoverPose(E, currFeatures, prevFeatures, R, t, focal, pp, mask);
+		}
+		else {
+			cout << "untracked and no update!" << endl;
+		}
 
 		if ((t.at<double>(2) > t.at<double>(0)) && (t.at<double>(2) > t.at<double>(1))) {
 
@@ -136,19 +147,19 @@ int main(int argc, char** argv) {
 		prevImage = currImage.clone();
 		prevFeatures = currFeatures;
 
-                double x1 = t_f.at<double>(0);
-                double y1 = t_f.at<double>(1);
-                double z1 = t_f.at<double>(2);
+		double x1 = t_f.at<double>(0);
+		double y1 = t_f.at<double>(1);
+		double z1 = t_f.at<double>(2);
 
-                int x = int(x1) +320;
-                int y = int(z1) +240;
+		int x = int(x1) + 320;
+		int y = int(z1) + 240;
 
-                cout << "numFrame:" << numFrame <<" mo: x = " << PL<< x1 << "\t y = " << PL<< y1 << "\t z = " << PL<< z1 << endl;
+		cout << "numFrame:" << numFrame << " mo: x =" << PL << x1 << "  y= " << PL << y1 << "  z= " << PL << z1 << endl;
 
 		circle(traj, Point(x, y), 1, CV_RGB(255, 0, 0), 2);
 
 		rectangle(traj, Point(10, 30), Point(550, 50), CV_RGB(0, 0, 0), CV_FILLED);
-		sprintf(text, "Coordinates: x = %02fm y = %02fm z = %02fm", t_f.at<double>(0), t_f.at<double>(1), t_f.at<double>(2));
+		sprintf(text, "Coordinates: x = %02fm y = %02fm z = %02fm", x1, y1, z1);
 		putText(traj, text, textOrg, fontFace, fontScale, Scalar::all(255), thickness, 8);
 
 		imshow("Road facing camera", currImage);

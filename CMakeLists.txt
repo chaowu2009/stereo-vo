@@ -17,9 +17,6 @@ IF (WIN32)
 	add_executable(vo_win32 "src/rotation.h" "src/vo_features.h" "src/visodo.cpp")
 	target_link_libraries(vo_win32 ${OpenCV_LIBS})
 
-	add_executable(singleCamera_win32 "src/rotation.h" "src/vo_features.h" "src/singleCamera.cpp")
-	target_link_libraries(singleCamera_win32 ${OpenCV_LIBS})
-	
 ENDIF()
 
 IF(LINUX)
@@ -28,11 +25,8 @@ IF(LINUX)
 
 	add_executable(vo "src/readBNO.h" "src/rotation.h" "src/vo_features.h" "src/visodo.cpp")
 	target_link_libraries(vo ${OpenCV_LIBS} wiringPi m rt)
-
-	add_executable(singleCamera "src/readBNO.h" "src/rotation.h" "src/vo_features.h" "src/singleCamera.cpp")
-	target_link_libraries(singleCamera ${OpenCV_LIBS} wiringPi m rt)
-
 ENDIF()
+
 add_executable(cri "src/rotation.h" "src/vo_features.h" "src/captureRealImage.cpp")
 target_link_libraries(cri ${OpenCV_LIBS})
 
