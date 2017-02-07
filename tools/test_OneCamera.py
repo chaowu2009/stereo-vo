@@ -13,7 +13,12 @@ cap.set(cv2.CAP_PROP_FRAME_WIDTH,1280)
 cap.set(cv2.CAP_PROP_FRAME_HEIGHT,720)
 
 while(True):
+<<<<<<< HEAD
 
+=======
+    cap = cv2.VideoCapture(port)
+  
+>>>>>>> 5dab2f3a5e0b64d70b0efb0bb68735a02e110869
     # Capture frame-by-frame
     ret, frame = cap.read()
 

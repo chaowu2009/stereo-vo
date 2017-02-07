@@ -14,7 +14,7 @@ fig = plt.figure()
 for counter in range(1,5):
 
     cap1 = cv2.VideoCapture(left)
-    
+    cap1.set()
 #    cap1.set(3,160)
 #    cap1.set(3,120)
 #    cv2.waitKey(time_in_ms)
