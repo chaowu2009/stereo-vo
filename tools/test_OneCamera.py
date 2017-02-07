@@ -3,25 +3,24 @@ import cv2
 import matplotlib.pylab as plt
 import time
 
-port = 1
+port = 0
 
 
 fig = plt.figure()
+cap = cv2.VideoCapture(port)
+cap.set(cv2.CAP_PROP_SETTINGS,0)
+cap.set(cv2.CAP_PROP_FRAME_WIDTH,1280)
+cap.set(cv2.CAP_PROP_FRAME_HEIGHT,720)
 
 while(True):
-    cap = cv2.VideoCapture(port)
-    if port == 1:
-        port = 0
-    else:
-        port = 1
 
     # Capture frame-by-frame
     ret, frame = cap.read()
 
     plt.imshow(frame)
     plt.show()
-    cv2.waitKey(2)    
+    cv2.waitKey(1)    
 
     # When everything done, release the capture
-    cap.release()
-    cv2.destroyAllWindows()		
+cap.release()
+cv2.destroyAllWindows()		

@@ -12,16 +12,19 @@ HEIGHT = 720;
 cap_left  = cv2.VideoCapture(LEFT)
 cap_right = cv2.VideoCapture(RIGHT)
 
-cap_left.set(cv2.CV_CAP_PROP_FRAME_WIDTH, WIDTH);
-cap_right.set(cv2.CV_CAP_PROP_FRAME_HEIGHT, HEIGHT);
+cap_left.set(cv2.CAP_PROP_FRAME_WIDTH, WIDTH);
+cap_left.set(cv2.CAP_PROP_FRAME_HEIGHT, HEIGHT);
 
-cap_left.set(cv2.CV_CAP_PROP_EXPOSURE, inf);
-cap_right.set(cv2.CV_CAP_PROP_EXPOSURE, inf);
+cap_right.set(cv2.CAP_PROP_FRAME_WIDTH, WIDTH);
+cap_right.set(cv2.CAP_PROP_FRAME_HEIGHT, HEIGHT);
+
+#cap_left.set(cv2.CAP_PROP_EXPOSURE, inf);
+#cap_right.set(cv2.CAP_PROP_EXPOSURE, inf);
 
 frameRate = 60
 
-cap_left.set(cv2.CAP_PROP_FPS , 60)
-cap_right.set(cv2.CAP_PROP_FPS , 60)
+#cap_left.set(cv2.CAP_PROP_FPS , 60)
+#cap_right.set(cv2.CAP_PROP_FPS , 60)
 
 # Define the codec and create VideoWriter object
 fourcc = cv2.VideoWriter_fourcc(*'XVID')

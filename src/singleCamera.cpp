@@ -6,7 +6,7 @@ using namespace cv;
 using namespace std;
 
 #define MAX_FRAME 1000
-#define MIN_NUM_FEAT 2000
+#define MIN_NUM_FEAT 100
 #define LEFT 0
 #define RIGHT 1
 
@@ -121,7 +121,7 @@ int main(int argc, char** argv) {
 			if (status[m] > 0) { trackedFeatureNumber++; }
 		}
 
-		if (trackedFeatureNumber > 10) {
+		if (trackedFeatureNumber > 50) {
 			E = findEssentialMat(currFeatures, prevFeatures, focal, pp, RANSAC, 0.999, 1.0, mask);
 			recoverPose(E, currFeatures, prevFeatures, R, t, focal, pp, mask);
 		}
@@ -129,13 +129,12 @@ int main(int argc, char** argv) {
 			cout << "untracked and no update!" << endl;
 		}
 
-		if ((t.at<double>(2) > t.at<double>(0)) && (t.at<double>(2) > t.at<double>(1))) {
-
-			t_f = t_f + (R_f*t);
-			R_f = R*R_f;
-		}
-
-
+		
+        // update pose
+        float deltaT = 1.0f / 16.0;
+		t_f = t_f *deltaT + (R_f*t)*deltaT;
+		R_f = R*R_f;
+		
 		// update featurs if trakced features go below a particular threshold
 		if (prevFeatures.size() < MIN_NUM_FEAT) {
 			//cout << "Number of tracked features reduced to " << prevFeatures.size() << endl;
@@ -159,7 +158,7 @@ int main(int argc, char** argv) {
 		circle(traj, Point(x, y), 1, CV_RGB(255, 0, 0), 2);
 
 		rectangle(traj, Point(10, 30), Point(550, 50), CV_RGB(0, 0, 0), CV_FILLED);
-		sprintf(text, "Coordinates: x = %02fm y = %02fm z = %02fm", x1, y1, z1);
+		sprintf(text, "Coordinates: x = %0 2fm y = %02fm z = %02fm", x1, y1, z1);
 		putText(traj, text, textOrg, fontFace, fontScale, Scalar::all(255), thickness, 8);
 
 		imshow("Road facing camera", currImage);
