@@ -3,7 +3,7 @@
 #sudo ddrescue -D --force ubuntu-mate-16.04-desktop-armhf-raspberry-pi.img /dev/sdx
 sudo apt-get update
 sudo apt-get -y upgrade
-sudo apt-get install -y build-essential cmake pkg-config git
+sudo apt-get install -y build-essential cmake pkg-config git cmake-gui
 sudo apt-get install -y libjpeg8-dev libtiff5-dev libjasper-dev libpng12-dev
 sudo apt-get install -y libavcodec-dev libavformat-dev libswscale-dev libv4l-dev
 sudo apt-get install -y libxvidcore-dev libx264-dev libglew-dev libeigen3-dev
@@ -23,8 +23,7 @@ pip install numpy
 cd ~/opencv-3.1.0/
 mkdir build
 cd build
-cmake -D CMAKE_BUILD_TYPE=RELEASE \
-    -D CMAKE_INSTALL_PREFIX=/usr/local \
+cmake -D CMAKE_BUILD_TYPE=RELEASE -D CMAKE_INSTALL_PREFIX=/usr/local \
     -D INSTALL_PYTHON_EXAMPLES=ON \
     -D INSTALL_C_EXAMPLES=OFF \
     -D OPENCV_EXTRA_MODULES_PATH=~/opencv_contrib-3.1.0/modules \
@@ -39,4 +38,13 @@ cd build
 cmake ..
 make -j4
 sudo make install 
+cd ~
+git clone https://github.com/RainerKuemmerle/g2o.git
+cd g2o
+mkdir build
+cd build
+cmake ..
+make -j4
+sudo make install
+cd ~
 sudo ldconfig

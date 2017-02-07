@@ -10,11 +10,7 @@ fig = plt.figure()
 
 while(True):
     cap = cv2.VideoCapture(port)
-    if port == 1:
-        port = 0
-    else:
-        port = 1
-
+  
     # Capture frame-by-frame
     ret, frame = cap.read()
 

@@ -7,8 +7,10 @@ using namespace std;
 
 #define MAX_FRAME 1000
 #define MIN_NUM_FEAT 2000
-#define LEFT 0
-#define RIGHT 1
+
+#define WEBCAM 0
+#define LEFT 1
+#define RIGHT 2
 
 #define REAL_TIME
 #define PLOT_COLOR CV_RGB(0, 0, 0)
@@ -46,7 +48,7 @@ int main(int argc, char** argv) {
 
 	cout << "Running at real-time" << endl;
 
-	VideoCapture left_capture(LEFT);
+	VideoCapture left_capture(WEBCAM);
 	left_capture.set(CV_CAP_PROP_FRAME_WIDTH, 640);
 	left_capture.set(CV_CAP_PROP_FRAME_HEIGHT, 480);
 
