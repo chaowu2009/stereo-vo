@@ -16,8 +16,9 @@ double current_timestamp() {
     return microseconds;
 }
 
+struct termios SerialPortSettings;	/* Create the structure                          */
 
-void initBNO080()
+int initBNO080()
 {
     int fd;
 
@@ -27,9 +28,6 @@ void initBNO080()
     else
         printf("ttyACM0 Opened Successfully\n");
 
-
-
-    struct termios SerialPortSettings;	/* Create the structure                          */
 
     tcgetattr(fd, &SerialPortSettings);	/* Get the current attributes of the Serial port */
 
@@ -61,7 +59,15 @@ void initBNO080()
 
     tcflush(fd, TCIFLUSH);
 
-    char read_buffer[100];   /* Buffer to store the data received              */
+    return fd;
+}
+
+char read_buffer[100];   /* Buffer to store the data received              */
+
+void testBNO(int fd) {
+
+    initBNO080();
+    
     int  bytes_read = 0;    /* Number of bytes read by the read() system call */
     int i = 0;
     double timeStamp = 0.0;
