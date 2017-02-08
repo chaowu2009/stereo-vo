@@ -130,13 +130,15 @@ void main()
 	robotStart(fd);
 
 	robotLED(fd);
-
+        
+        robotStartRotating(fd);
 
 	while(1)
 	{
 		//printf("T:%f \n", current_timestamp());
 
 		bytes_read = read(fd,read_buffer,1); /* Read the data */
+
 		if (bytes_read > 0)
 		{
 				

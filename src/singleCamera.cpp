@@ -5,18 +5,18 @@
 using namespace cv;
 using namespace std;
 
-#define MAX_FRAME 1000
-<<<<<<< HEAD
+#define MAX_FRAME 10000
+
 #define MIN_NUM_FEAT 100
 #define LEFT 0
 #define RIGHT 1
-=======
+
 #define MIN_NUM_FEAT 2000
 
 #define WEBCAM 0
 #define LEFT 1
 #define RIGHT 2
->>>>>>> 5dab2f3a5e0b64d70b0efb0bb68735a02e110869
+
 
 #define REAL_TIME
 #define PLOT_COLOR CV_RGB(0, 0, 0)
@@ -30,9 +30,8 @@ int main(int argc, char** argv) {
     int nMeasurements = 6;
     int nInputs = 0;
 
-    double dt = 1.0f / 30.0f;
 
-    initKalmanFilter(KF, nStates, nMeasurements, nInputs, dt);
+  //  initKalmanFilter(KF, nStates, nMeasurements, nInputs, dt);
 
 	char text[100];
 	int fontFace = FONT_HERSHEY_PLAIN;
@@ -54,7 +53,7 @@ int main(int argc, char** argv) {
 
 	cout << "Running at real-time" << endl;
 
-	VideoCapture left_capture(WEBCAM);
+	VideoCapture left_capture(LEFT);
 	left_capture.set(CV_CAP_PROP_FRAME_WIDTH, 640);
 	left_capture.set(CV_CAP_PROP_FRAME_HEIGHT, 480);
 
@@ -139,7 +138,7 @@ int main(int argc, char** argv) {
 
 		
         // update pose
-        float deltaT = 1.0f / 16.0;
+                float deltaT = 1.0 ;// / 16.0;
 		t_f = t_f *deltaT + (R_f*t)*deltaT;
 		R_f = R*R_f;
 		
@@ -158,15 +157,15 @@ int main(int argc, char** argv) {
 		double y1 = t_f.at<double>(1);
 		double z1 = t_f.at<double>(2);
 
-		int x = int(x1) + 320;
-		int y = int(z1) + 240;
+		int x = int(x1) + 300;
+		int y = int(z1) + 300;
 
 		cout << "numFrame:" << numFrame << " mo: x =" << PL << x1 << "  y= " << PL << y1 << "  z= " << PL << z1 << endl;
 
 		circle(traj, Point(x, y), 1, CV_RGB(255, 0, 0), 2);
 
 		rectangle(traj, Point(10, 30), Point(550, 50), CV_RGB(0, 0, 0), CV_FILLED);
-		sprintf(text, "Coordinates: x = %0 2fm y = %02fm z = %02fm", x1, y1, z1);
+		sprintf(text, "Coordinates: x = %0fm y = %02fm z = %02fm", x1, y1, z1);
 		putText(traj, text, textOrg, fontFace, fontScale, Scalar::all(255), thickness, 8);
 
 		imshow("Road facing camera", currImage);
