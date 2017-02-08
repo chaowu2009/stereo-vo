@@ -3,13 +3,15 @@ import cv2
 import time
 import matplotlib.pylab as plt
 
-left = 2
-right = 1
+left = 1
+right = 0
 
 time_in_ms= 1000/100
 #folder = "/home/cwu/Downloads/";
 folder = "/home/hillcrest/project/stereo-calibration/calib_imgs/ARC/"
 
+folder = "/home/hillcrest/project/stereo-calibration/calib_imgs/ARC/"
+folder = "D:/vision/stereo-calibration/calib_imgs/ARC/"
 
 fp = open(folder + "timeStamp.txt","w")
         
@@ -31,9 +33,10 @@ for counter in range(1,51):
     ret, frame2 = cap2.read()
     cap2.release()
 
-    #frame1 = cv2.cvtColor(frame1, cv2.COLOR_BGR2GRAY)
-    #frame2 = cv2.cvtColor(frame2, cv2.COLOR_BGR2GRAY)
+    frame1 = cv2.cvtColor(frame1, cv2.COLOR_BGR2GRAY)
+    frame2 = cv2.cvtColor(frame2, cv2.COLOR_BGR2GRAY)
     # Display the resulting frame
+    
     plt.subplot(121)
     plt.imshow(frame1)
     plt.title('left')
@@ -44,7 +47,8 @@ for counter in range(1,51):
 
     plt.show()
     print('another capture', counter)
-    plt.hold()
+    cv2.waitKey(100)
+    
 
     cv2.imwrite(folder + "img_left/left_" + str(counter) + ".jpg",  frame1)
     cv2.waitKey(time_in_ms)
