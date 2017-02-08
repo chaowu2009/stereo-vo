@@ -8,7 +8,7 @@ right = 1
 
 time_in_ms= 1000/100
 #folder = "/home/cwu/Downloads/";
-folder = "/home/cwu/project/dataset/images/7/"
+folder = "/home/cwu/project/data/images/FHD/"
 
 
 fp = open(folder + "timeStamp.txt","w")

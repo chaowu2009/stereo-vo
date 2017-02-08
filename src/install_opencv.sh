@@ -8,7 +8,7 @@ sudo apt-get install -y libjpeg8-dev libtiff5-dev libjasper-dev libpng12-dev
 sudo apt-get install -y libavcodec-dev libavformat-dev libswscale-dev libv4l-dev
 sudo apt-get install -y libxvidcore-dev libx264-dev libglew-dev libeigen3-dev
 sudo apt-get install -y libgtk-3-dev
-sudo apt-get install -y libatlas-base-dev gfortran
+sudo apt-get install -y libatlas-base-dev gfortran libpopt-dev
 sudo apt-get install -y python2.7-dev python3.5-dev
 sudo apt-get install -y python-opencv python-matplotlib
 cd ~
