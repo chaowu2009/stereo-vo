@@ -8,22 +8,22 @@ port = 0
 
 fig = plt.figure()
 cap = cv2.VideoCapture(port)
-cap.set(cv2.CAP_PROP_SETTINGS,0)
-cap.set(cv2.CAP_PROP_FRAME_WIDTH,1280)
-cap.set(cv2.CAP_PROP_FRAME_HEIGHT,720)
+cap.set(cv2.CAP_PROP_SETTINGS,1)
+cap.set(cv2.CAP_PROP_FRAME_WIDTH,640)
+cap.set(cv2.CAP_PROP_FRAME_HEIGHT,480)
 
 while(True):
-<<<<<<< HEAD
 
-=======
-    cap = cv2.VideoCapture(port)
-  
->>>>>>> 5dab2f3a5e0b64d70b0efb0bb68735a02e110869
     # Capture frame-by-frame
     ret, frame = cap.read()
+    # Our operations on the frame come here
+    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
-    plt.imshow(frame)
-    plt.show()
+    # Display the resulting frame
+    cv2.imshow('frame',gray)
+    if cv2.waitKey(1) & 0xFF == ord('q'):
+        break
+        
     cv2.waitKey(1)    
 
     # When everything done, release the capture
