@@ -4,7 +4,7 @@
 #include <unistd.h> /* UNIX Standard Definitions         */
 #include <errno.h>  /* ERROR Number Definitions          */
 
-double current_timestamp() {
+double current_timestamp_1() {
     struct timeval te;
     gettimeofday(&te, NULL); // get current time
 
