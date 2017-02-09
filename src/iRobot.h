@@ -7,7 +7,7 @@
 
 #include <sys/time.h>
 
-double current_timestamp() {
+double current_timestamp_1() {
     struct timeval te; 
     gettimeofday(&te, NULL); // get current time
 
@@ -71,9 +71,9 @@ void robotStopRotating(int fd)
     sleep(0.2);
 }                  
 
-struct termios SerialPortSettings;	/* Create the structure                          */
+struct termios SerialPortSettings_1;	/* Create the structure                          */
 
-void initRobot()
+int initRobot()
 {
 	int fd;
 
@@ -81,41 +81,43 @@ void initRobot()
 	if (fd<=0)
 	{
 		printf("Fail");
-		return;
+		return 0;
 	}
 	else {
 		printf("ttyUSB0 Opened Successfully\n");
 	}
 
-	tcgetattr(fd, &SerialPortSettings);	/* Get the current attributes of the Serial port */
+	tcgetattr(fd, &SerialPortSettings_1);	/* Get the current attributes of the Serial port */
 
-	cfsetispeed(&SerialPortSettings,B115200); /* Set Read  Speed as 115200                       */
-	cfsetospeed(&SerialPortSettings,B115200); /* Set Write Speed as 115200                       */
+	cfsetispeed(&SerialPortSettings_1,B115200); /* Set Read  Speed as 115200                       */
+	cfsetospeed(&SerialPortSettings_1,B115200); /* Set Write Speed as 115200                       */
 
-	SerialPortSettings.c_cflag &= ~PARENB;   /* Disables the Parity Enable bit(PARENB),So No Parity   */
-	SerialPortSettings.c_cflag &= ~CSTOPB;   /* CSTOPB = 2 Stop bits,here it is cleared so 1 Stop bit */
-	SerialPortSettings.c_cflag &= ~CSIZE;	 /* Clears the mask for setting the data size             */
-	SerialPortSettings.c_cflag |=  CS8;      /* Set the data bits = 8                                 */
+	SerialPortSettings_1.c_cflag &= ~PARENB;   /* Disables the Parity Enable bit(PARENB),So No Parity   */
+	SerialPortSettings_1.c_cflag &= ~CSTOPB;   /* CSTOPB = 2 Stop bits,here it is cleared so 1 Stop bit */
+	SerialPortSettings_1.c_cflag &= ~CSIZE;	 /* Clears the mask for setting the data size             */
+	SerialPortSettings_1.c_cflag |=  CS8;      /* Set the data bits = 8                                 */
 
-	SerialPortSettings.c_cflag &= ~CRTSCTS;       /* No Hardware flow Control                         */
-	SerialPortSettings.c_cflag |= CREAD | CLOCAL; /* Enable receiver,Ignore Modem Control lines       */ 
+	SerialPortSettings_1.c_cflag &= ~CRTSCTS;       /* No Hardware flow Control                         */
+	SerialPortSettings_1.c_cflag |= CREAD | CLOCAL; /* Enable receiver,Ignore Modem Control lines       */ 
 
 
-	SerialPortSettings.c_iflag &= ~(IXON | IXOFF | IXANY);          /* Disable XON/XOFF flow control both i/p and o/p */
-	SerialPortSettings.c_iflag &= ~(ICANON | ECHO | ECHOE | ISIG);  /* Non Cannonical mode                            */
+	SerialPortSettings_1.c_iflag &= ~(IXON | IXOFF | IXANY);          /* Disable XON/XOFF flow control both i/p and o/p */
+	SerialPortSettings_1.c_iflag &= ~(ICANON | ECHO | ECHOE | ISIG);  /* Non Cannonical mode                            */
 
-	SerialPortSettings.c_oflag &= ~OPOST;/*No Output Processing*/
+	SerialPortSettings_1.c_oflag &= ~OPOST;/*No Output Processing*/
 
 	/* Setting Time outs */
-	SerialPortSettings.c_cc[VMIN] = 1; /* Read at least 1 characters */
-	SerialPortSettings.c_cc[VTIME] = 1; /* Wait 0.1 second   */
+	SerialPortSettings_1.c_cc[VMIN] = 1; /* Read at least 1 characters */
+	SerialPortSettings_1.c_cc[VTIME] = 1; /* Wait 0.1 second   */
+
+      return fd;
 }
 
-void test()
+void test() {
 
-    initRobot();
+    int fd = initRobot();
 	
-	if((tcsetattr(fd,TCSANOW,&SerialPortSettings)) != 0) /* Set the attributes to the termios structure*/
+	if((tcsetattr(fd,TCSANOW,&SerialPortSettings_1)) != 0) /* Set the attributes to the termios structure*/
 	    printf("\n  ERROR ! in Setting attributes \n");
 	else
 	    printf("\n  BaudRate = 115200 \n  StopBits = 1 \n  Parity   = none \n");
