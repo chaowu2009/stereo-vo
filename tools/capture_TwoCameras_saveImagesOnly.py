@@ -17,6 +17,9 @@ fp = open(folder + "timeStamp.txt","w")
 
 WIDTH = 1280
 HEIGHT = 720
+
+WIDTH = 640
+HEIGHT = 480
         
 for counter in range(1,31):
     

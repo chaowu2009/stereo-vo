@@ -3,7 +3,7 @@ import cv2
 import matplotlib.pylab as plt
 import time
 
-port = 1
+port = 2
 
 fig = plt.figure()
 cap = cv2.VideoCapture(port)
@@ -12,8 +12,8 @@ cap.set(cv2.CAP_PROP_SETTINGS,0)
 WIDTH = 1280
 HEIGHT = 720
 
-#WIDTH = 640
-#HEIGHT = 480
+WIDTH = 640
+HEIGHT = 360
 
 cap.set(cv2.CAP_PROP_FRAME_WIDTH,WIDTH)
 cap.set(cv2.CAP_PROP_FRAME_HEIGHT,HEIGHT)

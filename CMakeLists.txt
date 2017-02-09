@@ -40,5 +40,8 @@ add_executable(iRobot "src/test_iRobot.cpp" "src/iRobot.h" )
 target_link_libraries(iRobot)
 
 
+add_executable(bno080 "src/test_BNO080.cpp" "src/BNO080.h" )
+target_link_libraries(bno080)
+
 #add_executable(testImage ${ti} )
 #target_link_libraries( testImage ${OpenCV_LIBS} )

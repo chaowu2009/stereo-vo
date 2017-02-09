@@ -112,11 +112,54 @@ void testBNO(int fd) {
 
     }
 
-
     close(fd);
 }
 
 // read quaternion into q
 void readQ(int fd, float q[4]){
+
+    int  bytes_read = 0;    /* Number of bytes read by the read() system call */
+    int i = 0;
+    double timeStamp = 0.0;
+
+    
+      bytes_read = read(fd, &read_buffer[i], 1); /* Read the data */
+        if (read_buffer[i] == 'G')
+        {
+            if (0 == i)
+            {
+                timeStamp = current_timestamp();
+                i = 1;
+            }
+            else
+            {
+                i = 0;
+            }
+
+        }
+        else if (read_buffer[i] == '\n')
+        {
+            if (i > 36)
+            {
+                printf("T:%f ", timeStamp);
+                int j = 0;
+                for (j = 0; j < i + 1; j++) {
+                    printf("%c", read_buffer[j]);
+                    q[j]= read_buffer[j];
+                 }
+                // parse the data. There might be some corrupts as "T:1486495961.133880 GRV: r:0.996 i:0.070 j:0.051 k0.079 j:0.059 k:-0.003"
+            }
+
+
+            i = 0;
+        }
+        else
+        {
+            i++;
+
+        }
+
+
+
 }
 

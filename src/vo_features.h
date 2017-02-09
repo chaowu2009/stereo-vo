@@ -51,6 +51,7 @@ const cv::Point2d pp(607.1928, 185.2157);
 #endif
 
 #ifdef ARC
+// 1280x720 resolution
 const double focal = 1087.9125;
 const cv::Point2d pp(692.9426, 264.13);
 #endif
