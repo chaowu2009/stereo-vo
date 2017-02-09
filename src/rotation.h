@@ -114,7 +114,7 @@ void qConj(const float qIn[4], float qOut[4]){
 
 }
 
-void qNorm(const float qIn[4], float qOut[4]){
+void qNorm(float qIn[4], float qOut[4]){
 
     float norm= 0;
     for(int i = 0; i<4; i++){
@@ -148,5 +148,19 @@ void qvrot(const float qIn[4], const float vIn[3], float vOut[3]){
     for(int i = 1; i<3; i++){
         vOut[i-1] = q2[i];
     }
+
+}
+
+void slerp(float q1[4], float q2[4], float w, float qOut[4]){
+
+     for(int i =0 ; i<4; i++){
+         qOut[i] = (1-w)*q1[i] + w* q2[i];     
+     }
+
+     float temp[4]
+     qNorm(qOut, temp);
+     for(int i =0 ; i<4; i++){
+         qOut[i] = temp[i];
+     }
 
 }

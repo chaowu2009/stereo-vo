@@ -7,10 +7,6 @@ using namespace std;
 
 #define MAX_FRAME 10000
 
-#define MIN_NUM_FEAT 100
-#define LEFT 0
-#define RIGHT 1
-
 #define WEBCAM 0
 #define LEFT 1
 #define RIGHT 2
@@ -58,6 +54,10 @@ int main(int argc, char** argv) {
     VideoCapture left_capture(LEFT);
     int WIDTH = 1280;
     int HEIGHT = 720;
+
+    WIDTH = 640;
+    HEIGHT = 480;
+
     left_capture.set(CV_CAP_PROP_FRAME_WIDTH, WIDTH);
     left_capture.set(CV_CAP_PROP_FRAME_HEIGHT, HEIGHT);
 
@@ -96,7 +96,10 @@ int main(int argc, char** argv) {
 
     //recovering the pose and the essential matrix
     Mat E, R, t, mask;
-    E = findEssentialMat(points2, points1, focal, pp, RANSAC, 0.999, 1.0, mask);
+   
+    double threshold = 5;
+    
+    E = findEssentialMat(points2, points1, focal, pp, RANSAC, 0.999, threshold, mask);
     recoverPose(E, points2, points1, R, t, focal, pp, mask);
 
     Mat prevImage = img_2;
@@ -108,7 +111,7 @@ int main(int argc, char** argv) {
 
     R_f = R.clone();
     t_f = t.clone();
-
+    cout << "tf = " << t_f.at<double>(0) << t_f.at<double>(1) << t_f.at<double>(2) << endl;
     clock_t begin = clock();
 
     namedWindow("Road facing camera", WINDOW_AUTOSIZE); // Create a window for display.
@@ -127,28 +130,31 @@ int main(int argc, char** argv) {
         Mat img_1 = imread(filename);
 #endif
         cvtColor(img_1, currImage, COLOR_BGR2GRAY);
+        bool theSameImageFlag =  areTheSameImage(prevImage, currImage);
+        
         vector<uchar> status;
         featureTracking(prevImage, currImage, prevFeatures, currFeatures, status);
         int trackedFeatureNumber = 0;
         for (int m = 0; m < status.size(); m++) {
             if (status[m] > 0) { trackedFeatureNumber++; }
         }
+        
+     //   if (theSameImageFlag) {trackedFeatureNumber = 0;}
 
         if (trackedFeatureNumber > 200) {
-            E = findEssentialMat(currFeatures, prevFeatures, focal, pp, RANSAC, 0.999, 1.0, mask);
+            E = findEssentialMat(currFeatures, prevFeatures, focal, pp, RANSAC, 0.999, threshold, mask);
             recoverPose(E, currFeatures, prevFeatures, R, t, focal, pp, mask);
-        }
-        else {
+
+           // update pose
+           float scale = 1.0/10.0;// / 16.0;
+           t_f = t_f  + scale*(R_f*t);
+           R_f = R*R_f;
+
+        } else {
             cout << "untracked and no update!" << endl;
         }
 
-
-        // update pose
-        float scale = 0.5;// / 16.0;
-        t_f = t_f  + scale*(R_f*t);
-        R_f = R*R_f;
-
-        // update featurs if trakced features go below a particular threshold
+        // update features if trakced features go below a particular threshold
         if (prevFeatures.size() < MIN_NUM_FEAT) {
             //cout << "Number of tracked features reduced to " << prevFeatures.size() << endl;
             //cout << "trigerring redection" << endl;
