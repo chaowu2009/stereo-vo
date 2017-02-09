@@ -14,21 +14,24 @@ folder = "/home/hillcrest/project/stereo-calibration/calib_imgs/ARC/"
 #folder = "D:/vision/stereo-calibration/calib_imgs/ARC/"
 
 fp = open(folder + "timeStamp.txt","w")
+
+WIDTH = 1280
+HEIGHT = 720
         
 for counter in range(1,31):
     
     millis = int(round(time.time() * 1000))
     cap1 = cv2.VideoCapture(left)
-    cap1.set(cv2.CAP_PROP_FRAME_WIDTH,640)
-    cap1.set(cv2.CAP_PROP_FRAME_HEIGHT,480)
+    cap1.set(cv2.CAP_PROP_FRAME_WIDTH,WIDTH)
+    cap1.set(cv2.CAP_PROP_FRAME_HEIGHT,HEIGHT)
     cv2.waitKey(100)
     ret, frame1 = cap1.read()
     
     cap1.release()
 
     cap2 = cv2.VideoCapture(right)
-    cap2.set(cv2.CAP_PROP_FRAME_WIDTH,640)
-    cap2.set(cv2.CAP_PROP_FRAME_HEIGHT,480)
+    cap2.set(cv2.CAP_PROP_FRAME_WIDTH,WIDTH)
+    cap2.set(cv2.CAP_PROP_FRAME_HEIGHT,HEIGHT)
     cv2.waitKey(100)
     ret, frame2 = cap2.read()
     cap2.release()

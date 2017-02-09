@@ -56,16 +56,18 @@ int main(int argc, char** argv) {
     cout << "Running at real-time" << endl;
 
     VideoCapture left_capture(LEFT);
-    left_capture.set(CV_CAP_PROP_FRAME_WIDTH, 640);
-    left_capture.set(CV_CAP_PROP_FRAME_HEIGHT, 480);
+    int WIDTH = 1280;
+    int HEIGHT = 720;
+    left_capture.set(CV_CAP_PROP_FRAME_WIDTH, WIDTH);
+    left_capture.set(CV_CAP_PROP_FRAME_HEIGHT, HEIGHT);
 
     left_capture.read(img_1_c);
     cvtColor(img_1_c, img_1, COLOR_BGR2GRAY);
-    //        undistort(img_1, img_1, K, D);
+    //undistort(img_1, img_1, K, D);
 
     left_capture.read(img_2_c);
     cvtColor(img_2_c, img_2, COLOR_BGR2GRAY);
-    //        undistort(img_2, img_2, K, D);
+    //undistort(img_2, img_2, K, D);
 
 #else
     double scale = 1.00;
@@ -119,7 +121,7 @@ int main(int argc, char** argv) {
         left_capture.read(img_1);
         // read BNO
         readQ(fd, q);
-        //   undistort(img_1, img_1, K, D);
+        //undistort(img_1, img_1, K, D);
 #else
         sprintf(filename, "D:/vision/dataset/sequences/00/image_1/%06d.png", numFrame);
         Mat img_1 = imread(filename);

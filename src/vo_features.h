@@ -34,9 +34,9 @@ using namespace std;
 
 using namespace cv::xfeatures2d;
 
-#define LOGITEC
+//#define LOGITEC
 //#define KITTK
-//#define ARC
+#define ARC
 
 #ifdef LOGITEC
 // new Logitec Camera
@@ -48,6 +48,11 @@ const cv::Point2d pp(332.96486550136854, 220.37986827273829);
 //  kittk camera
 const double focal = 718.8560;
 const cv::Point2d pp(607.1928, 185.2157);
+#endif
+
+#ifdef ARC
+const double focal = 1087.9125;
+const cv::Point2d pp(692.9426, 264.13);
 #endif
 
 #define MIN_NUM_FEAT 2000
@@ -651,9 +656,9 @@ void rectifyStereoImage(Mat &img1,
 
       //cv::FileStorage fs1("cam_stereo.yml", cv::FileStorage::READ);
 #ifdef __linux__ 
-    cv::FileStorage fs1("/home/cwu/project/stereo-vo/src/cam_stereo.yml", cv::FileStorage::READ);
+    cv::FileStorage fs1("/home/hillcrest/project/stereo-vo/src/ARC_cam_stereo.yml", cv::FileStorage::READ);
 #else
-    cv::FileStorage fs1("d:/vision/stereo-vo/src/cam_stereo.yml", cv::FileStorage::READ);
+    cv::FileStorage fs1("d:/vision/stereo-vo/src/ARC_cam_stereo.yml", cv::FileStorage::READ);
 #endif
 
     if (!fs1.isOpened()) { cout << "unable to open yml file" << endl; }
@@ -685,7 +690,7 @@ void loadCameraParameters(Mat &K, Mat &D) {
 
     Mat K1, D1;
 #ifdef __linux__ 
-    cv::FileStorage fs1("/home/cwu/project/stereo-vo/src/cam_left.yml", cv::FileStorage::READ);
+    cv::FileStorage fs1("/home/hillcrest/project/stereo-vo/src/cam_left.yml", cv::FileStorage::READ);
 #else
     cv::FileStorage fs1("d:/vision/stereo-vo/src/cam_left.yml", cv::FileStorage::READ);
 #endif
@@ -707,7 +712,7 @@ void rectifyImage(Mat &imgIn,
     Mat D;   // distCoeffs, 5
 
 #ifdef __linux__ 
-    cv::FileStorage fs1("/home/cwu/project/stereo-vo/src/cam_left.yml", cv::FileStorage::READ);
+    cv::FileStorage fs1("/home/hillcrest/project/stereo-vo/src/cam_left.yml", cv::FileStorage::READ);
 #else
     cv::FileStorage fs1("d:/vision/stereo-vo/src/cam_left.yml", cv::FileStorage::READ);
 #endif
