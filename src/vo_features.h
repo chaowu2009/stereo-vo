@@ -35,12 +35,16 @@ using namespace std;
 using namespace cv::xfeatures2d;
 
 #define LOGITEC
+//#define KITTK
+//#define ARC
 
 #ifdef LOGITEC
 // new Logitec Camera
 const double focal = 837.69737925956247;
 const cv::Point2d pp(332.96486550136854, 220.37986827273829);
-#else
+#endif
+
+#ifdef KITTK
 //  kittk camera
 const double focal = 718.8560;
 const cv::Point2d pp(607.1928, 185.2157);

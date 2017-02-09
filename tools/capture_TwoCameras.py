@@ -3,8 +3,8 @@ import cv2
 import time
 import matplotlib.pylab as plt
 
-left = 2
-right = 1
+left = 1
+right = 2
 
 time_in_ms= 1000/100
 

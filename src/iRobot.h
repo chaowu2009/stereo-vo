@@ -6,7 +6,7 @@
 
 double current_timestamp_1() {
     struct timeval te;
-    gettimeofday(&te, NULL); // get current time
+    //gettimeofday(&te, NULL); // get current time
 
     double microseconds = (double)te.tv_sec + (double)te.tv_usec / 1000000;
 

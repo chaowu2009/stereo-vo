@@ -36,8 +36,8 @@ target_link_libraries(rectify ${OpenCV_LIBS})
 add_executable(singleCamera "src/iRobot.h" "src/BNO080.h" "src/rotation.h" "src/vo_features.h" "src/singleCamera.cpp" "src/cam_stereo.yml")
 target_link_libraries(singleCamera ${OpenCV_LIBS})
 
-#add_executable(test "src/test.cpp" )
-#target_link_libraries(test ${OpenCV_LIBS})
+add_executable(iRobot "src/test_iRobot.cpp" "src/iRobot.h" )
+target_link_libraries(iRobot)
 
 
 #add_executable(testImage ${ti} )

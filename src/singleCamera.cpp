@@ -1,7 +1,6 @@
 
 #include "vo_features.h"
 #include "BNO080.h"
-#include "iRobot.h"
 
 using namespace cv;
 using namespace std;
@@ -11,8 +10,6 @@ using namespace std;
 #define MIN_NUM_FEAT 100
 #define LEFT 0
 #define RIGHT 1
-
-#define MIN_NUM_FEAT 2000
 
 #define WEBCAM 0
 #define LEFT 1
@@ -135,7 +132,7 @@ int main(int argc, char** argv) {
             if (status[m] > 0) { trackedFeatureNumber++; }
         }
 
-        if (trackedFeatureNumber > 50) {
+        if (trackedFeatureNumber > 200) {
             E = findEssentialMat(currFeatures, prevFeatures, focal, pp, RANSAC, 0.999, 1.0, mask);
             recoverPose(E, currFeatures, prevFeatures, R, t, focal, pp, mask);
         }
@@ -145,8 +142,8 @@ int main(int argc, char** argv) {
 
 
         // update pose
-        float deltaT = 0.5;// / 16.0;
-        t_f = t_f *deltaT + (R_f*t);
+        float scale = 0.5;// / 16.0;
+        t_f = t_f  + scale*(R_f*t);
         R_f = R*R_f;
 
         // update featurs if trakced features go below a particular threshold

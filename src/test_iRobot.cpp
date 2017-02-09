@@ -1,7 +1,7 @@
 #include "iRobot.h"
 #include <stdio.h>
 
-void main()
+int main()
 {
 	int fd;
 
@@ -10,7 +10,7 @@ void main()
 	if(fd <= 0)
 	{
 		printf("Can't initialize the serial port\n");
-		return;
+		return -1;
 	}
 
 

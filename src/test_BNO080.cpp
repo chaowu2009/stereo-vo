@@ -7,7 +7,7 @@ int main()
 
 	while(1)
 	{
-		readQuaternion(fd, quaternion);
+		readQ(fd, quaternion);
 	}
 	
 	return 0;
