@@ -1,6 +1,7 @@
 
 #include "vo_features.h"
-//#include <opencv2/viz.hpp>
+#include "BNO080.h"
+
 
 using namespace cv;
 using namespace std;
@@ -30,6 +31,10 @@ int main(int argc, char** argv) {
     int nMeasurements = 6;
     int nInputs = 0;
 
+    int fd ;//= initBNO080();
+
+    float q[4];
+    readQ(fd, q);
 
   //  initKalmanFilter(KF, nStates, nMeasurements, nInputs, dt);
 
@@ -115,6 +120,8 @@ int main(int argc, char** argv) {
 	for (int numFrame = 2; numFrame < MAX_FRAME; numFrame++) {
 #ifdef REAL_TIME
 		left_capture.read(img_1);
+                 // read BNO
+                readQ(fd, q);
 		//   undistort(img_1, img_1, K, D);
 #else
 		sprintf(filename, "D:/vision/dataset/sequences/00/image_1/%06d.png", numFrame);
@@ -138,8 +145,8 @@ int main(int argc, char** argv) {
 
 		
         // update pose
-                float deltaT = 1.0 ;// / 16.0;
-		t_f = t_f *deltaT + (R_f*t)*deltaT;
+                float deltaT = 0.5 ;// / 16.0;
+		t_f = t_f *deltaT + (R_f*t);
 		R_f = R*R_f;
 		
 		// update featurs if trakced features go below a particular threshold

@@ -116,4 +116,7 @@ void testBNO(int fd) {
     close(fd);
 }
 
+// read quaternion into q
+void readQ(int fd, float q[4]){
+}
 
