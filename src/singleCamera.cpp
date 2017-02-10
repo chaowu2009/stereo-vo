@@ -12,7 +12,7 @@ using namespace std;
 #define RIGHT 2
 
 
-#define REAL_TIME
+//#define REAL_TIME
 #define PLOT_COLOR CV_RGB(0, 0, 0)
 #define PL std::setprecision(6)
 
@@ -70,11 +70,12 @@ int main(int argc, char** argv) {
     //undistort(img_2, img_2, K, D);
 
 #else
+    cout << "Running simulation data " << endl;
     double scale = 1.00;
     char filename1[200];
     char filename2[200];
-    sprintf(filename1, "D:/vision/dataset/sequences/00/image_1/%06d.png", 0);
-    sprintf(filename2, "D:/vision/dataset/sequences/00/image_1/%06d.png", 1);
+    sprintf(filename1, "/home/hillcrest/project/data/kittk/sequences/00/image_1/%06d.png", 0);
+    sprintf(filename2, "/home/hillcrest/project/data/kittk/sequences/00/image_1/%06d.png", 1);
 
     //read the first two frames from the dataset
     img_1_c = imread(filename1);
@@ -126,18 +127,15 @@ int main(int argc, char** argv) {
         readQ(fd, q);
         //undistort(img_1, img_1, K, D);
 #else
-        sprintf(filename, "D:/vision/dataset/sequences/00/image_1/%06d.png", numFrame);
+        sprintf(filename, "/home/hillcrest/project/data/kittk/sequences/00/image_1/%06d.png", numFrame);
         Mat img_1 = imread(filename);
 #endif
         cvtColor(img_1, currImage, COLOR_BGR2GRAY);
-        bool theSameImageFlag =  areTheSameImage(prevImage, currImage);
+       // bool theSameImageFlag =  areTheSameImage(prevImage, currImage);
         
         vector<uchar> status;
         featureTracking(prevImage, currImage, prevFeatures, currFeatures, status);
-        int trackedFeatureNumber = 0;
-        for (int m = 0; m < status.size(); m++) {
-            if (status[m] > 0) { trackedFeatureNumber++; }
-        }
+        int trackedFeatureNumber = prevFeatures.size();
         
      //   if (theSameImageFlag) {trackedFeatureNumber = 0;}
 
@@ -146,20 +144,16 @@ int main(int argc, char** argv) {
             recoverPose(E, currFeatures, prevFeatures, R, t, focal, pp, mask);
 
            // update pose
-           float scale = 1.0/10.0;// / 16.0;
+           float scale = 1.0/2.0;// / 16.0;
            t_f = t_f  + scale*(R_f*t);
            R_f = R*R_f;
 
-        } else {
-            cout << "untracked and no update!" << endl;
-        }
-
-        // update features if trakced features go below a particular threshold
-        if (prevFeatures.size() < MIN_NUM_FEAT) {
-            //cout << "Number of tracked features reduced to " << prevFeatures.size() << endl;
-            //cout << "trigerring redection" << endl;
+        } else if  (prevFeatures.size() < MIN_NUM_FEAT) {
+           // update features if trakced features go below a particular threshold
             featureDetection(prevImage, prevFeatures);
             featureTracking(prevImage, currImage, prevFeatures, currFeatures, status);
+        } else { 
+                cout << "untracked and no update!" << endl;
         }
 
         prevImage = currImage.clone();

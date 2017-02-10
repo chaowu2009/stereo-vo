@@ -35,8 +35,8 @@ using namespace std;
 using namespace cv::xfeatures2d;
 
 //#define LOGITEC
-//#define KITTK
-#define ARC
+#define KITTK
+//#define ARC
 
 #ifdef LOGITEC
 // new Logitec Camera
@@ -742,7 +742,7 @@ bool areTheSameImage( Mat preImage, Mat currentImage) {
           
         }
  
-    cout << "dist = " << dist << endl; 
+ //   cout << "dist = " << dist << endl; 
     if(dist>threshold) {
       return false;
     }
