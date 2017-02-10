@@ -1,7 +1,11 @@
 #include <stdio.h>
 #include <fcntl.h>  /* File Control Definitions          */
-#include <termios.h>/* POSIX Terminal Control Definitions*/
-#include <unistd.h> /* UNIX Standard Definitions         */
+//#include <termios.h>/* POSIX Terminal Control Definitions*/
+#ifdef _WIN32
+#include <io.h>
+#else
+#include <unistd.h>
+#endif
 #include <errno.h>  /* ERROR Number Definitions          */
 
 double current_timestamp_1() {

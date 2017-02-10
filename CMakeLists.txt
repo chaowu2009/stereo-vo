@@ -13,19 +13,9 @@ SET(GCC_COVERAGE_LINK_FLAGS "wiringPi m rt")
 add_executable(tracker "src/stats.h" "src/utils.h" "src/tracker.cpp")
 target_link_libraries(tracker ${OpenCV_LIBS})
 
-IF (WIN32)
-	add_executable(vo_win32 "src/rotation.h" "src/vo_features.h" "src/visodo.cpp")
-	target_link_libraries(vo_win32 ${OpenCV_LIBS})
 
-ENDIF()
-
-IF(LINUX)
-	add_executable(readBNO "src/BNO070.h" "src/test_BNO070.cpp")
-	target_link_libraries(readBNO ${OpenCV_LIBS} wiringPi m rt)
-
-	add_executable(vo "src/BNO070.h" "src/rotation.h" "src/vo_features.h" "src/visodo.cpp")
-	target_link_libraries(vo ${OpenCV_LIBS} wiringPi m rt)
-ENDIF()
+#	add_executable(readBNO "src/BNO070.h" "src/test_BNO070.cpp")
+#	target_link_libraries(readBNO ${OpenCV_LIBS} wiringPi m rt)
 
 add_executable(vo "src/BNO070.h" "src/rotation.h" "src/vo_features.h" "src/visodo.cpp")
 target_link_libraries(vo ${OpenCV_LIBS})
@@ -36,12 +26,11 @@ target_link_libraries(cri ${OpenCV_LIBS})
 add_executable(rectify "src/rotation.h" "src/vo_features.h" "src/test_rectify.cpp" "src/cam_stereo.yml")
 target_link_libraries(rectify ${OpenCV_LIBS})
 
-add_executable(singleCamera "src/iRobot.h" "src/BNO080.h" "src/rotation.h" "src/vo_features.h" "src/singleCamera.cpp" "src/cam_stereo.yml")
+add_executable(singleCamera "src/BNO080.h" "src/rotation.h" "src/vo_features.h" "src/singleCamera.cpp" "src/cam_stereo.yml")
 target_link_libraries(singleCamera ${OpenCV_LIBS})
 
 add_executable(iRobot "src/test_iRobot.cpp" "src/iRobot.h" )
 target_link_libraries(iRobot)
-
 
 add_executable(bno080 "src/test_BNO080.cpp" "src/BNO080.h" )
 target_link_libraries(bno080)

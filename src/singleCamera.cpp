@@ -1,6 +1,6 @@
 
 #include "vo_features.h"
-#include "BNO080.h"
+//#include "BNO080.h"
 
 using namespace cv;
 using namespace std;
@@ -27,7 +27,7 @@ int main(int argc, char** argv) {
     int fd;//= initBNO080();
 
     float q[4];
-    readQ(fd, q);
+    //readQ(fd, q);
 
     //  initKalmanFilter(KF, nStates, nMeasurements, nInputs, dt);
 
@@ -124,7 +124,7 @@ int main(int argc, char** argv) {
 #ifdef REAL_TIME
         left_capture.read(img_1);
         // read BNO
-        readQ(fd, q);
+       // readQ(fd, q);
         //undistort(img_1, img_1, K, D);
 #else
         sprintf(filename, "/home/hillcrest/project/data/kittk/sequences/00/image_1/%06d.png", numFrame);

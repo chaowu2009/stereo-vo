@@ -12,7 +12,7 @@
 using namespace cv;
 using namespace std;
 
-// solve stereo camera issues http://renoirsrants.blogspot.in/2011/07/multiple-webcams-on-zoneminder.html
+// solve (NOT YET) stereo camera issues http://renoirsrants.blogspot.in/2011/07/multiple-webcams-on-zoneminder.html
 
 //#define MIN_NUM_FEAT 200
 #define PLOT_COLOR CV_RGB(0, 0, 0)
@@ -29,16 +29,8 @@ cv::Point textOrg(10, 50);
 //#define SHOW_IMAGE_ONLY 1
 //#define BNO
 
-// new camera
-//const double focal = 837.69737925956247;
-//const cv::Point2d pp (332.96486550136854, 220.37986827273829);
-//  kittk camera
-//const double focal = 718.8560;
-//const cv::Point2d pp(607.1928, 185.2157);
-
-
-int LEFT = 1;
-int RIGHT = 2;
+#define LEFT 0
+#define RIGHT 1
 
 int main(int argc, char** argv) {
 
@@ -77,7 +69,7 @@ int main(int argc, char** argv) {
     string imgDir = "d:/vision/dataset/sequences/00/";
     string resultFile = imgDir + "vo_result.txt";
     std::string imgFormat = ".png";
-
+    std::string timeStampFile = imgDir + "timeStamp.txt";
     std::string quaternionFile = imgDir + "q.txt";
     std::fstream infile(quaternionFile);
     std::string line;
@@ -111,6 +103,9 @@ int main(int argc, char** argv) {
     right_capture.set(CV_CAP_PROP_FRAME_HEIGHT, HEIGHT);
 
     left_capture.read(img_1);
+    if (!img_1.data) {
+        std::cout << " --(!) Error reading images (left camera) " << std::endl;
+    }
     begin = clock();
 
 #ifdef SHOW_IMAGE_ONLY
@@ -190,6 +185,13 @@ int main(int argc, char** argv) {
     left_capture.read(img_2);
     // right camera	
     right_capture.read(previous_img_right);
+    if (!img_2.data) {
+        std::cout << " --(!) Error reading images (left camera) " << std::endl;
+    }
+
+    if (!previous_img_right.data) {
+        std::cout << " --(!) Error reading images (right camera) " << std::endl;
+    }
 
 #else
     // use the first two images from left camera to compute the init values.
@@ -226,7 +228,6 @@ int main(int argc, char** argv) {
     Mat traj = Mat::zeros(640, 480, CV_8UC3);
     Mat trajTruth = Mat::zeros(640, 480, CV_8UC3);
 
-    string fileFolder = imgDir + "/dataset/sequences/00/"; 
     Mat R_f_left, t_f_left;
     previous_img_left = img_2;
 
@@ -289,10 +290,16 @@ int main(int argc, char** argv) {
         // Mat leftFrame;
         bool readSuccess1 = left_capture.read(current_img_left);
        // if (readSuccess1){ currImage_l = current_img_left;}
+        if (!current_img_left.data) {
+            std::cout << " --(!) Error reading images (left camera) " << std::endl;
+        }
 
         // Mat rightFrame;
         bool readSuccess2 = right_capture.read(current_img_right);
         //if (readSuccess2) {currImage_r = current_img_right; }
+        if (!current_img_right.data) {
+            std::cout << " --(!) Error reading images (left camera) " << std::endl;
+        }
 
 #else
 

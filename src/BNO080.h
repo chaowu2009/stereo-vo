@@ -1,15 +1,20 @@
 #include <stdio.h>
 #include <fcntl.h>  /* File Control Definitions          */
-#include <termios.h>/* POSIX Terminal Control Definitions*/
-#include <unistd.h> /* UNIX Standard Definitions         */
+//#include <termios.h>/* POSIX Terminal Control Definitions*/
+#ifdef _WIN32
+#include <io.h>
+#else
+#include <unistd.h>
+#endif
 #include <errno.h>  /* ERROR Number Definitions          */
 
-
+#ifndef _WIN32
 #include <sys/time.h>
+#endif
 
 double current_timestamp() {
     struct timeval te;
-    gettimeofday(&te, NULL); // get current time
+  //  gettimeofday(&te, NULL); // get current time
 
     double microseconds = (double)te.tv_sec + (double)te.tv_usec / 1000000;
 
