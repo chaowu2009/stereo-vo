@@ -145,7 +145,7 @@ int main(int argc, char** argv) {
             recoverPose(E, currFeatures, prevFeatures, R, t, focal, pp, mask);
 
            // update pose
-           float scale = 1.0/30.0;// / 16.0;
+           float scale = 1.0/2.0;// / 16.0;
            t_f = t_f  + scale*(R_f*t);
            R_f = R*R_f;
 
@@ -167,7 +167,7 @@ int main(int argc, char** argv) {
         int x = int(x1) + 300;
         int y = int(z1) + 300;
 
-        cout << "numFrame:" << numFrame << " mo: x =" << PL << x1 << "  y= " << PL << y1 << "  z= " << PL << z1 << endl;
+      //  cout << "numFrame:" << numFrame << " mo: x =" << PL << x1 << "  y= " << PL << y1 << "  z= " << PL << z1 << endl;
 
         circle(traj, Point(x, y), 1, CV_RGB(255, 0, 0), 2);
 

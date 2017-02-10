@@ -7,6 +7,7 @@
 #include <unistd.h>
 #endif
 #include <errno.h>  /* ERROR Number Definitions          */
+#include <math.h>
 
 double current_timestamp_1() {
     struct timeval te;
@@ -84,7 +85,7 @@ void robotStartDrive(int fd)
 }
 
 void robotStopDrive(int fd)
-
+{
     printf("Stop Rotating\n");
     //Drive in straight and turn: [137] [Velocity high byte] [Velocity low byte] [Radius high byte] [Radius low byte]
     unsigned char writeBuff[5] = { 0x89,0x00,0x00,0x80,0x00 };
@@ -148,5 +149,13 @@ int initRobot()
 
 
 
+float const RAD2DEG_FLT = 57.295779513082323f;
 
+float quaternionToYaw(float i, float j, float k, float r) {
+  float num = 2.0f*i*j + 2.0f*r*k;
+  float den = r*r + i*i - j*j - k*k;
+  
+  float yaw = atan2(-num, den);
+  return yaw*RAD2DEG_FLT;
+}
 

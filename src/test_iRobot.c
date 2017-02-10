@@ -1,7 +1,7 @@
 #include "iRobot.h"
 #include <stdio.h>
 #include "BNO080.h"
-//#include "rotation.h"
+#include "rotation.h"
 #include <math.h>
 
 int main()
@@ -43,7 +43,6 @@ int main()
       
         float init_heading = 0;
         float current_heading = 0;	 
-        float delta = 0;
 
 // first line
          readQ(fd_bno, q);
@@ -55,18 +54,14 @@ int main()
 		
 	readQ(fd_bno, q);
 
-         current_heading = quaternionToYaw(q[1],q[2],q[3],q[0]);       
-         delta = abs(current_heading - init_heading);
-         printf( "current = %f\t, init = %f\tdelta = %f\n",  current_heading, init_heading, delta);
-         if (delta > 180)
-             delta = 360-delta; 
-        if ( delta>= 90.0) {
+         current_heading = quaternionToYaw(q[1],q[2],q[3],q[0]);        
+         if (abs(current_heading - init_heading) >= 90.0) {
             robotStopRotating(fd);
             break;         
          }
 
 	}
-
+/*
 // second line
         robotStartDrive(fd);
          sleep(5);
@@ -74,7 +69,7 @@ int main()
          sleep(1); 
       
          readQ(fd_bno, q);
-         init_heading =  quaternionToYaw(q[1],q[2],q[3],q[0]);        
+         init_heading =  quaterionToYaw(q[1],q[2],q[3],q[0]);        
          robotStartRotating(fd);
         
 	while(1)
@@ -82,12 +77,8 @@ int main()
 		
 	readQ(fd_bno, q);
 
-         current_heading =quaternionToYaw(q[1],q[2],q[3],q[0]);        
-         delta = abs(current_heading - init_heading);
-         printf( "current = %f\t, init = %f\tdelta = %f\n",  current_heading, init_heading, delta);
-         if (delta > 180)
-             delta = 360-delta;
-         if ( delta>= 90.0) {
+         current_heading =quaterionToYaw(q[1],q[2],q[3],q[0]);        
+         if (abs(current_heading - init_heading) >= 90.0) {
             robotStopRotating(fd);
             break;         
          }
@@ -101,7 +92,7 @@ int main()
          sleep(1); 
       
          readQ(fd_bno, q);
-         init_heading =  quaternionToYaw(q[1],q[2],q[3],q[0]);        
+         init_heading =  quaterionToYaw(q[1],q[2],q[3],q[0]);        
          robotStartRotating(fd);
         
 	while(1)
@@ -109,15 +100,12 @@ int main()
 		
 	readQ(fd_bno, q);
 
-         current_heading =quaternionToYaw(q[1],q[2],q[3],q[0]);        
-        delta = abs(current_heading - init_heading);
-         printf( "current = %f\t, init = %f\tdelta = %f\n",  current_heading, init_heading, delta);
-        if (delta > 180)
-             delta = 360-delta;
-         if ( delta>= 90.0) {
+         current_heading =quaterionToYaw(q[1],q[2],q[3],q[0]);        
+         if (abs(current_heading - init_heading) >= 90.0) {
             robotStopRotating(fd);
             break;         
          }
+
 	}
 
 // fourth line
@@ -127,7 +115,7 @@ int main()
          sleep(1); 
       
          readQ(fd_bno, q);
-         init_heading =  quaternionToYaw(q[1],q[2],q[3],q[0]);        
+         float init_heading =  quaterionToYaw(q[1],q[2],q[3],q[0]);        
          robotStartRotating(fd);
         
 	while(1)
@@ -135,16 +123,13 @@ int main()
 		
 	readQ(fd_bno, q);
 
-         current_heading =quaternionToYaw(q[1],q[2],q[3],q[0]);        
-        delta = abs(current_heading - init_heading);
-        printf( "current = %f\t, init = %f\tdelta = %f\n",  current_heading, init_heading, delta);
-        if (delta > 180)
-             delta = 360-delta; 
-        if ( delta>= 90.0) {
+         current_heading =quaterionToYaw(q[1],q[2],q[3],q[0]);        
+         if (abs(current_heading - init_heading) >= 90.0) {
             robotStopRotating(fd);
             break;         
          }
-	}
 
+	}
+*/
 	close(fd);
 }

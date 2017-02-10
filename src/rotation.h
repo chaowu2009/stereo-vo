@@ -164,7 +164,7 @@ void slerp(float q1[4], float q2[4], float w, float qOut[4]){
      }
 
 }
-
+/*
 // Euler 
 float const RAD2DEG_FLT = 57.295779513082323f;
 
@@ -173,7 +173,7 @@ float quaternionToYaw(float i, float j, float k, float r) {
   float den = r*r + i*i - j*j - k*k;
   
   float yaw = atan2(-num, den);
-  return yaw;
+  return yaw*RAD2DEG_FLT;
 }
 
 float quaternionToPitch(float i, float j, float k, float r) {
@@ -206,4 +206,6 @@ void quaternionToEuler(float i, float j, float k, float r) {
   
   printf("%0.3f, %0.3f, %0.3f\n", yaw, pitch, roll);      
 }
+*/
+
 
