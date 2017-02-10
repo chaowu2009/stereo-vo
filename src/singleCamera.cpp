@@ -12,7 +12,7 @@ using namespace std;
 #define RIGHT 2
 
 
-//#define REAL_TIME
+#define REAL_TIME
 #define PLOT_COLOR CV_RGB(0, 0, 0)
 #define PL std::setprecision(6)
 

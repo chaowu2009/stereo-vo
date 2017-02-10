@@ -6,12 +6,13 @@
 #include <string>
 
 #ifdef __linux__ 
-#include "readBNO.h"
+#include "BNO080.h"
 #endif
 
 using namespace cv;
 using namespace std;
 
+// solve stereo camera issues http://renoirsrants.blogspot.in/2011/07/multiple-webcams-on-zoneminder.html
 
 //#define MIN_NUM_FEAT 200
 #define PLOT_COLOR CV_RGB(0, 0, 0)
@@ -24,7 +25,7 @@ double fontScale = 1;
 int thickness = 1;
 cv::Point textOrg(10, 50);
 
-//#define REAL_TIME 1
+#define REAL_TIME 1
 //#define SHOW_IMAGE_ONLY 1
 //#define BNO
 
@@ -36,50 +37,50 @@ cv::Point textOrg(10, 50);
 //const cv::Point2d pp(607.1928, 185.2157);
 
 
-int LEFT = 0;
-int RIGHT = 1;
+int LEFT = 1;
+int RIGHT = 2;
 
 int main(int argc, char** argv) {
 
     clock_t begin = clock();
-	clock_t currentFrameClock;
-	float deltaTinSecond = 0.0f;
+    clock_t currentFrameClock;
+    float deltaTinSecond = 0.0f;
     int MAX_FRAME = 1000;
 	    
-	float q[4];
-	q[0] = 1.0; q[1] = 0.0; q[2] = 0.0; q[3] = 0.0;
-	Mat dcm;
-	dcm = (cv::Mat_<float>(3, 3) << 1.0, 0.0, 0.0, 0.0,1.0,0.0, 0.0, 0.0, 1.0);
+    float q[4];
+    q[0] = 1.0; q[1] = 0.0; q[2] = 0.0; q[3] = 0.0;
+    Mat dcm;
+    dcm = (cv::Mat_<float>(3, 3) << 1.0, 0.0, 0.0, 0.0,1.0,0.0, 0.0, 0.0, 1.0);
 	
 #ifdef __linux__ 
-    int fd = initBNO();
+    int fd ; //= initBNO080();
     
-    readQuaternion(fd, q);  //the first sample is bad. So clean the buffer
+    readQ(fd, q);  //the first sample is bad. So clean the buffer
 #endif
 
 #ifdef __linux__ 
     //linux code goes here
 
-    std::string imgDir="/home/cwu/project/dataset/images/10/";
+    std::string imgDir="/home/hillcrest/project/dataset/images/10/";
     std::string imgFormat = ".jpg";
     std::string timeStampFile = imgDir + "timeStamp.txt";
-    std::string resultFile = imgDir + "vo_result.txt";
+    std::string resultFile = "/home/hillcrest/project/stereo-vo/src/vo_result.txt";
  
     MAX_FRAME = 1000;
     
-	std::string quaternionFile = imgDir + "q.txt";
-	std::fstream infile(quaternionFile.c_str());
-	std::string line;
+    std::string quaternionFile = imgDir + "q.txt";
+    std::fstream infile(quaternionFile.c_str());
+    std::string line;
 #else
     // windows code goes here
-	//string imgDir = "d:/vision/dataset/sequences/planar/";
-	string imgDir = "d:/vision/dataset/sequences/00/";
-	string resultFile = imgDir + "vo_result.txt";
-	std::string imgFormat = ".png";
+    //string imgDir = "d:/vision/dataset/sequences/planar/";
+    string imgDir = "d:/vision/dataset/sequences/00/";
+    string resultFile = imgDir + "vo_result.txt";
+    std::string imgFormat = ".png";
 
-	std::string quaternionFile = imgDir + "q.txt";
-	std::fstream infile(quaternionFile);
-	std::string line;
+    std::string quaternionFile = imgDir + "q.txt";
+    std::fstream infile(quaternionFile);
+    std::string line;
 #endif
 
     Mat current_img_left, current_img_right;
@@ -95,16 +96,19 @@ int main(int argc, char** argv) {
 
 #ifdef REAL_TIME
     cout << "Running at real-time" <<endl;
-	std::ofstream fpTimeStamp;
-	fpTimeStamp.open(timeStampFile.c_str());
+    std::ofstream fpTimeStamp;
+    fpTimeStamp.open(timeStampFile.c_str());
+
+    int WIDTH = 640;
+    int HEIGHT = 480;
 
     VideoCapture left_capture(LEFT);
-    left_capture.set(CV_CAP_PROP_FRAME_WIDTH, 320);
-    left_capture.set(CV_CAP_PROP_FRAME_HEIGHT, 240);
+    left_capture.set(CV_CAP_PROP_FRAME_WIDTH, WIDTH);
+    left_capture.set(CV_CAP_PROP_FRAME_HEIGHT, HEIGHT);
 
     VideoCapture right_capture(RIGHT);
-    right_capture.set(CV_CAP_PROP_FRAME_WIDTH, 320);
-    right_capture.set(CV_CAP_PROP_FRAME_HEIGHT, 240);
+    right_capture.set(CV_CAP_PROP_FRAME_WIDTH, WIDTH);
+    right_capture.set(CV_CAP_PROP_FRAME_HEIGHT, HEIGHT);
 
     left_capture.read(img_1);
     begin = clock();
@@ -190,9 +194,9 @@ int main(int argc, char** argv) {
 #else
     // use the first two images from left camera to compute the init values.
     loadImage(imgDir + "/image_0/000000.png", temp);
-	img_1 = temp;
+    img_1 = temp;
     loadImage(imgDir + "/image_0/000001.png", temp);
-	img_2 = temp;
+    img_2 = temp;
     //loadImage(imgDir + "/img_left/1" + imgFormat, img_1, currImage_lc);
     //loadImage(imgDir + "/img_right/1"+ imgFormat, img_2, currImage_lc);
 
@@ -284,11 +288,11 @@ int main(int argc, char** argv) {
 
         // Mat leftFrame;
         bool readSuccess1 = left_capture.read(current_img_left);
-        if (readSuccess1){ currImage_lc = current_img_left;}
+       // if (readSuccess1){ currImage_l = current_img_left;}
 
         // Mat rightFrame;
         bool readSuccess2 = right_capture.read(current_img_right);
-        if (readSuccess2) {currImage_rc = current_img_right; }
+        //if (readSuccess2) {currImage_r = current_img_right; }
 
 #else
 
@@ -300,8 +304,8 @@ int main(int argc, char** argv) {
         //string filename1 =  imgDir + "/img_left/" + idx + imgFormat;
         //string filename2 =  imgDir + "/img_right/" + idx + imgFormat;
 
-		string filename1 = imgDir + "/image_0/" + idx + imgFormat;
-		string filename2 = imgDir + "/image_1/" + idx + imgFormat;
+	string filename1 = imgDir + "/image_0/" + idx + imgFormat;
+	string filename2 = imgDir + "/image_1/" + idx + imgFormat;
 
         loadImage(filename1, current_img_left);
         loadImage(filename2, current_img_right);

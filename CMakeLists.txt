@@ -27,6 +27,9 @@ IF(LINUX)
 	target_link_libraries(vo ${OpenCV_LIBS} wiringPi m rt)
 ENDIF()
 
+add_executable(vo "src/BNO070.h" "src/rotation.h" "src/vo_features.h" "src/visodo.cpp")
+target_link_libraries(vo ${OpenCV_LIBS})
+
 add_executable(cri "src/rotation.h" "src/vo_features.h" "src/captureRealImage.cpp")
 target_link_libraries(cri ${OpenCV_LIBS})
 

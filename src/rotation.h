@@ -157,7 +157,7 @@ void slerp(float q1[4], float q2[4], float w, float qOut[4]){
          qOut[i] = (1-w)*q1[i] + w* q2[i];     
      }
 
-     float temp[4]
+     float temp[4];
      qNorm(qOut, temp);
      for(int i =0 ; i<4; i++){
          qOut[i] = temp[i];
