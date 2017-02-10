@@ -1,11 +1,17 @@
 #include "iRobot.h"
 #include <stdio.h>
+#include "BNO080.h"
+
 
 int main()
 {
 	int fd;
 
 	fd = initRobot();
+
+        int fd_bno = initBNO080();
+        float q[4];
+
 
 	if(fd <= 0)
 	{
@@ -28,27 +34,31 @@ int main()
 	robotLED(fd);
 	sleep(1);
 
-	robotStartRotating(fd);
-	sleep(2);
-	robotStopRotating(fd);
+	//robotStartRotating(fd);
+	//sleep(2);
+	//robotStopRotating(fd);
 	
-	sleep(2);
+	//sleep(2);
 
-	robotStartDrive(fd);
-	sleep(2);
-	robotStopDrive(fd);
+	//robotStartDrive(fd);
+	//sleep(2);
+	//robotStopDrive(fd);
 
 
 	while(1)
 	{
 		//printf("T:%f \n", current_timestamp());
 
-		bytes_read = read(fd,read_buffer,1); /* Read the data */
-		if (bytes_read > 0)
-		{
-				
-				printf("%c",read_buffer[0]);
-		}
+//		bytes_read = read(fd,read_buffer,1); /* Read the data */
+//		if (bytes_read > 0)
+//		{
+//				
+//				printf("%c",read_buffer[0]);
+//		}
+	readQ(fd, q);
+        printf("%f \t%f \t%f \t%f \n", q[0],q[1],q[2],q[3]);  
+
+
 
 	}
 

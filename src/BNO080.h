@@ -7,7 +7,6 @@
 
 
 #include <sys/time.h>
-#include "BNO080.h"
 #include <stdlib.h>     /* atof */
 
 double current_timestamp() {

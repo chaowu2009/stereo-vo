@@ -119,8 +119,9 @@ int main(int argc, char** argv) {
     namedWindow("Trajectory", WINDOW_AUTOSIZE);         // Create a window for display.
 
     Mat traj = Mat::zeros(600, 600, CV_8UC3);
-
-    for (int numFrame = 2; numFrame < MAX_FRAME; numFrame++) {
+    int numFrame = 2;
+   // for  numFrame = 2; numFrame < MAX_FRAME; numFrame++) {
+    while (1) {  numFrame++;
 #ifdef REAL_TIME
         left_capture.read(img_1);
         // read BNO
@@ -144,7 +145,7 @@ int main(int argc, char** argv) {
             recoverPose(E, currFeatures, prevFeatures, R, t, focal, pp, mask);
 
            // update pose
-           float scale = 1.0/2.0;// / 16.0;
+           float scale = 1.0/30.0;// / 16.0;
            t_f = t_f  + scale*(R_f*t);
            R_f = R*R_f;
 

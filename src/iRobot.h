@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <fcntl.h>  /* File Control Definitions          */
-//#include <termios.h>/* POSIX Terminal Control Definitions*/
+#include <termios.h>/* POSIX Terminal Control Definitions*/
 #ifdef _WIN32
 #include <io.h>
 #else
@@ -78,13 +78,13 @@ void robotStartDrive(int fd)
 {
     printf("Start Rotating\n");
     //Drive in straight and turn: [137] [Velocity high byte] [Velocity low byte] [Radius high byte] [Radius low byte]
-    unsigned char writeBuff[5] = { 0x89,0x00,0x20,0x80,0x00 };
+    unsigned char writeBuff[5] = { 0x89,0x00,0xC8,0x80,0x00 };
     write(fd, writeBuff, 5);
 
 }
 
 void robotStopDrive(int fd)
-{
+
     printf("Stop Rotating\n");
     //Drive in straight and turn: [137] [Velocity high byte] [Velocity low byte] [Radius high byte] [Radius low byte]
     unsigned char writeBuff[5] = { 0x89,0x00,0x00,0x80,0x00 };
