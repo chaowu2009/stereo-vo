@@ -35,8 +35,8 @@ using namespace std;
 using namespace cv::xfeatures2d;
 
 //#define LOGITEC
-#define KITTK
-//#define ARC
+//#define KITTK
+#define ARC
 
 #ifdef LOGITEC
 // new Logitec Camera
@@ -51,9 +51,9 @@ const cv::Point2d pp(607.1928, 185.2157);
 #endif
 
 #ifdef ARC
-// 1280x720 resolution
-const double focal = 1087.9125;
-const cv::Point2d pp(692.9426, 264.13);
+// 640x480 resolution
+const double focal = 483.45;
+const cv::Point2d pp(300.98, 253.10);
 #endif
 
 #define MIN_NUM_FEAT 2000
