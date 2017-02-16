@@ -5,8 +5,6 @@
 using namespace cv;
 using namespace std;
 
-
-
 int main(int argc, char** argv) {
 
     string imgFile="/home/cwu/project/dataset/images/9/img_left/1.jpg";

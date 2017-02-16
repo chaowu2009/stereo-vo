@@ -3,27 +3,29 @@ import cv2
 import time
 import matplotlib.pylab as plt
 
-left = 2
+left = 0
 right = 1
 
 time_in_ms= 1000/100
 
+WIDTH = 1280
+HEIGHT = 720
 
 fig = plt.figure()
         
 for counter in range(1,5):
 
     cap1 = cv2.VideoCapture(left)
-    cap1.set(cv2.CAP_PROP_FRAME_WIDTH,640)
-    cap1.set(cv2.CAP_PROP_FRAME_HEIGHT,480)
+    cap1.set(cv2.CAP_PROP_FRAME_WIDTH,WIDTH)
+    cap1.set(cv2.CAP_PROP_FRAME_HEIGHT,HEIGHT)
 #    cv2.waitKey(time_in_ms)
     # Capture frame-by-frame
     ret, frame1 = cap1.read()
     cap1.release()
     
     cap2 = cv2.VideoCapture(right)
-    cap2.set(cv2.CAP_PROP_FRAME_WIDTH,640)
-    cap2.set(cv2.CAP_PROP_FRAME_HEIGHT,480)
+    cap2.set(cv2.CAP_PROP_FRAME_WIDTH,WIDTH)
+    cap2.set(cv2.CAP_PROP_FRAME_HEIGHT,HEIGHT)
 
     #cv2.waitKey(time_in_ms)
     ret, frame2 = cap2.read()

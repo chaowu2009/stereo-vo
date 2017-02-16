@@ -114,7 +114,7 @@ void qConj(const float qIn[4], float qOut[4]){
 
 }
 
-void qNorm(const float qIn[4], float qOut[4]){
+void qNorm(float qIn[4], float qOut[4]){
 
     float norm= 0;
     for(int i = 0; i<4; i++){
@@ -150,3 +150,62 @@ void qvrot(const float qIn[4], const float vIn[3], float vOut[3]){
     }
 
 }
+
+void slerp(float q1[4], float q2[4], float w, float qOut[4]){
+
+     for(int i =0 ; i<4; i++){
+         qOut[i] = (1-w)*q1[i] + w* q2[i];     
+     }
+
+     float temp[4];
+     qNorm(qOut, temp);
+     for(int i =0 ; i<4; i++){
+         qOut[i] = temp[i];
+     }
+
+}
+/*
+// Euler 
+float const RAD2DEG_FLT = 57.295779513082323f;
+
+float quaternionToYaw(float i, float j, float k, float r) {
+  float num = 2.0f*i*j + 2.0f*r*k;
+  float den = r*r + i*i - j*j - k*k;
+  
+  float yaw = atan2(-num, den);
+  return yaw*RAD2DEG_FLT;
+}
+
+float quaternionToPitch(float i, float j, float k, float r) {
+  float m32 = 2.0f*j*k + 2.0f*r*i;
+  float m33 = r*r - i*i - j*j + k*k;
+  float pitch = atan2(-m32, m33);
+  return pitch;
+}
+
+float quaternionToRoll(float i, float j, float k, float r) {
+  float zed = 0;
+  zed = 2.0f*i*k - 2.0f*r*j;
+  if (zed > 1.0f) {
+    return 1.5707963267948966f;
+  } else if (zed < -1.0f) {
+    return -1.5707963267948966f;
+  }
+  float roll = asin(zed);
+  return roll;
+}
+
+
+void quaternionToEuler(float i, float j, float k, float r) {
+  float yaw   = RAD2DEG_FLT * quaternionToYaw(i, j, k, r);
+  float pitch = RAD2DEG_FLT * quaternionToPitch(i, j, k, r);
+  float roll  = RAD2DEG_FLT * quaternionToRoll(i, j, k, r);
+  if (yaw < 0) {
+    yaw += 360;
+  } 
+  
+  printf("%0.3f, %0.3f, %0.3f\n", yaw, pitch, roll);      
+}
+*/
+
+

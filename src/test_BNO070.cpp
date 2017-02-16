@@ -1,4 +1,4 @@
-#include "readBNO.h"
+#include "readBNO070.h"
 
 int main()
 {
