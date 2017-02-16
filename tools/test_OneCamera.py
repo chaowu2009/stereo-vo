@@ -3,7 +3,7 @@ import cv2
 import matplotlib.pylab as plt
 import time
 
-port = 2
+port = 1
 
 
 fig = plt.figure()
