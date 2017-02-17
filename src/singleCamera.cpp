@@ -8,7 +8,7 @@ using namespace std;
 #define MAX_FRAME 10000
 
 #define WEBCAM 0
-#define LEFT 1
+#define LEFT 0
 #define RIGHT 2
 
 

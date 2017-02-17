@@ -1,0 +1,3 @@
+sudo chown cwu:cwu /dev/ttyUSB0
+sudo chown cwu:cwu /dev/ttyACM0
+./test_iRobot

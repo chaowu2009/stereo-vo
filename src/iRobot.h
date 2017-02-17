@@ -102,7 +102,7 @@ int initRobot()
     fd = open("/dev/ttyUSB0", O_RDWR | O_NOCTTY);// iRobot Serial Port
     if (fd <= 0)
     {
-        printf("Fail in open ttyUSB0");
+        printf("Fail in open ttyUSB0\n");
         return -1;
     }
     else
