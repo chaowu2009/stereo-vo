@@ -3,6 +3,19 @@ import cv2
 import time
 import matplotlib.pylab as plt
 
+"""
+Make sure that you hold the checkerboard horizontally (more checkers horizontally than vertically). 
+
+In order to get a good calibration you will need to move the checkerboard around in the camera frame such that:
+
+    the checkerboard is detected at the left and right edges of the field of view (X calibration)
+    the checkerboard is detected at the top and bottom edges of the field of view (Y calibration)
+    the checkerboard is detected at various angles to the camera ("Skew")
+    the checkerboard fills the entire field of view (Size calibration)
+    checkerboard tilted to the left, right, top and bottom (X,Y, and Size calibration) 
+"""
+
+
 left = 1
 right = 2
 
@@ -20,6 +33,8 @@ HEIGHT = 720
 
 WIDTH = 640
 HEIGHT = 480
+
+
         
 for counter in range(1,31):
     

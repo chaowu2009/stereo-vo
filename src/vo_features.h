@@ -478,7 +478,7 @@ void getImage(VideoCapture &capture, Mat &imgOut, Mat &edges)
 void loadImage(string fileName, Mat &imgOut, Mat &img_1_c) {
 
     //read the image
-  //  cout << "image name = " << fileName << endl;
+    //cout << "image name = " << fileName << endl;
     img_1_c = imread(fileName);
 
     if (!img_1_c.data) {
@@ -492,7 +492,7 @@ void loadImage(string fileName, Mat &imgOut, Mat &img_1_c) {
 void loadImage(string fileName, Mat &imgOut) {
 
     //read the image
-    //cout << "image name = " << fileName << endl;
+    cout << "image name = " << fileName << endl;
     Mat img_1_c = imread(fileName);
 
     if (!img_1_c.data) {

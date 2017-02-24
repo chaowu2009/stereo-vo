@@ -1,174 +1,52 @@
-#include "rotation.h"
 #include "vo_features.h"
-//#include <iomanip>
-#include <fstream>
-#include <ostream>
-#include <string>
-
-#ifdef __linux__ 
-#include "BNO080.h"
-#endif
 
 using namespace cv;
 using namespace std;
 
-// solve (NOT YET) stereo camera issues http://renoirsrants.blogspot.in/2011/07/multiple-webcams-on-zoneminder.html
-
-//#define MIN_NUM_FEAT 200
+#define MAX_FRAME 500
+#define MIN_NUM_FEAT 2000
 #define PLOT_COLOR CV_RGB(0, 0, 0)
 #define PL std::setprecision(3)
 
-double scale = 1.00;
-char text[100];
-int fontFace = FONT_HERSHEY_PLAIN;
-double fontScale = 1;
-int thickness = 1;
-cv::Point textOrg(10, 50);
+int main( int argc, char** argv )	{
 
-#define REAL_TIME 1
-//#define SHOW_IMAGE_ONLY 1
-//#define BNO
+  Mat img_1, img_2;
+  Mat R_f, t_f; //the final rotation and tranlation vectors containing the 
 
-#define LEFT 0
-#define RIGHT 1
+ // ofstream myfile;
+//  myfile.open ("results1_1.txt");
 
-int main(int argc, char** argv) {
+  double scale = 1.00;
+  char filename1[200];
+  char filename2[200];
+  sprintf(filename1, "/home/cwu/Downloads/dataset/sequences/00/image_0/%06d.png", 0);
+  sprintf(filename2, "/home/cwu/Downloads/dataset/sequences/00/image_0/%06d.png", 1);
 
-    clock_t begin = clock();
-    clock_t currentFrameClock;
-    float deltaTinSecond = 0.0f;
-    int MAX_FRAME = 1000;
-	    
-    float q[4];
-    q[0] = 1.0; q[1] = 0.0; q[2] = 0.0; q[3] = 0.0;
-    Mat dcm;
-    dcm = (cv::Mat_<float>(3, 3) << 1.0, 0.0, 0.0, 0.0,1.0,0.0, 0.0, 0.0, 1.0);
-	
-#ifdef __linux__ 
-    int fd ; //= initBNO080();
-    
-    readQ(fd, q);  //the first sample is bad. So clean the buffer
-#endif
+  char text[100];
+  int fontFace = FONT_HERSHEY_PLAIN;
+  double fontScale = 1;
+  int thickness = 1;  
+  cv::Point textOrg(10, 50);
 
-#ifdef __linux__ 
-    //linux code goes here
+  //read the first two frames from the dataset
+  Mat img_1_c = imread(filename1);
+  Mat img_2_c = imread(filename2);
 
-    std::string imgDir="/home/hillcrest/project/dataset/images/10/";
-    std::string imgFormat = ".jpg";
-    std::string timeStampFile = imgDir + "timeStamp.txt";
-    std::string resultFile = "/home/hillcrest/project/stereo-vo/src/vo_result.txt";
- 
-    MAX_FRAME = 1000;
-    
-    std::string quaternionFile = imgDir + "q.txt";
-    std::fstream infile(quaternionFile.c_str());
-    std::string line;
-#else
-    // windows code goes here
-    //string imgDir = "d:/vision/dataset/sequences/planar/";
-    string imgDir = "d:/vision/dataset/sequences/00/";
-    string resultFile = imgDir + "vo_result.txt";
-    std::string imgFormat = ".png";
-    std::string timeStampFile = imgDir + "timeStamp.txt";
-    std::string quaternionFile = imgDir + "q.txt";
-    std::fstream infile(quaternionFile);
-    std::string line;
-#endif
+  if ( !img_1_c.data || !img_2_c.data ) { 
+    std::cout<< " --(!) Error reading images " << std::endl; return -1;
+  }
 
-    Mat current_img_left, current_img_right;
-    Mat previous_img_left, previous_img_right; 
-    Mat leftEdge, rightEdge;
-
-    // for plotting purpose
-    Mat temp; 
-
-    Mat R_f, t_f; //the final rotation and translation vectors
-
-    Mat img_1, img_2;  // two consecutive images from the same camera
-
-#ifdef REAL_TIME
-    cout << "Running at real-time" <<endl;
-    std::ofstream fpTimeStamp;
-    fpTimeStamp.open(timeStampFile.c_str());
-
-    int WIDTH = 640;
-    int HEIGHT = 480;
-
-    VideoCapture left_capture(LEFT);
-    left_capture.set(CV_CAP_PROP_FRAME_WIDTH, WIDTH);
-    left_capture.set(CV_CAP_PROP_FRAME_HEIGHT, HEIGHT);
-
-    VideoCapture right_capture(RIGHT);
-    right_capture.set(CV_CAP_PROP_FRAME_WIDTH, WIDTH);
-    right_capture.set(CV_CAP_PROP_FRAME_HEIGHT, HEIGHT);
-
-    left_capture.read(img_1);
-    if (!img_1.data) {
-        std::cout << " --(!) Error reading images (left camera) " << std::endl;
-    }
-    begin = clock();
-
-#ifdef SHOW_IMAGE_ONLY
-  //  namedWindow("LEFT image", 0);
-  //  namedWindow("RIGHT image", 1);
-
-    int numFrame = 1;
-    while (1) {
-        left_capture.read(current_img_left);
-        right_capture.read(current_img_right);
-
-       // imshow("LEFT image", current_img_left);
-       // imshow("RIGHT image", current_img_right);
-        
-        stringstream ss;
-        ss << numFrame;
-        string idx = ss.str();
-        string leftImg  = imgDir + "img_left/" + idx + imgFormat;
-        string rightImg = imgDir + "img_right/" + idx + imgFormat;
-        //cout << "leftImg = " << leftImg << endl;
-        Mat imgOut;
-        cvtColor(current_img_left, imgOut, COLOR_BGR2GRAY);
-        imwrite(leftImg,  current_img_left);
-
-        cvtColor(current_img_right, imgOut, COLOR_BGR2GRAY);
-        imwrite(rightImg, imgOut);
-        
-        currentFrameClock = clock();
-        deltaTinSecond = double(currentFrameClock-begin)/CLOCKS_PER_SEC;
-        fpTimeStamp << numFrame << "," << deltaTinSecond << endl;
-        
-#ifdef __linux__ 
-#ifdef BNO
-    //    readQuaternion(fd, q);
-    //    myfile << q[0] <<" " << q[1] <<" "<< q[2] <<" "<< q[3] << endl;
-#endif
-#endif
-        numFrame++;
-  //    cout << "numFrame = " << numFrame << endl;
-        if (numFrame > MAX_FRAME) {
-            fpTimeStamp.close();
-            cout << "capture done" << endl;
-            return 0;
-        }
-   //     waitKey(100); //micro second
-    }
-    
-#endif
-
-#else
-    cout << "Running at simulation mode!" << endl;
-#endif
-
-    //obtain truth for plot comparison
-   // string posePath = localDataDir + "/dataset/poses/00.txt";
-   // std::ifstream infile(posePath.c_str());
-
+   string resultFile ="/home/cwu/project/stereo-vo/src/vo_result.txt";
+   //obtain truth for plot comparison
+   string posePath =  "/home/cwu/Downloads/dataset/poses/00.txt";
+   std::ifstream infile(posePath.c_str());
+   std::string line;
     //std::string line; 
     float truthPosition[3] ;
     Mat truthOrientation;
 
-    //getline(infile, line);
-    //getPosition(line, truthPosition);
+    getline(infile, line);
+    getPosition(line, truthPosition);
 
     // Open a txt file to store the results
     ofstream fout(resultFile.c_str());
@@ -177,202 +55,127 @@ int main(int argc, char** argv) {
         return 1;
     }
 
-    // features
-    vector < Point2f > keyFeatures;
 
-#ifdef REAL_TIME
-    //left camera, second frame
-    left_capture.read(img_2);
-    // right camera	
-    right_capture.read(previous_img_right);
-    if (!img_2.data) {
-        std::cout << " --(!) Error reading images (left camera) " << std::endl;
+  // we work with grayscale images
+  cvtColor(img_1_c, img_1, COLOR_BGR2GRAY);
+  cvtColor(img_2_c, img_2, COLOR_BGR2GRAY);
+
+  // feature detection, tracking
+  vector<Point2f> points1, points2;        //vectors to store the coordinates of the feature points
+  featureDetection(img_1, points1);        //detect features in img_1
+  vector<uchar> status;
+  featureTracking(img_1,img_2,points1,points2, status); //track those features to img_2
+
+  //TODO: add a fucntion to load these values directly from KITTI's calib files
+  // WARNING: different sequences in the KITTI VO dataset have different intrinsic/extrinsic parameters
+  double focal = 718.8560;
+  cv::Point2d pp(607.1928, 185.2157);
+  //recovering the pose and the essential matrix
+  Mat E, R, t, mask;
+  E = findEssentialMat(points2, points1, focal, pp, RANSAC, 0.999, 1.0, mask);
+  recoverPose(E, points2, points1, R, t, focal, pp, mask);
+
+  Mat prevImage = img_2;
+  Mat currImage;
+  vector<Point2f> prevFeatures = points2;
+  vector<Point2f> currFeatures;
+
+  char filename[100];
+
+  R_f = R.clone();
+  t_f = t.clone();
+
+  clock_t begin = clock();
+
+  namedWindow( "Road facing camera", WINDOW_AUTOSIZE );// Create a window for display.
+  namedWindow( "Trajectory", WINDOW_AUTOSIZE );// Create a window for display.
+
+  Mat traj = Mat::zeros(600, 600, CV_8UC3);
+
+  for(int numFrame=2; numFrame < MAX_FRAME; numFrame++)	{
+  	sprintf(filename, "/home/cwu/Downloads/dataset/sequences/00/image_0/%06d.png", numFrame);
+    //cout << numFrame << endl;
+       getline(infile, line);
+       getPosition(line, truthPosition);
+  	Mat currImage_c = imread(filename);
+  	cvtColor(currImage_c, currImage, COLOR_BGR2GRAY);
+  	vector<uchar> status;
+  	featureTracking(prevImage, currImage, prevFeatures, currFeatures, status);
+
+  	E = findEssentialMat(currFeatures, prevFeatures, focal, pp, RANSAC, 0.999, 1.0, mask);
+  	recoverPose(E, currFeatures, prevFeatures, R, t, focal, pp, mask);
+
+    Mat prevPts(2,prevFeatures.size(), CV_64F), currPts(2,currFeatures.size(), CV_64F);
+
+
+   for(int i=0;i<prevFeatures.size();i++)	{   //this (x,y) combination makes sense as observed from the source code of triangulatePoints on GitHub
+  		prevPts.at<double>(0,i) = prevFeatures.at(i).x;
+  		prevPts.at<double>(1,i) = prevFeatures.at(i).y;
+
+  		currPts.at<double>(0,i) = currFeatures.at(i).x;
+  		currPts.at<double>(1,i) = currFeatures.at(i).y;
     }
 
-    if (!previous_img_right.data) {
-        std::cout << " --(!) Error reading images (right camera) " << std::endl;
+   scale = 0.80;
+
+    //cout << "Scale is " << scale << endl;
+
+    if ((scale>0.1)&&(t.at<double>(2) > t.at<double>(0)) && (t.at<double>(2) > t.at<double>(1))) {
+
+      t_f = t_f + scale*(R_f*t);
+      R_f = R*R_f;
+
     }
-
-#else
-    // use the first two images from left camera to compute the init values.
-    loadImage(imgDir + "/image_0/000000.png", temp);
-    img_1 = temp;
-    loadImage(imgDir + "/image_0/000001.png", temp);
-    img_2 = temp;
-    //loadImage(imgDir + "/img_left/1" + imgFormat, img_1, currImage_lc);
-    //loadImage(imgDir + "/img_right/1"+ imgFormat, img_2, currImage_lc);
-
-#endif
-
-    computeInitialPose(img_1, R_f, t_f, img_2, keyFeatures);
-#ifdef BNO
-    readQuaternion(fd, q);
-#else
-	std::getline(infile, line);
-
-#endif
-	
-    // assign them to be previous
-    Mat prevImage = img_2;
-    vector < Point2f > prevFeatures = keyFeatures;
-
-    Mat currImage;
-    vector < Point2f > currFeatures;
-
-    string filename;
-    Mat E, R, t, mask;
-
-    //namedWindow("Road facing camera", WINDOW_AUTOSIZE); // Create a window for display.
-    namedWindow("Trajectory", WINDOW_AUTOSIZE); // Create a window for display.
-
-    Mat traj = Mat::zeros(640, 480, CV_8UC3);
-    Mat trajTruth = Mat::zeros(640, 480, CV_8UC3);
-
-    Mat R_f_left, t_f_left;
-    previous_img_left = img_2;
-
-    vector<Point2f> previous_feature_left = keyFeatures;;
-    vector<Point2f> current_feature_left;
-
-    Mat R_f_right, t_f_right;
-    vector<Point2f> previous_feature_right, current_feature_right;
-
-#ifdef REAL_TIME
-    // new frame from left camera
-    previous_img_left = img_2;
-    left_capture.read(current_img_left);
-
-    // new frame from right camera
-    right_capture.read(current_img_right);
-
-#else
-
-    // read the first two iamges from left camera
-    loadImage(imgDir + "/image_0/000000.png", previous_img_left );
-    loadImage(imgDir + "image_0/000001.png", current_img_left);
-
-    //loadImage(imgDir + "/img_left/1"+ imgFormat, previous_img_left, currImage_lc );
-    //loadImage(imgDir + "/img_left/2" +imgFormat, current_img_left,  currImage_lc);
-
-    // read the first two iamges from right camera
-	loadImage(imgDir + "/image_1/000000.png", previous_img_left);
-	loadImage(imgDir + "image_1/000001.png", current_img_left);
-
-	//loadImage(imgDir + "/img_right/1"+ imgFormat, previous_img_right, currImage_rc);
-    //loadImage(imgDir + "/img_right/2"+ imgFormat, current_img_right, currImage_rc);
-
-    //rectifyStereoImage(previous_img_left, previous_img_right, previous_img_left, previous_img_right);
-    //rectifyStereoImage(current_img_left, current_img_right, current_img_left, current_img_right);
-
-#endif
-    computeInitialStereoPose(previous_img_left,
-        current_img_left,
-        R_f_left, 
-        t_f_left, 
-        previous_feature_left,
-        previous_img_right,
-        current_img_right,
-        R_f_right, 
-        t_f_right, 
-        previous_feature_right);
-
-	R_f_left = dcm;
-	R_f_right = dcm;
-	
-    for (int numFrame = 2; numFrame < MAX_FRAME; numFrame++) {
-        //filename = combineName(localDataDir + "/dataset/sequences/00/image_0/", numFrame);
-        //cout << "numFrame is " << numFrame << endl;
-        //getline(infile, line);
-        //getPosition(line, truthPosition);
-
-#ifdef REAL_TIME
-
-        // Mat leftFrame;
-        bool readSuccess1 = left_capture.read(current_img_left);
-       // if (readSuccess1){ currImage_l = current_img_left;}
-        if (!current_img_left.data) {
-            std::cout << " --(!) Error reading images (left camera) " << std::endl;
-        }
-
-        // Mat rightFrame;
-        bool readSuccess2 = right_capture.read(current_img_right);
-        //if (readSuccess2) {currImage_r = current_img_right; }
-        if (!current_img_right.data) {
-            std::cout << " --(!) Error reading images (left camera) " << std::endl;
-        }
-
-#else
-
-        stringstream ss;
-        ss << numFrame;
-        string idx = ss.str();
-
-        //idx = "3";
-        //string filename1 =  imgDir + "/img_left/" + idx + imgFormat;
-        //string filename2 =  imgDir + "/img_right/" + idx + imgFormat;
-
-	string filename1 = imgDir + "/image_0/" + idx + imgFormat;
-	string filename2 = imgDir + "/image_1/" + idx + imgFormat;
-
-        loadImage(filename1, current_img_left);
-        loadImage(filename2, current_img_right);
-
-        //rectifyStereoImage(current_img_left, current_img_right, current_img_left, current_img_right);
-#ifdef BNO        
-        readQuaternion(fd, q); // read IMU
-#endif
-		std::getline(infile, line);
-		std::istringstream iss(line);
-		if (!(iss >> q[0] >> q[1] >> q[2] >> q[3])) { break; }
-		//cout << "q=" << q[0] << " "<< q[1] << " " << q[2] << " " << q[3]  << endl;
-		q2Dcm(q, dcm);
-		//cout <<"dcm " << dcm <<  endl;
-
-#endif
-        stereoVision(previous_img_left, current_img_left, 
-			         previous_img_right, current_img_right,
-                     previous_feature_left,  current_feature_left, 
-                     previous_feature_right, current_feature_right,
-                     R_f, t_f, dcm); 
-
-        // for plotting purpose
-        double x1 = t_f.at<double>(0);
-        double y1 = t_f.at<double>(1);
-        double z1 = t_f.at<double>(2);
-
-        int x = int(x1) +320;
-        int y = int(z1) +240;
-
-        // output to the screen
-        cout << "numFrame:" << numFrame <<" vo: x = " << PL<< x1 << "\t y = " << PL<< y1 << "\t z = " << PL<< z1 << endl;
-#ifndef REAL_TIME
-        //cout << "tr: x = " << PL<< truthPosition[0] << "\t y = " << PL<< truthPosition[1] << "\t z = " << PL<< truthPosition[2] << endl;
-#endif
-        // current point
-        circle(traj, Point(x, y), 0.2, CV_RGB(255, 0, 0), 2);
-        rectangle(traj, Point(10,30), Point(500, 50), PLOT_COLOR, CV_FILLED);
-
-        sprintf(text, "Coordinates: x = %04fm y = %04fm z = %04fm", x1, y1, z1);
-        putText(traj, text, textOrg, fontFace, fontScale, Scalar::all(255),	thickness, 8);
-
-        // plot them
-#ifndef REAL_TIME
-        imshow("Left camera", current_img_left);
-#endif
-        imshow("Trajectory", traj);
-
-        // Save the result
-        fout << numFrame << "\t";
-        fout << x1 << "\t" << y1 << "\t" << z1 << "\t" << x << "\t" << y << "\n";
-
-        waitKey(2);  //microsecond
+  	
+    else {
+     //cout << "scale below 0.1, or incorrect translation" << endl;
     }
+    
+   // lines for printing results
+   // myfile << t_f.at<double>(0) << " " << t_f.at<double>(1) << " " << t_f.at<double>(2) << endl;
 
-    imwrite(imgDir + "/final_map" + imgFormat, traj);
+  // a redetection is triggered in case the number of feautres being trakced go below a particular threshold
+ 	  if (prevFeatures.size() < MIN_NUM_FEAT)	{
+      //cout << "Number of tracked features reduced to " << prevFeatures.size() << endl;
+      //cout << "trigerring redection" << endl;
+ 		  featureDetection(prevImage, prevFeatures);
+      featureTracking(prevImage,currImage,prevFeatures,currFeatures, status);
 
-    clock_t end = clock();
-    double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
-    cout << "Total time taken: " << elapsed_secs << "s" << endl;
+ 	  }
 
-    return 0;
+    prevImage = currImage.clone();
+    prevFeatures = currFeatures;
+
+    int x = int(t_f.at<double>(0)) + 300;
+    int y = int(t_f.at<double>(2)) + 100;
+
+    int xTruth = int(truthPosition[0])+ 300;
+    int yTruth = int(truthPosition[2])+ 100;
+
+    circle(traj, Point(x, y) ,0.2, CV_RGB(255,0,0), 2);
+    circle(traj, Point(xTruth, yTruth), 0.2, CV_RGB(0, 0, 255), 2);
+    
+    //cout << "tr: x = " << PL<< truthPosition[0] << "\t y = " << PL<< truthPosition[1] << "\t z = " << PL<< truthPosition[2] << endl;
+    
+    rectangle( traj, Point(10, 30), Point(550, 50), CV_RGB(0,0,0), CV_FILLED);
+    sprintf(text, "Coordinates: x = %02fm y = %02fm z = %02fm", t_f.at<double>(0), t_f.at<double>(1), t_f.at<double>(2));
+    putText(traj, text, textOrg, fontFace, fontScale, Scalar::all(255), thickness, 8);
+
+    imshow( "Road facing camera", currImage_c );
+    imshow( "Trajectory", traj );
+
+    waitKey(1);
+
+  }
+
+  imwrite("/home/cwu/project/stereo-vo/src/final_map.png", traj);
+
+  clock_t end = clock();
+  double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
+  cout << "Total time taken: " << elapsed_secs << "s" << endl;
+
+  //cout << R_f << endl;
+  //cout << t_f << endl;
+
+  return 0;
 }

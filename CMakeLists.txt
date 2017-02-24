@@ -29,9 +29,6 @@ target_link_libraries(rectify ${OpenCV_LIBS})
 add_executable(singleCamera "src/BNO080.h" "src/rotation.h" "src/vo_features.h" "src/singleCamera.cpp" "src/cam_stereo.yml")
 target_link_libraries(singleCamera ${OpenCV_LIBS})
 
-add_executable(iRobot "src/test_iRobot.cpp" "src/iRobot.h" )
-target_link_libraries(iRobot)
-
 add_executable(bno080 "src/test_BNO080.cpp" "src/BNO080.h" )
 target_link_libraries(bno080)
 
